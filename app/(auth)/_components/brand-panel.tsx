@@ -1,8 +1,8 @@
 import Logo from "@/app/_components/logo";
 
 type BrandPanelProps = {
-  headline: string;
-  subtext: string;
+  headline?: string;
+  subtext?: string;
 };
 
 export function BrandPanel({ headline, subtext }: BrandPanelProps) {
@@ -20,13 +20,9 @@ export function BrandPanel({ headline, subtext }: BrandPanelProps) {
         }}
       />
 
-      <div className="pointer-events-none absolute -right-24 -top-24 size-72 rounded-full bg-primary-foreground/10 blur-3xl" />
-
-      {/* Logo */}
       <Logo />
 
-      {/* Headline block */}
-      <div className="relative z-10 mt-auto mb-2 max-w-sm text-primary-foreground">
+      <div className="mt-auto mb-2 w-full text-center text-primary-foreground">
         <h2 className="text-3xl font-bold leading-tight text-balance">
           {headline}
         </h2>

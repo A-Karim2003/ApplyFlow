@@ -6,8 +6,8 @@ export default function SignUpPage() {
     <main className="flex min-h-svh items-center justify-center bg-background p-4 sm:p-6 lg:p-8">
       <div className="grid w-full max-w-5xl overflow-hidden rounded-2xl border border-border bg-card shadow-sm lg:grid-cols-2 lg:min-h-160">
         <BrandPanel
-          headline="Stop spending hours applying, start getting interviews"
-          subtext="Users booked 552 interviews in the last month"
+          headline="Everything you need for a successful job search"
+          subtext="Keep applications, interviews, companies, and documents organised in one workspace."
         />
         <div className="flex items-center justify-center px-6 py-14 sm:px-12">
           <SignupForm />

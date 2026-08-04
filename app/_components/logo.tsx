@@ -1,8 +1,13 @@
+import { cn } from "@/lib/utils";
 import Image from "next/image";
 
-export default function Logo() {
+type LogoProps = {
+  className?: string;
+};
+
+export default function Logo({ className }: LogoProps) {
   return (
-    <div className="relative w-100 aspect-[3.89/1]">
+    <div className={cn("relative w-100 aspect-[3.89/1]", className)}>
       <Image
         src="/logo.png"
         alt="ApplyFlow"

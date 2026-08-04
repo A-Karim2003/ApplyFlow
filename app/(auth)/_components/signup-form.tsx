@@ -105,23 +105,6 @@ export function SignupForm() {
         >
           Create Account
         </Button>
-
-        <p className="text-center text-xs leading-relaxed text-muted-foreground">
-          By creating an account, you agree to our{" "}
-          <a
-            href="#"
-            className="text-foreground underline underline-offset-2 hover:no-underline"
-          >
-            Terms of Use
-          </a>{" "}
-          and{" "}
-          <a
-            href="#"
-            className="text-foreground underline underline-offset-2 hover:no-underline"
-          >
-            Privacy Policy
-          </a>
-        </p>
       </div>
 
       <div className="my-6 flex items-center gap-4">
