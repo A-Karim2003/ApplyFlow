@@ -1,7 +1,7 @@
 import { pgEnum, pgTable, index } from "drizzle-orm/pg-core";
 import { user } from "./auth-schema";
 
-const documentTypeEnum = pgEnum("document_type", [
+export const documentTypeEnum = pgEnum("document_type", [
   "cv",
   "cover_letter",
   "other",

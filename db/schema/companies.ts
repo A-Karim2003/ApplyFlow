@@ -1,4 +1,4 @@
-import { pgTable, index } from "drizzle-orm/pg-core";
+import { pgTable, index, unique } from "drizzle-orm/pg-core";
 import { user } from "./auth-schema";
 
 export const companiesTable = pgTable(
@@ -24,5 +24,8 @@ export const companiesTable = pgTable(
       .$onUpdate(() => new Date())
       .notNull(),
   }),
-  (table) => [index("companies_user_id_idx").on(table.userId)],
+  (table) => [
+    index("companies_user_id_idx").on(table.userId),
+    unique("companies_user_name_unique").on(table.userId, table.name),
+  ],
 );

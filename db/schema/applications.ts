@@ -1,11 +1,12 @@
-import { pgEnum, pgTable, index } from "drizzle-orm/pg-core";
+import { pgEnum, pgTable, index, check } from "drizzle-orm/pg-core";
 import { user } from "./auth-schema";
 import { companiesTable } from "./companies";
 import { documentsTable } from "./documents";
+import { sql } from "drizzle-orm";
 
-const workModeEnum = pgEnum("work_mode", ["remote", "hybrid", "onsite"]);
+export const workModeEnum = pgEnum("work_mode", ["remote", "hybrid", "onsite"]);
 
-const applicationStatusEnum = pgEnum("application_status", [
+export const applicationStatusEnum = pgEnum("application_status", [
   "wishlist",
   "applied",
   "online_assessment",
@@ -14,7 +15,7 @@ const applicationStatusEnum = pgEnum("application_status", [
   "rejected",
 ]);
 
-const jobType = pgEnum("job_type", [
+export const jobType = pgEnum("job_type", [
   "full_time",
   "part_time",
   "internship",
@@ -36,7 +37,9 @@ export const applicationsTable = pgTable(
     companyId: t
       .integer("company_id")
       .notNull()
-      .references(() => companiesTable.id),
+      .references(() => companiesTable.id, {
+        onDelete: "restrict",
+      }),
 
     resumeDocumentId: t
       .integer("resume_document_id")
@@ -80,6 +83,7 @@ export const applicationsTable = pgTable(
     index("applications_company_id_idx").on(table.companyId),
     index("applications_status_idx").on(table.status),
     index("applications_user_status_idx").on(table.userId, table.status),
+    check("salary_range_check", sql`salary_min <= salary_max`),
   ],
 );
 

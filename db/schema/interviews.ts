@@ -8,13 +8,13 @@ import {
 } from "drizzle-orm/pg-core";
 import { applicationsTable } from "./applications";
 
-const interviewOutcome = pgEnum("interview_outcome", [
+export const interviewOutcome = pgEnum("interview_outcome", [
   "pending",
   "passed",
   "failed",
 ]);
 
-const interviewType = pgEnum("interview_type", [
+export const interviewType = pgEnum("interview_type", [
   "phone_screen",
   "online_assessment",
   "technical_interview",
