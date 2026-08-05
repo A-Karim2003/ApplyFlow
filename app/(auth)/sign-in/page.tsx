@@ -1,5 +1,5 @@
 import { BrandPanel } from "../_components/brand-panel";
-import { LoginForm } from "../_components/login-form";
+import { LoginForm } from "./login-form";
 
 export default function SignInPage() {
   return (

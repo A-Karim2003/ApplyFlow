@@ -1,5 +1,5 @@
 import { BrandPanel } from "../_components/brand-panel";
-import { SignupForm } from "../_components/signup-form";
+import { SignupForm } from "./signup-form";
 
 export default function SignUpPage() {
   return (
