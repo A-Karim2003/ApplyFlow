@@ -10,12 +10,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field, FieldLabel } from "@/components/ui/field";
 import GoogleIcon from "../_components/google-icon";
+import { signUpWithEmail } from "@/lib/auth-client-actions";
+import { useRouter } from "next/navigation";
 
 const FormSchema = z
   .object({
     firstName: z.string().min(2, "Must be at least 2 characters").max(100),
     lastName: z.string().min(2, "Must be at least 2 characters").max(100),
-    email: z.string().email("Enter a valid email address"),
+    email: z.email("Enter a valid email address"),
     password: z.string().min(8, "Must be at least 8 characters").max(100),
     confirmPassword: z.string(),
   })
@@ -29,6 +31,9 @@ type FormValues = z.infer<typeof FormSchema>;
 export function SignupForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+
+  const router = useRouter();
 
   const {
     register,
@@ -46,9 +51,22 @@ export function SignupForm() {
     },
   });
 
-  function onSubmit(data: FormValues) {
-    console.log(data);
-    // call your auth action here
+  async function onSubmit(data: FormValues) {
+    setFormError(null);
+
+    try {
+      await signUpWithEmail(
+        data.firstName,
+        data.lastName,
+        data.email,
+        data.password,
+      );
+      router.push("/dashboard");
+    } catch (error) {
+      setFormError(
+        error instanceof Error ? error.message : "Something went wrong",
+      );
+    }
   }
 
   return (
@@ -134,7 +152,7 @@ export function SignupForm() {
               variant="ghost"
               onClick={() => setShowPassword((s) => !s)}
               aria-label={showPassword ? "Hide password" : "Show password"}
-              className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:text-foreground hover:bg-transparent cursor-pointer"
+              className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:text-foreground hover:bg-transparent"
             >
               {showPassword ? (
                 <EyeOff className="size-4" />
@@ -168,7 +186,7 @@ export function SignupForm() {
               variant="ghost"
               onClick={() => setShowConfirm((s) => !s)}
               aria-label={showConfirm ? "Hide password" : "Show password"}
-              className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:text-foreground hover:bg-transparent cursor-pointer"
+              className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:text-foreground hover:bg-transparent"
             >
               {showConfirm ? (
                 <EyeOff className="size-4" />
@@ -183,6 +201,10 @@ export function SignupForm() {
             </p>
           )}
         </Field>
+
+        {formError && (
+          <p className="text-sm text-destructive text-center">{formError}</p>
+        )}
 
         <Button
           type="submit"

@@ -1,6 +1,9 @@
 import { pgTable } from "drizzle-orm/pg-core";
 import { user } from "./auth-schema";
 
+export type NewProfile = typeof profilesTable.$inferInsert;
+export type SelectProfile = typeof profilesTable.$inferSelect;
+
 export const profilesTable = pgTable("profiles", (t) => ({
   id: t.integer().primaryKey().generatedAlwaysAsIdentity(),
 
