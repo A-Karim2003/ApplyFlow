@@ -12,7 +12,6 @@ import { Field, FieldLabel } from "@/components/ui/field";
 import GoogleIcon from "../_components/google-icon";
 import { signUpWithEmail } from "@/lib/auth-client-actions";
 import { useRouter } from "next/navigation";
-
 const FormSchema = z
   .object({
     firstName: z.string().min(2, "Must be at least 2 characters").max(100),
