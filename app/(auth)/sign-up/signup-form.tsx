@@ -161,11 +161,6 @@ export function SignupForm() {
               )}
             </Button>
           </div>
-          {errors.password && (
-            <p className="text-xs text-destructive">
-              {errors.password.message}
-            </p>
-          )}
         </Field>
 
         <Field>
@@ -203,7 +198,9 @@ export function SignupForm() {
         </Field>
 
         {formError && (
-          <p className="text-sm text-destructive text-center">{formError}</p>
+          <p className="text-sm text-destructive text-center max-w-full wrap-break-word">
+            {formError}
+          </p>
         )}
 
         <Button

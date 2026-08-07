@@ -12,6 +12,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import GoogleIcon from "../_components/google-icon";
+import { signInWithEmail } from "@/lib/auth-client-actions";
+import { useRouter } from "next/navigation";
 
 const FormSchema = z.object({
   email: z.email("Enter a valid email address"),
@@ -23,6 +25,9 @@ type FormValues = z.infer<typeof FormSchema>;
 
 export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+
+  const router = useRouter();
 
   const {
     register,
@@ -39,9 +44,17 @@ export function LoginForm() {
     },
   });
 
-  function onSubmit(data: FormValues) {
-    console.log(data);
-    // Call your login action here
+  async function onSubmit(data: FormValues) {
+    setFormError(null);
+
+    try {
+      await signInWithEmail(data.email, data.password, data.remember);
+      router.push("/dashboard");
+    } catch (error) {
+      setFormError(
+        error instanceof Error ? error.message : "Invalid email or password",
+      );
+    }
   }
 
   return (
@@ -143,10 +156,16 @@ export function LoginForm() {
           </Link>
         </div>
 
+        {formError && (
+          <p className="text-sm text-destructive text-center max-w-full wrap-break-word">
+            {formError}
+          </p>
+        )}
+
         <Button
           type="submit"
           size="lg"
-          className="h-11 w-full text-sm font-semibold"
+          className="h-11 w-full text-sm font-semibold mb-4"
           disabled={isSubmitting}
         >
           {isSubmitting ? "Logging in..." : "Login"}
