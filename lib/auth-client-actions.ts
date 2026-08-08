@@ -58,6 +58,14 @@ export async function signInWithEmail(
   return data;
 }
 
+export async function signInWithGoogle() {
+  const { error } = await authClient.signIn.social({
+    provider: "google",
+  });
+
+  if (error) throw new Error(error.message);
+}
+
 export async function signOut() {
   const { error } = await authClient.signOut();
   if (error) throw new Error(error.message);
