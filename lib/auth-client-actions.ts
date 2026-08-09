@@ -33,6 +33,7 @@ export async function signInWithEmail(
 export async function signInWithGoogle() {
   const { error } = await authClient.signIn.social({
     provider: "google",
+    callbackURL: "/dashboard",
   });
 
   if (error) throw new Error(error.message);

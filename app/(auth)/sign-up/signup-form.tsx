@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field, FieldLabel } from "@/components/ui/field";
 import GoogleIcon from "../_components/google-icon";
-import { signUpWithEmail } from "@/lib/auth-client-actions";
+import { signInWithGoogle, signUpWithEmail } from "@/lib/auth-client-actions";
 import { useRouter } from "next/navigation";
 const FormSchema = z
   .object({
@@ -61,6 +61,17 @@ export function SignupForm() {
         data.password,
       );
       router.push("/dashboard");
+    } catch (error) {
+      setFormError(
+        error instanceof Error ? error.message : "Something went wrong",
+      );
+    }
+  }
+
+  async function handleGoogleSignIn() {
+    setFormError(null);
+    try {
+      await signInWithGoogle();
     } catch (error) {
       setFormError(
         error instanceof Error ? error.message : "Something went wrong",
@@ -223,6 +234,7 @@ export function SignupForm() {
         variant="outline"
         size="lg"
         className="h-11 w-full gap-2.5 text-sm font-medium"
+        onClick={handleGoogleSignIn}
       >
         <GoogleIcon />
         Sign up with Google

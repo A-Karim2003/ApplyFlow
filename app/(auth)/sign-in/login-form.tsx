@@ -12,7 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import GoogleIcon from "../_components/google-icon";
-import { signInWithEmail } from "@/lib/auth-client-actions";
+import { signInWithEmail, signInWithGoogle } from "@/lib/auth-client-actions";
 import { useRouter } from "next/navigation";
 
 const FormSchema = z.object({
@@ -53,6 +53,17 @@ export function LoginForm() {
     } catch (error) {
       setFormError(
         error instanceof Error ? error.message : "Invalid email or password",
+      );
+    }
+  }
+
+  async function handleGoogleSignIn() {
+    setFormError(null);
+    try {
+      await signInWithGoogle();
+    } catch (error) {
+      setFormError(
+        error instanceof Error ? error.message : "Something went wrong",
       );
     }
   }
@@ -183,6 +194,7 @@ export function LoginForm() {
         variant="outline"
         size="lg"
         className="h-11 w-full gap-2.5 text-sm font-medium"
+        onClick={handleGoogleSignIn}
       >
         <GoogleIcon />
         Log in with Google
