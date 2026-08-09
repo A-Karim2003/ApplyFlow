@@ -1,0 +1,285 @@
+"use client";
+
+import * as React from "react";
+import {
+  Sheet,
+  SheetTrigger,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetFooter,
+  SheetClose,
+} from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Field,
+  FieldLabel,
+  FieldGroup,
+  FieldDescription,
+} from "@/components/ui/field";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  STATUS_ORDER,
+  JOB_TYPES,
+  APPLICATION_SOURCES,
+  companies,
+  documents,
+} from "@/lib/data";
+
+export function AddApplicationSheet({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const [open, setOpen] = React.useState(false);
+
+  const resumes = documents.filter((d) => d.category === "CV");
+  const coverLetters = documents.filter((d) => d.category === "Cover Letter");
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setOpen(false);
+  }
+
+  return (
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger render={children as React.ReactElement} />
+      <SheetContent className="flex w-full flex-col gap-0 p-0 sm:max-w-md">
+        <SheetHeader className="border-b">
+          <SheetTitle className="font-serif text-xl">
+            Add job application
+          </SheetTitle>
+          <SheetDescription>
+            Track a new opportunity in your pipeline. You can refine the details
+            anytime.
+          </SheetDescription>
+        </SheetHeader>
+
+        <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
+          <div className="flex-1 overflow-y-auto p-4">
+            <FieldGroup>
+              <Field>
+                <FieldLabel htmlFor="job-title">Job title</FieldLabel>
+                <Input
+                  id="job-title"
+                  placeholder="e.g. Software Engineer, New Grad"
+                />
+              </Field>
+
+              <Field>
+                <FieldLabel htmlFor="company">Company</FieldLabel>
+                <Select>
+                  <SelectTrigger id="company" className="w-full">
+                    <SelectValue placeholder="Select a company" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      {companies.map((c) => (
+                        <SelectItem key={c.id} value={c.id}>
+                          {c.name}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </Field>
+
+              <div className="grid grid-cols-2 gap-3">
+                <Field>
+                  <FieldLabel htmlFor="status">Status</FieldLabel>
+                  <Select defaultValue="Wishlist">
+                    <SelectTrigger id="status" className="w-full">
+                      <SelectValue placeholder="Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {STATUS_ORDER.map((s) => (
+                          <SelectItem key={s} value={s}>
+                            {s}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </Field>
+
+                <Field>
+                  <FieldLabel htmlFor="job-type">Job type</FieldLabel>
+                  <Select defaultValue="Full-time">
+                    <SelectTrigger id="job-type" className="w-full">
+                      <SelectValue placeholder="Job type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {JOB_TYPES.map((t) => (
+                          <SelectItem key={t} value={t}>
+                            {t}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </Field>
+              </div>
+
+              <Field>
+                <FieldLabel>Work mode</FieldLabel>
+                <ToggleGroup defaultValue={["Remote"]} className="w-full">
+                  <ToggleGroupItem value="Remote" className="flex-1">
+                    Remote
+                  </ToggleGroupItem>
+                  <ToggleGroupItem value="Hybrid" className="flex-1">
+                    Hybrid
+                  </ToggleGroupItem>
+                  <ToggleGroupItem value="On-site" className="flex-1">
+                    On-site
+                  </ToggleGroupItem>
+                </ToggleGroup>
+              </Field>
+
+              <Field>
+                <FieldLabel htmlFor="location">Location</FieldLabel>
+                <Input id="location" placeholder="e.g. San Francisco, CA" />
+              </Field>
+
+              <Field>
+                <FieldLabel htmlFor="source">Source</FieldLabel>
+                <Select>
+                  <SelectTrigger id="source" className="w-full">
+                    <SelectValue placeholder="Where did you find this role?" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      {APPLICATION_SOURCES.map((s) => (
+                        <SelectItem key={s} value={s}>
+                          {s}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </Field>
+
+              <Field>
+                <FieldLabel htmlFor="job-url">
+                  Job posting URL{" "}
+                  <span className="text-muted-foreground">(optional)</span>
+                </FieldLabel>
+                <Input
+                  id="job-url"
+                  type="url"
+                  placeholder="https://…"
+                  inputMode="url"
+                />
+              </Field>
+
+              <div className="grid grid-cols-2 gap-3">
+                <Field>
+                  <FieldLabel htmlFor="salary-min">Salary min</FieldLabel>
+                  <Input
+                    id="salary-min"
+                    type="number"
+                    placeholder="120000"
+                    inputMode="numeric"
+                  />
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor="salary-max">Salary max</FieldLabel>
+                  <Input
+                    id="salary-max"
+                    type="number"
+                    placeholder="150000"
+                    inputMode="numeric"
+                  />
+                </Field>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <Field>
+                  <FieldLabel htmlFor="applied-at">Date applied</FieldLabel>
+                  <Input id="applied-at" type="date" />
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor="deadline">Deadline</FieldLabel>
+                  <Input id="deadline" type="date" />
+                </Field>
+              </div>
+
+              <Field>
+                <FieldLabel htmlFor="resume">Resume</FieldLabel>
+                <Select>
+                  <SelectTrigger id="resume" className="w-full">
+                    <SelectValue placeholder="Attach a resume" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      {resumes.map((d) => (
+                        <SelectItem key={d.id} value={d.id}>
+                          {d.name}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </Field>
+
+              <Field>
+                <FieldLabel htmlFor="cover-letter">Cover letter</FieldLabel>
+                <Select>
+                  <SelectTrigger id="cover-letter" className="w-full">
+                    <SelectValue placeholder="Attach a cover letter" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      {coverLetters.map((d) => (
+                        <SelectItem key={d.id} value={d.id}>
+                          {d.name}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </Field>
+
+              <Field>
+                <FieldLabel htmlFor="notes">Notes</FieldLabel>
+                <Textarea
+                  id="notes"
+                  placeholder="Referrals, contacts, prep reminders…"
+                  rows={3}
+                />
+                <FieldDescription>
+                  Keep track of anything that will help you stay organized.
+                </FieldDescription>
+              </Field>
+            </FieldGroup>
+          </div>
+
+          <SheetFooter className="flex-row gap-2 border-t">
+            <SheetClose
+              render={
+                <Button type="button" variant="outline" className="flex-1">
+                  Cancel
+                </Button>
+              }
+            />
+            <Button type="submit" className="flex-1">
+              Add application
+            </Button>
+          </SheetFooter>
+        </form>
+      </SheetContent>
+    </Sheet>
+  );
+}

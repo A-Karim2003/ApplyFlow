@@ -18,7 +18,7 @@ const fraunces = Fraunces({
 export const metadata: Metadata = {
   title: "ApplyFlow — Your Calm Career Command Center",
   description:
-    "Organize your job search with ApplyFlow. Track applications, interviews, companies, and documents in one calm, focused workspace.",
+    "Organise your job search with ApplyFlow. Track applications, interviews, companies, and documents in one calm, focused workspace.",
 };
 
 export default function RootLayout({
