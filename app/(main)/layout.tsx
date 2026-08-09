@@ -1,6 +1,9 @@
 import { getSession } from "@/actions/auth-actions";
 import { redirect } from "next/navigation";
 
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { AppSidebar } from "../_components/app-sidebar";
+
 export default async function Layout({
   children,
 }: {
@@ -9,5 +12,13 @@ export default async function Layout({
   const session = await getSession();
   if (!session) redirect("/sign-in");
 
-  return <main>{children}</main>;
+  return (
+    <SidebarProvider>
+      <AppSidebar />
+      <main>
+        <SidebarTrigger />
+        {children}
+      </main>
+    </SidebarProvider>
+  );
 }
