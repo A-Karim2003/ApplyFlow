@@ -30,13 +30,19 @@ import {
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Textarea } from "@/components/ui/textarea";
 import {
+  APPLICATION_SOURCE_OPTIONS,
   STATUS_OPTIONS,
   JOB_TYPE_OPTIONS,
   WORK_MODE_OPTIONS,
-  // APPLICATION_SOURCES,
-  // companies,
-  // documents,
+  DOCUMENT_TYPE_OPTIONS,
 } from "@/lib/constants/";
+
+const companies = [] as Array<{ id: string; name: string }>;
+const documents = [] as Array<{
+  id: string;
+  filename?: string;
+  documentType?: (typeof DOCUMENT_TYPE_OPTIONS)[number]["value"] | null;
+}>;
 
 export function AddApplicationForm({
   children,
@@ -45,8 +51,12 @@ export function AddApplicationForm({
 }) {
   const [open, setOpen] = React.useState(false);
 
-  const resumes = documents.filter((d) => d.category === "CV");
-  const coverLetters = documents.filter((d) => d.category === "Cover Letter");
+  const resumes = documents.filter(
+    (document) => document.documentType === "cv",
+  );
+  const coverLetters = documents.filter(
+    (document) => document.documentType === "cover_letter",
+  );
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -140,15 +150,17 @@ export function AddApplicationForm({
               <Field>
                 <FieldLabel>Work mode</FieldLabel>
                 <ToggleGroup defaultValue={["Remote"]} className="w-full">
-                  {WORK_MODE_OPTIONS.map((workModeOption) => (
-                    <ToggleGroupItem
-                      key={workModeOption.value}
-                      value={workModeOption.value}
-                      className="flex-1"
-                    >
-                      {workModeOption.label}
-                    </ToggleGroupItem>
-                  ))}
+                  <ToggleGroup className="w-full gap-2">
+                    {WORK_MODE_OPTIONS.map((workModeOption) => (
+                      <ToggleGroupItem
+                        key={workModeOption.value}
+                        value={workModeOption.value}
+                        className="flex-1 border border-input data-pressed:border-primary data-pressed:bg-primary data-pressed:text-primary-foreground"
+                      >
+                        {workModeOption.label}
+                      </ToggleGroupItem>
+                    ))}
+                  </ToggleGroup>
                 </ToggleGroup>
               </Field>
 
@@ -165,9 +177,9 @@ export function AddApplicationForm({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
-                      {APPLICATION_SOURCES.map((s) => (
-                        <SelectItem key={s} value={s}>
-                          {s}
+                      {APPLICATION_SOURCE_OPTIONS.map((source) => (
+                        <SelectItem key={source.value} value={source.value}>
+                          {source.label}
                         </SelectItem>
                       ))}
                     </SelectGroup>
@@ -228,9 +240,9 @@ export function AddApplicationForm({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
-                      {resumes.map((d) => (
-                        <SelectItem key={d.id} value={d.id}>
-                          {d.name}
+                      {resumes.map((document) => (
+                        <SelectItem key={document.id} value={document.id}>
+                          {document.filename ?? document.id}
                         </SelectItem>
                       ))}
                     </SelectGroup>
@@ -246,9 +258,9 @@ export function AddApplicationForm({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
-                      {coverLetters.map((d) => (
-                        <SelectItem key={d.id} value={d.id}>
-                          {d.name}
+                      {coverLetters.map((document) => (
+                        <SelectItem key={document.id} value={document.id}>
+                          {document.filename ?? document.id}
                         </SelectItem>
                       ))}
                     </SelectGroup>

@@ -1,6 +1,7 @@
 import {
+  applicationSourceEnum,
   applicationStatusEnum,
-  jobType as jobTypeEnum,
+  jobTypeEnum,
   workModeEnum,
 } from "@/db/schema";
 
@@ -54,3 +55,22 @@ export const WORK_MODE_OPTIONS = workModeEnum.enumValues.map((mode) => ({
   label: WORK_MODES[mode],
   value: mode,
 }));
+
+/*========================Application Source========================*/
+
+type ApplicationSource = (typeof applicationSourceEnum.enumValues)[number];
+
+const APPLICATION_SOURCES: Record<ApplicationSource, string> = {
+  linkedin: "LinkedIn",
+  indeed: "Indeed",
+  company_website: "Company website",
+  referral: "Referral",
+  university: "University",
+  other: "Other",
+};
+
+export const APPLICATION_SOURCE_OPTIONS =
+  applicationSourceEnum.enumValues.map((source) => ({
+    label: APPLICATION_SOURCES[source],
+    value: source,
+  }));

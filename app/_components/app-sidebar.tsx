@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-// import { AddApplicationForm } from "@/components/add-application-form";
+import { AddApplicationForm } from "./add-application-form";
 
 const navItems = [
   { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -49,12 +49,12 @@ export function AppSidebar() {
             ApplyFlow
           </span>
         </Link>
-        {/* <AddApplicationForm>
+        <AddApplicationForm>
           <Button className="w-full justify-center" size="lg">
             <Plus data-icon="inline-start" />
             Add Job Application
           </Button>
-        </AddApplicationForm> */}
+        </AddApplicationForm>
       </SidebarHeader>
 
       <SidebarContent className="px-2">
