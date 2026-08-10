@@ -30,12 +30,13 @@ import {
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  STATUS_ORDER,
-  JOB_TYPES,
-  APPLICATION_SOURCES,
-  companies,
-  documents,
-} from "@/lib/data";
+  STATUS_OPTIONS,
+  JOB_TYPE_OPTIONS,
+  WORK_MODE_OPTIONS,
+  // APPLICATION_SOURCES,
+  // companies,
+  // documents,
+} from "@/lib/constants/";
 
 export function AddApplicationForm({
   children,
@@ -104,9 +105,9 @@ export function AddApplicationForm({
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>
-                        {STATUS_ORDER.map((s) => (
-                          <SelectItem key={s} value={s}>
-                            {s}
+                        {STATUS_OPTIONS.map((status) => (
+                          <SelectItem key={status.value} value={status.value}>
+                            {status.label}
                           </SelectItem>
                         ))}
                       </SelectGroup>
@@ -122,9 +123,12 @@ export function AddApplicationForm({
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>
-                        {JOB_TYPES.map((t) => (
-                          <SelectItem key={t} value={t}>
-                            {t}
+                        {JOB_TYPE_OPTIONS.map((jobTypeOption) => (
+                          <SelectItem
+                            key={jobTypeOption.value}
+                            value={jobTypeOption.value}
+                          >
+                            {jobTypeOption.label}
                           </SelectItem>
                         ))}
                       </SelectGroup>
@@ -136,15 +140,15 @@ export function AddApplicationForm({
               <Field>
                 <FieldLabel>Work mode</FieldLabel>
                 <ToggleGroup defaultValue={["Remote"]} className="w-full">
-                  <ToggleGroupItem value="Remote" className="flex-1">
-                    Remote
-                  </ToggleGroupItem>
-                  <ToggleGroupItem value="Hybrid" className="flex-1">
-                    Hybrid
-                  </ToggleGroupItem>
-                  <ToggleGroupItem value="On-site" className="flex-1">
-                    On-site
-                  </ToggleGroupItem>
+                  {WORK_MODE_OPTIONS.map((workModeOption) => (
+                    <ToggleGroupItem
+                      key={workModeOption.value}
+                      value={workModeOption.value}
+                      className="flex-1"
+                    >
+                      {workModeOption.label}
+                    </ToggleGroupItem>
+                  ))}
                 </ToggleGroup>
               </Field>
 
