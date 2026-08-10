@@ -1,5 +1,27 @@
-import { pgTable, index, unique } from "drizzle-orm/pg-core";
+import { pgTable, index, unique, pgEnum } from "drizzle-orm/pg-core";
 import { user } from "./auth-schema";
+
+export const industryEnum = pgEnum("industry", [
+  "technology",
+  "finance",
+  "fintech",
+  "healthcare",
+  "ecommerce",
+  "consulting",
+  "education",
+  "media_entertainment",
+  "gaming",
+  "manufacturing",
+  "retail",
+  "telecommunications",
+  "energy",
+  "government",
+  "nonprofit",
+  "real_estate",
+  "transportation",
+  "hospitality",
+  "other",
+]);
 
 export const companiesTable = pgTable(
   "companies",
@@ -13,7 +35,7 @@ export const companiesTable = pgTable(
 
     name: t.text("name").notNull(),
     website: t.text("website"),
-    industry: t.text("industry"),
+    industry: industryEnum("industry").notNull(),
     location: t.text("location"),
     notes: t.text("notes"),
 

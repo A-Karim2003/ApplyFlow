@@ -1,0 +1,3 @@
+CREATE TYPE "public"."industry" AS ENUM('technology', 'finance', 'fintech', 'healthcare', 'ecommerce', 'consulting', 'education', 'media_entertainment', 'gaming', 'manufacturing', 'retail', 'telecommunications', 'energy', 'government', 'nonprofit', 'real_estate', 'transportation', 'hospitality', 'other');--> statement-breakpoint
+ALTER TABLE "companies" ALTER COLUMN "industry" SET DATA TYPE "public"."industry" USING "industry"::"public"."industry";--> statement-breakpoint
+ALTER TABLE "companies" ALTER COLUMN "industry" SET NOT NULL;
