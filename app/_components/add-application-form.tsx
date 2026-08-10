@@ -37,7 +37,7 @@ import {
   documents,
 } from "@/lib/data";
 
-export function AddApplicationSheet({
+export function AddApplicationForm({
   children,
 }: {
   children: React.ReactNode;
