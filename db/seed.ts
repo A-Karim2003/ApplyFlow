@@ -1,220 +1,534 @@
-import dotenv from "dotenv";
-import { existsSync } from "node:fs";
+import "dotenv/config";
+import { db } from "@/db";
 import {
-  companiesTable,
   applicationsTable,
   applicationStatusHistoryTable,
+  companiesTable,
   documentsTable,
-  interviews,
+  interviewsTable,
+  user,
 } from "@/db/schema";
+import { eq, inArray } from "drizzle-orm";
 
-const envPath = existsSync(".env") ? ".env" : ".env.local";
-dotenv.config({ path: envPath });
-
-const SEED_USER_ID = "B4MHUOBhkZ3tAm0U2ErriJtfaStw99C9";
+const SEED_USER_ID = "wgZV35elYSi3hQFCqbvIx7cmXInxoZpb";
 
 async function seed() {
-  const { db } = await import("@/db");
+  console.log("Starting database seed...");
 
-  // 2. Companies
-  const companies = await db
-    .insert(companiesTable)
-    .values([
-      {
-        userId: SEED_USER_ID,
-        name: "Google",
-        website: "https://google.com",
-        industry: "technology",
-        location: "Mountain View, CA",
-        notes:
-          "Referred by Amina from the alumni network. L3 new-grad pipeline closes in March.",
-      },
-      {
-        userId: SEED_USER_ID,
-        name: "Stripe",
-        website: "https://stripe.com",
-        industry: "fintech",
-        location: "Remote (US)",
-        notes:
-          "Strong emphasis on systems design. Prep payment-ledger case study.",
-      },
-      {
-        userId: SEED_USER_ID,
-        name: "Figma",
-        website: "https://figma.com",
-        industry: "technology",
-        location: "San Francisco, CA",
-        notes: "Design-engineering hybrid role. They loved the portfolio site.",
-      },
-      {
-        userId: SEED_USER_ID,
-        name: "Notion",
-        website: "https://notion.so",
-        industry: "technology",
-        location: "Hybrid · New York",
-        notes:
-          "Waiting on take-home feedback. Follow up if no reply by Friday.",
-      },
-      {
-        userId: SEED_USER_ID,
-        name: "Linear",
-        website: "https://linear.app",
-        industry: "technology",
-        location: "Remote (Global)",
-        notes: "Small team, fast process. Recruiter very responsive.",
-      },
-    ])
-    .returning();
+  await db.transaction(async (tx) => {
+    // --------------------------------------------------
+    // 1. Verify the Better Auth user exists
+    // --------------------------------------------------
 
-  const [google, stripe, figma, notion, linear] = companies;
+    const [seedUser] = await tx
+      .select({ id: user.id })
+      .from(user)
+      .where(eq(user.id, SEED_USER_ID))
+      .limit(1);
 
-  // 3. Documents
-  const docs = await db
-    .insert(documentsTable)
-    .values([
-      {
-        userId: SEED_USER_ID,
-        filename: "Abdoulkarim_Resume_2026.pdf",
-        documentType: "cv",
-        storageKey: "seed/resume-main.pdf",
-        fileType: "application/pdf",
-        fileSize: 284_000,
-      },
-      {
-        userId: SEED_USER_ID,
-        filename: "CoverLetter_Figma.docx",
-        documentType: "cover_letter",
-        storageKey: "seed/cover-figma.docx",
-        fileType:
-          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        fileSize: 48_000,
-      },
-    ])
-    .returning();
+    if (!seedUser) {
+      throw new Error(
+        `Seed user "${SEED_USER_ID}" does not exist in the user table.`,
+      );
+    }
 
-  const [resume, coverLetter] = docs;
+    console.log("✓ Seed user found");
 
-  // 4. Applications
-  const apps = await db
-    .insert(applicationsTable)
-    .values([
+    // --------------------------------------------------
+    // 2. Remove existing seed data
+    // --------------------------------------------------
+    // This makes the seed script safely re-runnable.
+    //
+    // We only delete records belonging to this user.
+    // Nothing belonging to another user is touched.
+
+    const existingApplications = await tx
+      .select({ id: applicationsTable.id })
+      .from(applicationsTable)
+      .where(eq(applicationsTable.userId, SEED_USER_ID));
+
+    const applicationIds = existingApplications.map((app) => app.id);
+
+    if (applicationIds.length > 0) {
+      await tx
+        .delete(interviewsTable)
+        .where(inArray(interviewsTable.applicationId, applicationIds));
+
+      await tx
+        .delete(applicationStatusHistoryTable)
+        .where(
+          inArray(applicationStatusHistoryTable.applicationId, applicationIds),
+        );
+
+      await tx
+        .delete(applicationsTable)
+        .where(inArray(applicationsTable.id, applicationIds));
+    }
+
+    await tx
+      .delete(documentsTable)
+      .where(eq(documentsTable.userId, SEED_USER_ID));
+
+    await tx
+      .delete(companiesTable)
+      .where(eq(companiesTable.userId, SEED_USER_ID));
+
+    console.log("✓ Existing seed data cleared");
+
+    // --------------------------------------------------
+    // 3. Companies
+    // --------------------------------------------------
+
+    const companies = await tx
+      .insert(companiesTable)
+      .values([
+        {
+          userId: SEED_USER_ID,
+          name: "Google",
+          website: "https://www.google.com",
+          industry: "technology",
+          location: "London, UK",
+          notes:
+            "Graduate software engineering opportunity. Strong focus on problem solving and algorithms.",
+        },
+        {
+          userId: SEED_USER_ID,
+          name: "Monzo",
+          website: "https://monzo.com",
+          industry: "fintech",
+          location: "London, UK",
+          notes:
+            "Interested in backend and full-stack engineering opportunities.",
+        },
+        {
+          userId: SEED_USER_ID,
+          name: "Microsoft",
+          website: "https://www.microsoft.com",
+          industry: "technology",
+          location: "London, UK",
+          notes:
+            "Graduate software engineering role. Review technical interview topics before interview.",
+        },
+        {
+          userId: SEED_USER_ID,
+          name: "Sage",
+          website: "https://www.sage.com",
+          industry: "technology",
+          location: "Newcastle upon Tyne, UK",
+          notes:
+            "Graduate software engineering programme. Good opportunity for cloud and backend experience.",
+        },
+        {
+          userId: SEED_USER_ID,
+          name: "Revolut",
+          website: "https://www.revolut.com",
+          industry: "fintech",
+          location: "London, UK",
+          notes:
+            "Competitive graduate engineering programme with multiple technical stages.",
+        },
+        {
+          userId: SEED_USER_ID,
+          name: "Amazon",
+          website: "https://www.amazon.jobs",
+          industry: "technology",
+          location: "London, UK",
+          notes:
+            "Graduate software development role. Prepare STAR examples and DSA questions.",
+        },
+      ])
+      .returning();
+
+    const companyByName = Object.fromEntries(
+      companies.map((company) => [company.name, company]),
+    );
+
+    console.log(`✓ Created ${companies.length} companies`);
+
+    // --------------------------------------------------
+    // 4. Documents
+    // --------------------------------------------------
+
+    const documents = await tx
+      .insert(documentsTable)
+      .values([
+        {
+          userId: SEED_USER_ID,
+          filename: "Abdoulkarim_Kourouma_CV.pdf",
+          documentType: "cv",
+          storageKey: "seed/cv/Abdoulkarim_Kourouma_CV.pdf",
+          fileType: "application/pdf",
+          fileSize: 284_000,
+        },
+        {
+          userId: SEED_USER_ID,
+          filename: "Google_Cover_Letter.pdf",
+          documentType: "cover_letter",
+          storageKey: "seed/cover-letters/google.pdf",
+          fileType: "application/pdf",
+          fileSize: 92_000,
+        },
+        {
+          userId: SEED_USER_ID,
+          filename: "Monzo_Cover_Letter.pdf",
+          documentType: "cover_letter",
+          storageKey: "seed/cover-letters/monzo.pdf",
+          fileType: "application/pdf",
+          fileSize: 88_000,
+        },
+      ])
+      .returning();
+
+    const resume = documents.find(
+      (document) => document.documentType === "cv",
+    )!;
+
+    const googleCoverLetter = documents.find(
+      (document) => document.filename === "Google_Cover_Letter.pdf",
+    )!;
+
+    const monzoCoverLetter = documents.find(
+      (document) => document.filename === "Monzo_Cover_Letter.pdf",
+    )!;
+
+    console.log(`✓ Created ${documents.length} documents`);
+
+    // --------------------------------------------------
+    // 5. Applications
+    // --------------------------------------------------
+
+    const applications = await tx
+      .insert(applicationsTable)
+      .values([
+        {
+          userId: SEED_USER_ID,
+          companyId: companyByName.Google.id,
+          resumeDocumentId: resume.id,
+          coverLetterDocumentId: googleCoverLetter.id,
+          jobTitle: "Graduate Software Engineer",
+          jobType: "graduate",
+          jobUrl: "https://careers.google.com/",
+          source: "company_website",
+          location: "London, UK",
+          workMode: "hybrid",
+          salaryMin: 55_000,
+          salaryMax: 65_000,
+          status: "interview",
+          appliedAt: "2026-06-15",
+          notes:
+            "Reached interview stage. Review DSA and system design fundamentals.",
+        },
+
+        {
+          userId: SEED_USER_ID,
+          companyId: companyByName.Monzo.id,
+          resumeDocumentId: resume.id,
+          coverLetterDocumentId: monzoCoverLetter.id,
+          jobTitle: "Graduate Software Engineer",
+          jobType: "graduate",
+          jobUrl: "https://monzo.com/careers/",
+          source: "linkedin",
+          location: "London, UK",
+          workMode: "hybrid",
+          salaryMin: 50_000,
+          salaryMax: 60_000,
+          status: "online_assessment",
+          appliedAt: "2026-07-01",
+          notes: "Online assessment received. Complete before the deadline.",
+        },
+
+        {
+          userId: SEED_USER_ID,
+          companyId: companyByName.Microsoft.id,
+          resumeDocumentId: resume.id,
+          jobTitle: "Software Engineer Graduate",
+          jobType: "graduate",
+          jobUrl: "https://careers.microsoft.com/",
+          source: "company_website",
+          location: "London, UK",
+          workMode: "hybrid",
+          salaryMin: 50_000,
+          salaryMax: 60_000,
+          status: "applied",
+          appliedAt: "2026-07-20",
+          notes: "Application submitted. Waiting for response.",
+        },
+
+        {
+          userId: SEED_USER_ID,
+          companyId: companyByName.Sage.id,
+          resumeDocumentId: resume.id,
+          jobTitle: "Graduate Software Engineer",
+          jobType: "graduate",
+          jobUrl: "https://www.sage.com/en-gb/company/careers/",
+          source: "university",
+          location: "Newcastle upon Tyne, UK",
+          workMode: "hybrid",
+          salaryMin: 35_000,
+          salaryMax: 42_000,
+          status: "offer",
+          appliedAt: "2026-05-12",
+          notes:
+            "Offer received. Compare package and development opportunities.",
+        },
+
+        {
+          userId: SEED_USER_ID,
+          companyId: companyByName.Revolut.id,
+          resumeDocumentId: resume.id,
+          jobTitle: "Graduate Software Engineer",
+          jobType: "graduate",
+          jobUrl: "https://www.revolut.com/careers/",
+          source: "linkedin",
+          location: "London, UK",
+          workMode: "onsite",
+          salaryMin: 45_000,
+          salaryMax: 55_000,
+          status: "rejected",
+          appliedAt: "2026-05-28",
+          notes:
+            "Rejected after online assessment. Review performance before applying again.",
+        },
+
+        {
+          userId: SEED_USER_ID,
+          companyId: companyByName.Amazon.id,
+          resumeDocumentId: resume.id,
+          jobTitle: "Software Development Engineer",
+          jobType: "graduate",
+          jobUrl: "https://www.amazon.jobs/",
+          source: "company_website",
+          location: "London, UK",
+          workMode: "hybrid",
+          salaryMin: 50_000,
+          salaryMax: 60_000,
+          status: "wishlist",
+          notes:
+            "Strong target role. Tailor CV before applying and prepare Amazon Leadership Principles examples.",
+        },
+
+        {
+          userId: SEED_USER_ID,
+          companyId: companyByName.Monzo.id,
+          resumeDocumentId: resume.id,
+          jobTitle: "Backend Engineer",
+          jobType: "full_time",
+          jobUrl: "https://monzo.com/careers/",
+          source: "referral",
+          location: "London, UK",
+          workMode: "hybrid",
+          salaryMin: 55_000,
+          salaryMax: 70_000,
+          status: "interview",
+          appliedAt: "2026-06-25",
+          notes:
+            "Technical interview scheduled. Focus on backend architecture and PostgreSQL.",
+        },
+      ])
+      .returning();
+
+    console.log(`✓ Created ${applications.length} applications`);
+
+    // --------------------------------------------------
+    // 6. Status history
+    // --------------------------------------------------
+
+    const googleApplication = applications.find(
+      (application) =>
+        application.companyId === companyByName.Google.id &&
+        application.jobTitle === "Graduate Software Engineer",
+    )!;
+
+    const monzoGraduateApplication = applications.find(
+      (application) =>
+        application.companyId === companyByName.Monzo.id &&
+        application.jobTitle === "Graduate Software Engineer",
+    )!;
+
+    const microsoftApplication = applications.find(
+      (application) => application.companyId === companyByName.Microsoft.id,
+    )!;
+
+    const sageApplication = applications.find(
+      (application) => application.companyId === companyByName.Sage.id,
+    )!;
+
+    const revolutApplication = applications.find(
+      (application) => application.companyId === companyByName.Revolut.id,
+    )!;
+
+    const monzoBackendApplication = applications.find(
+      (application) => application.jobTitle === "Backend Engineer",
+    )!;
+
+    await tx.insert(applicationStatusHistoryTable).values([
+      // Google:
+      // wishlist → applied → online assessment → interview
       {
-        userId: SEED_USER_ID,
-        companyId: google.id,
-        resumeDocumentId: resume.id,
-        jobTitle: "Software Engineer, New Grad",
-        jobType: "graduate",
-        jobUrl: "https://careers.google.com/jobs/123",
-        location: "Mountain View, CA",
-        workMode: "onsite",
-        salaryMin: 135_000,
-        salaryMax: 155_000,
-        status: "interview",
-        appliedAt: "2026-06-18",
-      },
-      {
-        userId: SEED_USER_ID,
-        companyId: stripe.id,
-        resumeDocumentId: resume.id,
-        jobTitle: "Frontend Engineer",
-        jobType: "full_time",
-        location: "Remote (US)",
-        workMode: "remote",
-        salaryMin: 128_000,
-        salaryMax: 150_000,
-        status: "online_assessment",
-        appliedAt: "2026-07-02",
-      },
-      {
-        userId: SEED_USER_ID,
-        companyId: figma.id,
-        resumeDocumentId: resume.id,
-        coverLetterDocumentId: coverLetter.id,
-        jobTitle: "Product Engineer",
-        jobType: "full_time",
-        location: "San Francisco, CA",
-        workMode: "hybrid",
-        salaryMin: 130_000,
-        salaryMax: 160_000,
-        status: "interview",
-        appliedAt: "2026-06-28",
-      },
-      {
-        userId: SEED_USER_ID,
-        companyId: notion.id,
-        jobTitle: "Software Engineer, Frontend",
-        jobType: "full_time",
-        location: "New York, NY",
-        workMode: "hybrid",
-        salaryMin: 125_000,
-        salaryMax: 145_000,
-        status: "applied",
-        appliedAt: "2026-07-20",
-      },
-      {
-        userId: SEED_USER_ID,
-        companyId: linear.id,
-        jobTitle: "Full-Stack Engineer",
-        jobType: "full_time",
-        location: "Remote (Global)",
-        workMode: "remote",
-        salaryMin: 120_000,
-        salaryMax: 140_000,
-        status: "offer",
-        appliedAt: "2026-05-30",
-      },
-      {
-        userId: SEED_USER_ID,
-        companyId: stripe.id,
-        jobTitle: "Platform Engineer",
-        jobType: "full_time",
-        location: "Remote (US)",
-        workMode: "remote",
-        salaryMin: 135_000,
-        salaryMax: 165_000,
+        applicationId: googleApplication.id,
+        previousStatus: null,
         status: "wishlist",
       },
-    ])
-    .returning();
+      {
+        applicationId: googleApplication.id,
+        previousStatus: "wishlist",
+        status: "applied",
+      },
+      {
+        applicationId: googleApplication.id,
+        previousStatus: "applied",
+        status: "online_assessment",
+      },
+      {
+        applicationId: googleApplication.id,
+        previousStatus: "online_assessment",
+        status: "interview",
+      },
 
-  // 5. Status history (one row per current status, simulating the journey)
-  await db.insert(applicationStatusHistoryTable).values(
-    apps
-      .filter((a) => a.status !== "wishlist")
-      .map((a) => ({
-        applicationId: a.id,
-        previousStatus: "applied" as const,
-        status: a.status,
-      })),
-  );
+      // Monzo Graduate:
+      // wishlist → applied → online assessment
+      {
+        applicationId: monzoGraduateApplication.id,
+        previousStatus: null,
+        status: "wishlist",
+      },
+      {
+        applicationId: monzoGraduateApplication.id,
+        previousStatus: "wishlist",
+        status: "applied",
+      },
+      {
+        applicationId: monzoGraduateApplication.id,
+        previousStatus: "applied",
+        status: "online_assessment",
+      },
 
-  // 6. Interviews (tied to the two "interview" status applications)
-  const googleApp = apps.find((a) => a.companyId === google.id)!;
-  const figmaApp = apps.find((a) => a.companyId === figma.id)!;
+      // Microsoft:
+      // wishlist → applied
+      {
+        applicationId: microsoftApplication.id,
+        previousStatus: null,
+        status: "wishlist",
+      },
+      {
+        applicationId: microsoftApplication.id,
+        previousStatus: "wishlist",
+        status: "applied",
+      },
 
-  await db.insert(interviews).values([
-    {
-      applicationId: googleApp.id,
-      scheduledAt: new Date("2026-08-06T10:00:00Z"),
-      interviewerName: null,
-      interviewType: "system_design_interview",
-      outcome: "pending",
-    },
-    {
-      applicationId: figmaApp.id,
-      scheduledAt: new Date("2026-08-07T14:30:00Z"),
-      interviewerName: null,
-      interviewType: "technical_interview",
-      outcome: "pending",
-    },
-  ]);
+      // Sage:
+      // wishlist → applied → online assessment → interview → offer
+      {
+        applicationId: sageApplication.id,
+        previousStatus: null,
+        status: "wishlist",
+      },
+      {
+        applicationId: sageApplication.id,
+        previousStatus: "wishlist",
+        status: "applied",
+      },
+      {
+        applicationId: sageApplication.id,
+        previousStatus: "applied",
+        status: "online_assessment",
+      },
+      {
+        applicationId: sageApplication.id,
+        previousStatus: "online_assessment",
+        status: "interview",
+      },
+      {
+        applicationId: sageApplication.id,
+        previousStatus: "interview",
+        status: "offer",
+      },
 
-  console.log("Seed complete.");
+      // Revolut:
+      // wishlist → applied → online assessment → rejected
+      {
+        applicationId: revolutApplication.id,
+        previousStatus: null,
+        status: "wishlist",
+      },
+      {
+        applicationId: revolutApplication.id,
+        previousStatus: "wishlist",
+        status: "applied",
+      },
+      {
+        applicationId: revolutApplication.id,
+        previousStatus: "applied",
+        status: "online_assessment",
+      },
+      {
+        applicationId: revolutApplication.id,
+        previousStatus: "online_assessment",
+        status: "rejected",
+      },
+
+      // Monzo Backend:
+      // wishlist → applied → interview
+      {
+        applicationId: monzoBackendApplication.id,
+        previousStatus: null,
+        status: "wishlist",
+      },
+      {
+        applicationId: monzoBackendApplication.id,
+        previousStatus: "wishlist",
+        status: "applied",
+      },
+      {
+        applicationId: monzoBackendApplication.id,
+        previousStatus: "applied",
+        status: "interview",
+      },
+    ]);
+
+    console.log("✓ Created application status history");
+
+    // --------------------------------------------------
+    // 7. Interviews
+    // --------------------------------------------------
+
+    await tx.insert(interviewsTable).values([
+      {
+        applicationId: googleApplication.id,
+        scheduledAt: new Date("2026-08-12T10:00:00+01:00"),
+        interviewerName: "James Wilson",
+        interviewType: "technical_interview",
+        notes:
+          "Technical interview covering algorithms, data structures and practical problem solving.",
+        outcome: "pending",
+      },
+      {
+        applicationId: monzoBackendApplication.id,
+        scheduledAt: new Date("2026-08-14T14:00:00+01:00"),
+        interviewerName: "Sarah Ahmed",
+        interviewType: "system_design_interview",
+        notes:
+          "Discuss backend architecture, PostgreSQL and designing a scalable service.",
+        outcome: "pending",
+      },
+      {
+        applicationId: sageApplication.id,
+        scheduledAt: new Date("2026-05-30T11:00:00+01:00"),
+        interviewerName: "Michael Brown",
+        interviewType: "behavioural_interview",
+        notes: "Final-stage behavioural interview before offer.",
+        outcome: "passed",
+      },
+    ]);
+
+    console.log("✓ Created interviews");
+  });
+
+  console.log("\nSeed completed successfully.");
 }
 
-seed()
-  .catch((err) => {
-    console.error("Seed failed:", err);
-    process.exit(1);
-  })
-  .then(() => process.exit(0));
+seed().catch((error) => {
+  console.error("\nSeed failed:");
+  console.error(error);
+  process.exit(1);
+});

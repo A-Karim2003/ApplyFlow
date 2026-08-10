@@ -26,7 +26,7 @@ export const interviewType = pgEnum("interview_type", [
   "final_interview",
 ]);
 
-export const interviews = pgTable(
+export const interviewsTable = pgTable(
   "interviews",
   {
     id: integer("id").primaryKey().generatedAlwaysAsIdentity(),

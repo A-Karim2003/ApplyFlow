@@ -15,6 +15,13 @@
       "when": 1786324822716,
       "tag": "0001_careless_colleen_wing",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1786375139443,
+      "tag": "0002_pretty_squirrel_girl",
+      "breakpoints": true
     }
   ]
 }

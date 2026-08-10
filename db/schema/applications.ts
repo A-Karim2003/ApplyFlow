@@ -15,13 +15,22 @@ export const applicationStatusEnum = pgEnum("application_status", [
   "rejected",
 ]);
 
-export const jobType = pgEnum("job_type", [
+export const jobTypeEnum = pgEnum("job_type", [
   "full_time",
   "part_time",
   "internship",
   "placement",
   "graduate",
   "contract",
+]);
+
+export const applicationSourceEnum = pgEnum("application_source", [
+  "linkedin",
+  "indeed",
+  "company_website",
+  "referral",
+  "university",
+  "other",
 ]);
 
 export const applicationsTable = pgTable(
@@ -54,8 +63,9 @@ export const applicationsTable = pgTable(
       }),
 
     jobTitle: t.text("job_title").notNull(),
-    jobType: jobType("job_type"),
+    jobType: jobTypeEnum("job_type").notNull(),
     jobUrl: t.text("job_url"),
+    source: applicationSourceEnum("source").notNull(),
 
     location: t.text("location"),
     workMode: workModeEnum("work_mode"),
