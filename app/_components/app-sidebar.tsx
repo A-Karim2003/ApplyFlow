@@ -32,7 +32,7 @@ const navItems = [
   { title: "Applications", href: "/applications", icon: Briefcase },
   { title: "Companies", href: "/companies", icon: Building2 },
   { title: "Documents", href: "/documents", icon: FileText },
-  { title: "Settings", href: "/settings", icon: Settings },
+  { title: "Account", href: "/account", icon: Settings },
 ];
 
 export function AppSidebar() {
