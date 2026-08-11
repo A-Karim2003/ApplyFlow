@@ -1,15 +1,16 @@
-import type { InferInsertModel, InferSelectModel } from "drizzle-orm";
-import { session } from "../../db/schema/auth-schema";
+import { headers } from "next/headers";
+import { auth } from "../auth";
 
-export type Session = InferSelectModel<typeof session>;
-export type NewSession = InferInsertModel<typeof session>;
+export type Session = NonNullable<
+  Awaited<ReturnType<typeof auth.api.getSession>>
+>;
 
-export async function getSession(id: Session["id"]): Promise<Session | null> {
-  throw new Error("Not implemented yet.");
-}
-
-export async function getSessionsByUserId(
-  userId: Session["userId"],
-): Promise<Session[]> {
-  throw new Error("Not implemented yet.");
+export async function getSession(): Promise<Session | null> {
+  try {
+    return await auth.api.getSession({
+      headers: await headers(),
+    });
+  } catch {
+    return null;
+  }
 }
