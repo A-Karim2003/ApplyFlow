@@ -1,3 +1,3 @@
-export default function ApplicationsPage() {
+export default async function ApplicationsPage() {
   return <div></div>;
 }

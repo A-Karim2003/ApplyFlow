@@ -6,7 +6,8 @@ import {
 } from "@/db/schema";
 
 /*=======================Application Status=======================*/
-type ApplicationStatus = (typeof applicationStatusEnum.enumValues)[number];
+export type ApplicationStatus =
+  (typeof applicationStatusEnum.enumValues)[number];
 
 const STATUS_LABELS: Record<ApplicationStatus, string> = {
   wishlist: "Wishlist",
@@ -69,8 +70,9 @@ const APPLICATION_SOURCES: Record<ApplicationSource, string> = {
   other: "Other",
 };
 
-export const APPLICATION_SOURCE_OPTIONS =
-  applicationSourceEnum.enumValues.map((source) => ({
+export const APPLICATION_SOURCE_OPTIONS = applicationSourceEnum.enumValues.map(
+  (source) => ({
     label: APPLICATION_SOURCES[source],
     value: source,
-  }));
+  }),
+);

@@ -1,23 +1,45 @@
-import type { InferInsertModel, InferSelectModel } from "drizzle-orm";
-import {
-  applicationStatusHistoryTable as applicationEvents,
-  applicationsTable as applications,
-} from "../../db/schema/applications";
+import type { InferSelectModel } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 
-export type Application = InferSelectModel<typeof applications>;
-export type NewApplication = InferInsertModel<typeof applications>;
+import { db } from "@/db";
+import { Result } from "@/types";
 
-export type ApplicationFilters = {
-  userId?: Application["userId"];
-  companyId?: Application["companyId"];
-  status?: Application["status"];
+import { applicationsTable } from "../../db/schema/applications";
+import { companiesTable } from "../../db/schema/companies";
+import { getSession } from "./session";
+
+export type Application = InferSelectModel<typeof applicationsTable>;
+export type Company = InferSelectModel<typeof companiesTable>;
+export type ApplicationStatus = Application["status"];
+
+export type ApplicationWithCompany = {
+  application: Application;
+  company: Company;
 };
 
-export async function getApplications(
-  filters: ApplicationFilters,
-): Promise<Application[]> {
-  throw new Error("Not implemented yet.");
-}
+export type ApplicationsPageData = {
+  applications: ApplicationWithCompany[];
+};
 
-export type ApplicationEvent = InferSelectModel<typeof applicationEvents>;
-export type NewApplicationEvent = InferInsertModel<typeof applicationEvents>;
+export async function getApplicationsPageData(): Promise<
+  Result<ApplicationsPageData>
+> {
+  const session = await getSession();
+  if (!session) return { success: false, error: "Not authenticated" };
+
+  try {
+    const applications = await db
+      .select({ application: applicationsTable, company: companiesTable })
+      .from(applicationsTable)
+      .innerJoin(
+        companiesTable,
+        eq(applicationsTable.companyId, companiesTable.id),
+      )
+      .where(eq(applicationsTable.userId, session.user.id))
+      .orderBy(desc(applicationsTable.createdAt));
+
+    return { success: true, data: { applications } };
+  } catch {
+    return { success: false, error: "Failed to fetch applications page data" };
+  }
+}
