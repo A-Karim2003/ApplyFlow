@@ -17,7 +17,12 @@ import {
 
 import type { Application, CompanyRecord } from "@/lib/data/companies";
 
-import { MapPinIcon, SearchIcon, BriefcaseIcon } from "lucide-react";
+import {
+  MapPinIcon,
+  SearchIcon,
+  BriefcaseIcon,
+  ExternalLinkIcon,
+} from "lucide-react";
 import CompanyLogo from "@/app/_components/company-logo";
 
 import { CompanyDetailSheet } from "./companies-detail-sheet";
@@ -32,9 +37,11 @@ interface CompaniesGridProps {
 
 export function CompaniesGrid({ companies, applications }: CompaniesGridProps) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [active, setActive] = useState<CompanyRecord | null>(null);
+  const [activeCompany, setActiveCompany] = useState<CompanyRecord | null>(
+    null,
+  );
 
-  const appsByCompany = useMemo(() => {
+  const applicationsPerCompany = useMemo(() => {
     const map = new Map<number, Application[]>();
 
     applications.forEach((application) => {
@@ -51,8 +58,7 @@ export function CompaniesGrid({ companies, applications }: CompaniesGridProps) {
     return (
       company.name.toLowerCase().includes(search) ||
       formatEnumLabel(company.industry).toLowerCase().includes(search) ||
-      formatLocation(company.location).toLowerCase().includes(search) ||
-      (company.website?.toLowerCase().includes(search) ?? false)
+      formatLocation(company.location).toLowerCase().includes(search)
     );
   });
 
@@ -74,11 +80,18 @@ export function CompaniesGrid({ companies, applications }: CompaniesGridProps) {
       {filteredCompanies.length > 0 ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filteredCompanies.map((company) => {
-            const applicationList = appsByCompany.get(company.id) ?? [];
+            const applicationList =
+              applicationsPerCompany.get(company.id) ?? [];
+
+            const uniqueStatuses = [
+              ...new Set(applicationList.map((app) => app.status)),
+            ];
+
+            console.log(uniqueStatuses);
 
             return (
               <Card key={company.id} className="flex flex-col">
-                <CardHeader className="flex flex-row items-start gap-3">
+                <CardHeader className="flex flex-row items-start gap-3 pb-3">
                   <CompanyLogo
                     name={company.name}
                     className="size-11 text-base"
@@ -93,7 +106,8 @@ export function CompaniesGrid({ companies, applications }: CompaniesGridProps) {
                   </div>
                 </CardHeader>
 
-                <CardContent className="flex flex-1 flex-col gap-3">
+                <CardContent className="flex flex-1 flex-col gap-2.5 pt-0">
+                  {/* Location */}
                   <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
                     <MapPinIcon className="size-4 shrink-0" />
                     <span className="truncate">
@@ -101,47 +115,58 @@ export function CompaniesGrid({ companies, applications }: CompaniesGridProps) {
                     </span>
                   </div>
 
-                  {company.website ? (
+                  {/* Website */}
+                  {company.website && (
                     <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                      <BriefcaseIcon className="size-4 shrink-0" />
+                      <ExternalLinkIcon className="size-4 shrink-0" />
                       <a
                         href={company.website}
                         target="_blank"
                         rel="noreferrer"
                         className="truncate underline-offset-4 hover:underline"
                       >
-                        {company.website}
+                        Visit website
                       </a>
                     </div>
-                  ) : null}
+                  )}
 
-                  <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                    <BriefcaseIcon className="size-4 shrink-0" />
-                    <span>
+                  {/* Applications count*/}
+                  <div className="flex items-center gap-1.5 text-sm">
+                    <BriefcaseIcon className="size-4 shrink-0 text-muted-foreground" />
+                    <span className="font-medium">
                       {applicationList.length}{" "}
                       {applicationList.length === 1
                         ? "application"
-                        : "applications"}{" "}
-                      tracked
+                        : "applications"}
                     </span>
+                    <span className="text-muted-foreground">tracked</span>
                   </div>
 
+                  {/* Status badges */}
                   <div className="flex flex-wrap gap-1.5 pt-1">
-                    {applicationList.slice(0, 3).map((app) => (
-                      <CompanyStatusBadge key={app.id} status={app.status} />
-                    ))}
-                    {applicationList.length === 0 ? (
+                    {uniqueStatuses.length > 0 ? (
+                      <>
+                        {uniqueStatuses.slice(0, 3).map((status) => (
+                          <CompanyStatusBadge key={status} status={status} />
+                        ))}
+                        {uniqueStatuses.length > 3 && (
+                          <Badge variant="outline" className="text-xs">
+                            +{uniqueStatuses.length - 3}
+                          </Badge>
+                        )}
+                      </>
+                    ) : (
                       <Badge variant="outline">No applications yet</Badge>
-                    ) : null}
+                    )}
                   </div>
                 </CardContent>
 
-                <CardFooter className="gap-2">
+                <CardFooter className="pt-3">
                   <Button
                     variant="outline"
                     size="sm"
-                    className="flex-1"
-                    onClick={() => setActive(company)}
+                    className="w-full"
+                    onClick={() => setActiveCompany(company)}
                   >
                     View details
                   </Button>
@@ -157,11 +182,15 @@ export function CompaniesGrid({ companies, applications }: CompaniesGridProps) {
       )}
 
       <CompanyDetailSheet
-        company={active}
-        applications={active ? (appsByCompany.get(active.id) ?? []) : []}
-        open={active !== null}
+        company={activeCompany}
+        applications={
+          activeCompany
+            ? (applicationsPerCompany.get(activeCompany.id) ?? [])
+            : []
+        }
+        open={activeCompany !== null}
         onOpenChange={(open) => {
-          if (!open) setActive(null);
+          if (!open) setActiveCompany(null);
         }}
       />
     </div>

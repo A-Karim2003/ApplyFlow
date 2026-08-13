@@ -14,7 +14,9 @@ export function initials(name: string) {
     .toUpperCase();
 }
 
-export function formatEnumLabel(value: string) {
+export function formatEnumLabel(value: string | null | undefined) {
+  if (!value?.trim()) return "Not set";
+
   return value
     .replaceAll("_", " ")
     .replace(/\b\w/g, (character) => character.toUpperCase());
