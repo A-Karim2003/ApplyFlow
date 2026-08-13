@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { cn, formatEnumLabel } from "@/lib/utils";
 
 import type { ApplicationStatus } from "@/lib/constants/applications-status";
 
@@ -29,8 +29,9 @@ const STATUS_STYLES: Record<ApplicationStatus, { dot: string; pill: string }> =
       pill: "bg-destructive/10 text-destructive",
     },
   };
+
 function formatStatus(status: ApplicationStatus) {
-  return status;
+  return formatEnumLabel(status);
 }
 
 export function StatusBadge({

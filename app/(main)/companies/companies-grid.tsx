@@ -26,7 +26,7 @@ import {
 import CompanyLogo from "@/app/_components/company-logo";
 
 import { CompanyDetailSheet } from "./companies-detail-sheet";
-import { CompanyStatusBadge } from "./company-status-badge";
+import { StatusBadge } from "@/app/_components/status-badge";
 import { formatEnumLabel, formatLocation } from "@/lib/utils";
 import { useMemo, useState } from "react";
 
@@ -147,7 +147,7 @@ export function CompaniesGrid({ companies, applications }: CompaniesGridProps) {
                     {uniqueStatuses.length > 0 ? (
                       <>
                         {uniqueStatuses.slice(0, 3).map((status) => (
-                          <CompanyStatusBadge key={status} status={status} />
+                          <StatusBadge key={status} status={status} />
                         ))}
                         {uniqueStatuses.length > 3 && (
                           <Badge variant="outline" className="text-xs">

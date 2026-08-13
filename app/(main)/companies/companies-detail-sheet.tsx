@@ -13,7 +13,7 @@ import { Card } from "@/components/ui/card";
 
 import type { Application, CompanyRecord } from "@/lib/data/companies";
 
-import { CompanyStatusBadge } from "./company-status-badge";
+import { StatusBadge } from "@/app/_components/status-badge";
 import CompanyLogo from "@/app/_components/company-logo";
 
 import {
@@ -148,7 +148,7 @@ export function CompanyDetailSheet({
                           </div>
                         </div>
 
-                        <CompanyStatusBadge status={app.status} />
+                        <StatusBadge status={app.status} />
                       </Card>
                     ))}
                   </div>
