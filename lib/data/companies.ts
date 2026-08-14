@@ -8,7 +8,6 @@ import { Result } from "@/types";
 
 export type Company = InferSelectModel<typeof companiesTable>;
 export type Application = InferSelectModel<typeof applicationsTable>;
-export type CompanyRecord = Company;
 export type CompanyApplicationStatus = Application["status"];
 
 export type CompaniesPageData = {

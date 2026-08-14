@@ -11,7 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 
-import type { Application, CompanyRecord } from "@/lib/data/companies";
+import type { Application, Company } from "@/lib/data/companies";
 
 import { StatusBadge } from "@/app/_components/status-badge";
 import CompanyLogo from "@/app/_components/company-logo";
@@ -26,7 +26,7 @@ import { ExternalLinkIcon, MapPinIcon, StickyNoteIcon } from "lucide-react";
 import Link from "next/link";
 
 interface CompanyDetailSheetProps {
-  company: CompanyRecord | null;
+  company: Company | null;
   applications: Application[];
   open: boolean;
   onOpenChange: (open: boolean) => void;

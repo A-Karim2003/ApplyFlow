@@ -15,13 +15,14 @@ import {
   InputGroupAddon,
 } from "@/components/ui/input-group";
 
-import type { Application, CompanyRecord } from "@/lib/data/companies";
+import type { Application, Company } from "@/lib/data/companies";
 
 import {
   MapPinIcon,
   SearchIcon,
   BriefcaseIcon,
   ExternalLinkIcon,
+  PlusIcon,
 } from "lucide-react";
 import CompanyLogo from "@/app/_components/company-logo";
 
@@ -29,17 +30,16 @@ import { CompanyDetailSheet } from "./companies-detail-sheet";
 import { StatusBadge } from "@/app/_components/status-badge";
 import { formatEnumLabel, formatLocation } from "@/lib/utils";
 import { useMemo, useState } from "react";
+import { AddCompanyModal } from "./add-company-modal";
 
 interface CompaniesGridProps {
-  companies: CompanyRecord[];
+  companies: Company[];
   applications: Application[];
 }
 
 export function CompaniesGrid({ companies, applications }: CompaniesGridProps) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeCompany, setActiveCompany] = useState<CompanyRecord | null>(
-    null,
-  );
+  const [activeCompany, setActiveCompany] = useState<Company | null>(null);
 
   const applicationsPerCompany = useMemo(() => {
     const map = new Map<number, Application[]>();
@@ -64,8 +64,8 @@ export function CompaniesGrid({ companies, applications }: CompaniesGridProps) {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="max-w-sm">
-        <InputGroup>
+      <div className="flex justify-between items-center w-full">
+        <InputGroup className="max-w-sm ">
           <InputGroupAddon>
             <SearchIcon />
           </InputGroupAddon>
@@ -75,6 +75,13 @@ export function CompaniesGrid({ companies, applications }: CompaniesGridProps) {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </InputGroup>
+
+        <AddCompanyModal>
+          <Button>
+            <PlusIcon data-icon="inline-start" />
+            Add company
+          </Button>
+        </AddCompanyModal>
       </div>
 
       {filteredCompanies.length > 0 ? (
@@ -86,8 +93,6 @@ export function CompaniesGrid({ companies, applications }: CompaniesGridProps) {
             const uniqueStatuses = [
               ...new Set(applicationList.map((app) => app.status)),
             ];
-
-            console.log(uniqueStatuses);
 
             return (
               <Card key={company.id} className="flex flex-col">

@@ -1,9 +1,9 @@
-import { getSession } from "@/actions/auth-actions";
 import { redirect } from "next/navigation";
 
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "../_components/app-sidebar";
 import { RoutePageHeader } from "../_components/route-page-header";
+import { getSession } from "@/lib/data/session";
 
 export default async function Layout({
   children,
