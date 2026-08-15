@@ -1,15 +1,35 @@
 "use client";
 
+import { useState, useTransition } from "react";
+
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
   SheetDescription,
+  SheetClose,
 } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 import type { Application, Company } from "@/lib/data/companies";
 
@@ -22,8 +42,16 @@ import {
   formatSalaryRange,
 } from "@/lib/utils";
 
-import { ExternalLinkIcon, MapPinIcon, StickyNoteIcon } from "lucide-react";
+import {
+  EllipsisVerticalIcon,
+  ExternalLinkIcon,
+  MapPinIcon,
+  StickyNoteIcon,
+  XIcon,
+} from "lucide-react";
 import Link from "next/link";
+import { CompanyFormModal } from "@/app/(main)/companies/company-form-modal";
+import { deleteCompany } from "@/actions/companies";
 
 interface CompanyDetailSheetProps {
   company: Company | null;
@@ -38,21 +66,138 @@ export function CompanyDetailSheet({
   open,
   onOpenChange,
 }: CompanyDetailSheetProps) {
+  const [editOpen, setEditOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+
+  const [isDeleting, startDelete] = useTransition();
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  function handleDelete() {
+    if (!company) return;
+    setDeleteError(null);
+
+    startDelete(async () => {
+      try {
+        const result = await deleteCompany(company.id);
+        if (!result.success) {
+          setDeleteError(result.error);
+          return;
+        }
+        setDeleteOpen(false);
+        onOpenChange(false);
+      } catch (error) {
+        setDeleteError(
+          error instanceof Error ? error.message : "Something went wrong",
+        );
+      }
+    });
+  }
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="flex w-full flex-col gap-0 sm:max-w-md">
+      <SheetContent
+        showCloseButton={false}
+        className="flex w-full flex-col gap-0 sm:max-w-md"
+      >
         {company && (
           <>
-            <SheetHeader>
-              <div className="flex items-center gap-3">
-                <CompanyLogo name={company.name} className="size-12 text-lg" />
-                <div className="flex flex-col gap-0.5">
-                  <SheetTitle className="font-serif text-xl">
-                    {company.name}
-                  </SheetTitle>
-                  <SheetDescription>
-                    {formatEnumLabel(company.industry)}
-                  </SheetDescription>
+            <CompanyFormModal
+              company={company}
+              open={editOpen}
+              onOpenChange={setEditOpen}
+            />
+
+            <SheetHeader className="gap-3">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex min-w-0 items-center gap-3">
+                  <CompanyLogo
+                    name={company.name}
+                    className="size-12 text-lg"
+                  />
+                  <div className="flex min-w-0 flex-col gap-0.5">
+                    <SheetTitle className="truncate font-serif text-xl">
+                      {company.name}
+                    </SheetTitle>
+                    <SheetDescription className="truncate">
+                      {formatEnumLabel(company.industry)}
+                    </SheetDescription>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-1">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger
+                      render={
+                        <Button variant="ghost" size="icon-sm">
+                          <EllipsisVerticalIcon />
+                          <span className="sr-only">Company actions</span>
+                        </Button>
+                      }
+                    />
+                    <DropdownMenuContent align="end" sideOffset={6}>
+                      <DropdownMenuItem onClick={() => setEditOpen(true)}>
+                        Edit
+                      </DropdownMenuItem>
+
+                      <DropdownMenuItem
+                        variant="destructive"
+                        onClick={() => setDeleteOpen(true)}
+                      >
+                        Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+
+                  {/* Delete Confirmation */}
+                  <AlertDialog
+                    open={deleteOpen}
+                    onOpenChange={(open) => {
+                      setDeleteOpen(open);
+                      if (!open) setDeleteError(null);
+                    }}
+                  >
+                    {/* TODO: If company has applications, prevent deletion */}
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>
+                          Delete company {company.name}?
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                          {applications.length > 0
+                            ? `This permanently removes ${company.name} and its ${applications.length} tracked ${applications.length === 1 ? "application" : "applications"}. This action cannot be undone.`
+                            : `This permanently removes ${company.name}. This action cannot be undone.`}
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+
+                      {deleteError && (
+                        <p className="text-sm text-destructive wrap-break-word">
+                          {deleteError}
+                        </p>
+                      )}
+
+                      <AlertDialogFooter>
+                        <AlertDialogCancel disabled={isDeleting}>
+                          Cancel
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                          variant="destructive"
+                          disabled={isDeleting}
+                          onClick={handleDelete}
+                        >
+                          {isDeleting ? "Deleting…" : "Delete company"}
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+
+                  <SheetClose
+                    render={
+                      <Button variant="ghost" size="icon-sm">
+                        <XIcon />
+                        <span className="sr-only">Close</span>
+                      </Button>
+                    }
+                  />
                 </div>
               </div>
             </SheetHeader>

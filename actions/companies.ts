@@ -6,6 +6,7 @@ import { getSession } from "@/lib/data/session";
 import { Result } from "@/types";
 import { db } from "@/db";
 import { revalidatePath } from "next/cache";
+import type { Company } from "@/lib/data/companies";
 
 export type NewCompany = InferInsertModel<typeof companiesTable>;
 
@@ -14,8 +15,6 @@ type CreateCompanyInput = Omit<NewCompany, "userId">;
 export async function createCompany(
   data: CreateCompanyInput,
 ): Promise<Result<NewCompany>> {
-  return { success: false, error: "testing" };
-
   const session = await getSession();
   if (!session) return { success: false, error: "User not authenticated" };
 
@@ -32,4 +31,21 @@ export async function createCompany(
     console.error("createCompany failed:", error);
     return { success: false, error: "Failed to create company" };
   }
+}
+
+export async function updateCompany(
+  id: number,
+  data: Omit<NewCompany, "userId">,
+): Promise<Result<Company>> {
+  const session = await getSession();
+  if (!session) return { success: false, error: "User not authenticated" };
+
+  throw new Error("Not implemented");
+}
+
+export async function deleteCompany(id: number): Promise<Result<void>> {
+  const session = await getSession();
+  if (!session) return { success: false, error: "User not authenticated" };
+
+  throw new Error("Not implemented");
 }

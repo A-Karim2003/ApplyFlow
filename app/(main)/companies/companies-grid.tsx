@@ -30,7 +30,7 @@ import { CompanyDetailSheet } from "./companies-detail-sheet";
 import { StatusBadge } from "@/app/_components/status-badge";
 import { formatEnumLabel, formatLocation } from "@/lib/utils";
 import { useMemo, useState } from "react";
-import { AddCompanyModal } from "./add-company-modal";
+import { CompanyFormModal } from "./company-form-modal";
 
 interface CompaniesGridProps {
   companies: Company[];
@@ -76,12 +76,12 @@ export function CompaniesGrid({ companies, applications }: CompaniesGridProps) {
           />
         </InputGroup>
 
-        <AddCompanyModal>
+        <CompanyFormModal>
           <Button>
             <PlusIcon data-icon="inline-start" />
             Add company
           </Button>
-        </AddCompanyModal>
+        </CompanyFormModal>
       </div>
 
       {filteredCompanies.length > 0 ? (

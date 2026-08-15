@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, type ReactNode, type ReactElement } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState, type ReactElement, type ReactNode } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, Controller } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import * as z from "zod";
 
 import {
@@ -39,7 +38,8 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { INDUSTRY_OPTIONS } from "@/lib/constants";
 import { industryEnum } from "@/db/schema";
-import { createCompany } from "@/actions/companies";
+import { createCompany, updateCompany } from "@/actions/companies";
+import type { Company } from "@/lib/data/companies";
 
 const FormSchema = z.object({
   name: z.string().trim().min(1, "Company name is required").max(200),
@@ -53,14 +53,44 @@ const FormSchema = z.object({
 
 type FormValues = z.infer<typeof FormSchema>;
 
-interface AddCompanyModalProps {
-  children: ReactNode;
+const EMPTY_VALUES: Partial<FormValues> = {
+  name: "",
+  website: "",
+  location: "",
+  notes: "",
+};
+
+function getDefaultValues(company?: Company): Partial<FormValues> {
+  if (!company) return EMPTY_VALUES;
+
+  return {
+    name: company.name,
+    website: company.website ?? "",
+    industry: company.industry,
+    location: company.location ?? "",
+    notes: company.notes ?? "",
+  };
 }
 
-export function AddCompanyModal({ children }: AddCompanyModalProps) {
-  const [open, setOpen] = useState(false);
+interface CompanyFormModalProps {
+  children?: ReactNode;
+  company?: Company;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}
+
+export function CompanyFormModal({
+  children,
+  company,
+  open,
+  onOpenChange,
+}: CompanyFormModalProps) {
+  const [internalOpen, setInternalOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
-  const router = useRouter();
+  const isEditing = Boolean(company);
+  const isControlled = open !== undefined;
+  const dialogOpen = isControlled ? open : internalOpen;
+  const setDialogOpen = onOpenChange ?? setInternalOpen;
 
   const {
     register,
@@ -71,51 +101,71 @@ export function AddCompanyModal({ children }: AddCompanyModalProps) {
   } = useForm<FormValues>({
     resolver: zodResolver(FormSchema),
     mode: "onSubmit",
-    defaultValues: {
-      name: "",
-      website: "",
-      location: "",
-      notes: "",
-    },
+    defaultValues: EMPTY_VALUES,
   });
+
+  useEffect(() => {
+    if (dialogOpen) {
+      reset(getDefaultValues(company));
+    }
+  }, [company, dialogOpen, reset]);
 
   async function onSubmit(data: FormValues) {
     setFormError(null);
 
-    const result = await createCompany({
-      name: data.name,
-      industry: data.industry,
-      website: data.website?.trim() || undefined,
-      location: data.location?.trim() || undefined,
-      notes: data.notes?.trim() ?? "",
-    });
+    try {
+      // TODO: remove try/catch once updateCompany/deleteCompany return Result without throwing
+      const result = isEditing
+        ? await updateCompany(company!.id, {
+            name: data.name,
+            industry: data.industry,
+            website: data.website?.trim() || undefined,
+            location: data.location?.trim() || undefined,
+            notes: data.notes?.trim() ?? "",
+          })
+        : await createCompany({
+            name: data.name,
+            industry: data.industry,
+            website: data.website?.trim() || undefined,
+            location: data.location?.trim() || undefined,
+            notes: data.notes?.trim() ?? "",
+          });
 
-    if (!result.success) {
-      setFormError(result.error);
+      if (!result.success) {
+        setFormError(result.error);
+        return;
+      }
+    } catch (error) {
+      setFormError(
+        error instanceof Error ? error.message : "Something went wrong",
+      );
       return;
     }
 
-    reset();
-    setOpen(false);
-    router.refresh();
+    reset(getDefaultValues(company));
+    setDialogOpen(false);
   }
 
   return (
     <Dialog
-      open={open}
-      onOpenChange={(open) => {
-        setOpen(open);
-        if (!open) {
-          reset();
+      open={dialogOpen}
+      onOpenChange={(nextOpen) => {
+        setDialogOpen(nextOpen);
+        if (!nextOpen) {
+          reset(getDefaultValues(company));
           setFormError(null);
         }
       }}
     >
-      <DialogTrigger render={children as ReactElement} />
+      {!isControlled && children ? (
+        <DialogTrigger render={children as ReactElement} />
+      ) : null}
 
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle className="font-serif text-xl">Add company</DialogTitle>
+          <DialogTitle className="font-serif text-xl">
+            {isEditing ? "Edit company" : "Add company"}
+          </DialogTitle>
           <DialogDescription>
             Manually add a company to track roles, contacts, and notes.
           </DialogDescription>
@@ -228,7 +278,7 @@ export function AddCompanyModal({ children }: AddCompanyModalProps) {
             </Field>
 
             {formError && (
-              <p className="text-sm text-destructive text-center wrap-break-word">
+              <p className="text-center text-sm text-destructive wrap-break-word">
                 {formError}
               </p>
             )}
@@ -243,7 +293,13 @@ export function AddCompanyModal({ children }: AddCompanyModalProps) {
               }
             />
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Adding…" : "Add company"}
+              {isSubmitting
+                ? isEditing
+                  ? "Saving…"
+                  : "Adding…"
+                : isEditing
+                  ? "Save changes"
+                  : "Add company"}
             </Button>
           </DialogFooter>
         </form>
