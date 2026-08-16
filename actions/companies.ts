@@ -12,9 +12,6 @@ export type NewCompany = InferInsertModel<typeof companiesTable>;
 
 type CreateCompanyInput = Omit<NewCompany, "userId">;
 
-const wait = (seconds: number) =>
-  new Promise((resolve) => setTimeout(resolve, seconds * 1000));
-
 export async function createCompany(
   data: CreateCompanyInput,
 ): Promise<Result<NewCompany>> {

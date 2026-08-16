@@ -50,3 +50,6 @@ export function formatSalaryRange(
 
   return `Up to ${formatter.format(maxSalary ?? 0)}`;
 }
+
+const wait = (seconds: number) =>
+  new Promise((resolve) => setTimeout(resolve, seconds * 1000));

@@ -91,7 +91,8 @@ export function CompanyFormModal({
     handleSubmit,
     control,
     reset,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, isDirty },
+    // isDirtycompares current values against defaultValues
   } = useForm<FormValues>({
     resolver: zodResolver(FormSchema),
     mode: "onSubmit",
@@ -286,7 +287,10 @@ export function CompanyFormModal({
                 </Button>
               }
             />
-            <Button type="submit" disabled={isSubmitting}>
+            <Button
+              type="submit"
+              disabled={isSubmitting || (isEditing && !isDirty)}
+            >
               {isSubmitting && (isEditing ? "Saving" : "Adding")}
               {!isSubmitting && (isEditing ? "Save changes" : "Add company")}
               {isSubmitting && <SpinnerEllipsis />}
