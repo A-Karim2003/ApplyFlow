@@ -56,6 +56,7 @@ type FormValues = z.infer<typeof FormSchema>;
 const EMPTY_VALUES: Partial<FormValues> = {
   name: "",
   website: "",
+  industry: "" as FormValues["industry"],
   location: "",
   notes: "",
 };
@@ -92,7 +93,7 @@ export function CompanyFormModal({
     control,
     reset,
     formState: { errors, isSubmitting, isDirty },
-    // isDirtycompares current values against defaultValues
+    // isDirty compares current values against defaultValues
   } = useForm<FormValues>({
     resolver: zodResolver(FormSchema),
     mode: "onSubmit",
@@ -111,9 +112,6 @@ export function CompanyFormModal({
     setFormError(null);
 
     try {
-      // TODO: verify updateCompany/createCompany never throw for expected
-      // TODO: add useTransition hook
-      // failures; this catch is a defensive backstop for unexpected errors
       const result = isEditing
         ? await updateCompany(company!.id, {
             name: data.name,

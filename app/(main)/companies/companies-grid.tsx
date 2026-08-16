@@ -39,8 +39,15 @@ interface CompaniesGridProps {
 
 export function CompaniesGrid({ companies, applications }: CompaniesGridProps) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeCompany, setActiveCompany] = useState<Company | null>(null);
   const [addOpen, setAddOpen] = useState(false);
+
+  const [activeCompanyId, setActiveCompanyId] = useState<number | null>(null);
+
+  // update active company whenever companies data changes or a company is clicked
+  const activeCompany = useMemo(
+    () => companies.find((c) => c.id === activeCompanyId) ?? null,
+    [companies, activeCompanyId],
+  );
 
   const applicationsPerCompany = useMemo(() => {
     const map = new Map<number, Application[]>();
@@ -172,7 +179,7 @@ export function CompaniesGrid({ companies, applications }: CompaniesGridProps) {
                     variant="outline"
                     size="sm"
                     className="w-full"
-                    onClick={() => setActiveCompany(company)}
+                    onClick={() => setActiveCompanyId(company.id)}
                   >
                     View details
                   </Button>
@@ -196,7 +203,7 @@ export function CompaniesGrid({ companies, applications }: CompaniesGridProps) {
         }
         open={activeCompany !== null}
         onOpenChange={(open) => {
-          if (!open) setActiveCompany(null);
+          if (!open) setActiveCompanyId(null);
         }}
       />
     </div>
