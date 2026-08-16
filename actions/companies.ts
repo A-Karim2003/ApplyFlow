@@ -1,6 +1,6 @@
 "use server";
 
-import type { InferInsertModel } from "drizzle-orm";
+import { and, eq, type InferInsertModel } from "drizzle-orm";
 import { companiesTable } from "@/db/schema/companies";
 import { getSession } from "@/lib/data/session";
 import { Result } from "@/types";
@@ -11,6 +11,9 @@ import type { Company } from "@/lib/data/companies";
 export type NewCompany = InferInsertModel<typeof companiesTable>;
 
 type CreateCompanyInput = Omit<NewCompany, "userId">;
+
+const wait = (seconds: number) =>
+  new Promise((resolve) => setTimeout(resolve, seconds * 1000));
 
 export async function createCompany(
   data: CreateCompanyInput,
@@ -40,12 +43,52 @@ export async function updateCompany(
   const session = await getSession();
   if (!session) return { success: false, error: "User not authenticated" };
 
-  throw new Error("Not implemented");
+  try {
+    const result = await db
+      .update(companiesTable)
+      .set(data)
+      .where(
+        and(
+          eq(companiesTable.id, id),
+          eq(companiesTable.userId, session.user.id),
+        ),
+      )
+      .returning();
+
+    if (result.length === 0)
+      return { success: false, error: "Company not found" };
+
+    revalidatePath("/companies");
+    return { success: true, data: result[0] };
+  } catch (error) {
+    console.error("updateCompany failed:", error);
+    return { success: false, error: "Failed to update company" };
+  }
 }
 
-export async function deleteCompany(id: number): Promise<Result<void>> {
+export async function deleteCompany(id: number): Promise<Result<Company>> {
   const session = await getSession();
   if (!session) return { success: false, error: "User not authenticated" };
 
-  throw new Error("Not implemented");
+  try {
+    const result = await db
+      .delete(companiesTable)
+      .where(
+        and(
+          eq(companiesTable.id, id),
+          eq(companiesTable.userId, session.user.id),
+        ),
+      )
+      .returning();
+
+    if (result.length === 0) {
+      return { success: false, error: "Company not found" };
+    }
+
+    revalidatePath("/companies");
+    return { success: true, data: result[0] };
+  } catch (error) {
+    console.error("deleteCompany failed:", error);
+    return { success: false, error: "Failed to delete company" };
+  }
 }

@@ -40,6 +40,7 @@ interface CompaniesGridProps {
 export function CompaniesGrid({ companies, applications }: CompaniesGridProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCompany, setActiveCompany] = useState<Company | null>(null);
+  const [addOpen, setAddOpen] = useState(false);
 
   const applicationsPerCompany = useMemo(() => {
     const map = new Map<number, Application[]>();
@@ -76,12 +77,12 @@ export function CompaniesGrid({ companies, applications }: CompaniesGridProps) {
           />
         </InputGroup>
 
-        <CompanyFormModal>
-          <Button>
-            <PlusIcon data-icon="inline-start" />
-            Add company
-          </Button>
-        </CompanyFormModal>
+        <Button onClick={() => setAddOpen(true)}>
+          <PlusIcon data-icon="inline-start" />
+          Add company
+        </Button>
+
+        <CompanyFormModal open={addOpen} onOpenChange={setAddOpen} />
       </div>
 
       {filteredCompanies.length > 0 ? (

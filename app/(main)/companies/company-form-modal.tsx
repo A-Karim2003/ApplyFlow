@@ -1,13 +1,12 @@
 "use client";
 
-import { useEffect, useState, type ReactElement, type ReactNode } from "react";
+import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import * as z from "zod";
 
 import {
   Dialog,
-  DialogTrigger,
   DialogContent,
   DialogHeader,
   DialogTitle,
@@ -40,6 +39,7 @@ import { INDUSTRY_OPTIONS } from "@/lib/constants";
 import { industryEnum } from "@/db/schema";
 import { createCompany, updateCompany } from "@/actions/companies";
 import type { Company } from "@/lib/data/companies";
+import SpinnerEllipsis from "@/components/shadcn-space/spinner/spinner-05";
 
 const FormSchema = z.object({
   name: z.string().trim().min(1, "Company name is required").max(200),
@@ -73,24 +73,18 @@ function getDefaultValues(company?: Company): Partial<FormValues> {
 }
 
 interface CompanyFormModalProps {
-  children?: ReactNode;
   company?: Company;
-  open?: boolean;
-  onOpenChange?: (open: boolean) => void;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
 export function CompanyFormModal({
-  children,
   company,
   open,
   onOpenChange,
 }: CompanyFormModalProps) {
-  const [internalOpen, setInternalOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const isEditing = Boolean(company);
-  const isControlled = open !== undefined;
-  const dialogOpen = isControlled ? open : internalOpen;
-  const setDialogOpen = onOpenChange ?? setInternalOpen;
 
   const {
     register,
@@ -105,16 +99,20 @@ export function CompanyFormModal({
   });
 
   useEffect(() => {
-    if (dialogOpen) {
+    // Reset form to company's values (or blank) each time the dialog opens
+
+    if (open) {
       reset(getDefaultValues(company));
     }
-  }, [company, dialogOpen, reset]);
+  }, [company, open, reset]);
 
   async function onSubmit(data: FormValues) {
     setFormError(null);
 
     try {
-      // TODO: remove try/catch once updateCompany/deleteCompany return Result without throwing
+      // TODO: verify updateCompany/createCompany never throw for expected
+      // TODO: add useTransition hook
+      // failures; this catch is a defensive backstop for unexpected errors
       const result = isEditing
         ? await updateCompany(company!.id, {
             name: data.name,
@@ -143,24 +141,20 @@ export function CompanyFormModal({
     }
 
     reset(getDefaultValues(company));
-    setDialogOpen(false);
+    onOpenChange(false);
   }
 
   return (
     <Dialog
-      open={dialogOpen}
+      open={open}
       onOpenChange={(nextOpen) => {
-        setDialogOpen(nextOpen);
+        onOpenChange(nextOpen);
         if (!nextOpen) {
           reset(getDefaultValues(company));
           setFormError(null);
         }
       }}
     >
-      {!isControlled && children ? (
-        <DialogTrigger render={children as ReactElement} />
-      ) : null}
-
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="font-serif text-xl">
@@ -293,13 +287,9 @@ export function CompanyFormModal({
               }
             />
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting
-                ? isEditing
-                  ? "Saving…"
-                  : "Adding…"
-                : isEditing
-                  ? "Save changes"
-                  : "Add company"}
+              {isSubmitting && (isEditing ? "Saving" : "Adding")}
+              {!isSubmitting && (isEditing ? "Save changes" : "Add company")}
+              {isSubmitting && <SpinnerEllipsis />}
             </Button>
           </DialogFooter>
         </form>
