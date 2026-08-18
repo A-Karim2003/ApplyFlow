@@ -4,3 +4,4 @@ export * from "./companies";
 export * from "./documents";
 export * from "./interviews";
 export * from "./profiles";
+export * from "./application-documents";

@@ -1,6 +1,7 @@
 import "dotenv/config";
 import { db } from "@/db";
 import {
+  applicationDocumentsTable,
   applicationsTable,
   applicationStatusHistoryTable,
   companiesTable,
@@ -41,6 +42,10 @@ async function seed() {
     //
     // We only delete records belonging to this user.
     // Nothing belonging to another user is touched.
+    //
+    // Note: application_documents rows are cleaned up automatically
+    // via ON DELETE CASCADE when applications or documents are deleted,
+    // so no explicit delete is needed for that table here.
 
     const existingApplications = await tx
       .select({ id: applicationsTable.id })
@@ -196,6 +201,9 @@ async function seed() {
     // --------------------------------------------------
     // 5. Applications
     // --------------------------------------------------
+    // Note: resume/cover letter are no longer stored as FK columns on
+    // applications. They're linked via the application_documents join
+    // table in step 5a below.
 
     const applications = await tx
       .insert(applicationsTable)
@@ -203,8 +211,6 @@ async function seed() {
         {
           userId: SEED_USER_ID,
           companyId: companyByName.Google.id,
-          resumeDocumentId: resume.id,
-          coverLetterDocumentId: googleCoverLetter.id,
           jobTitle: "Graduate Software Engineer",
           jobType: "graduate",
           jobUrl: "https://careers.google.com/",
@@ -222,8 +228,6 @@ async function seed() {
         {
           userId: SEED_USER_ID,
           companyId: companyByName.Monzo.id,
-          resumeDocumentId: resume.id,
-          coverLetterDocumentId: monzoCoverLetter.id,
           jobTitle: "Graduate Software Engineer",
           jobType: "graduate",
           jobUrl: "https://monzo.com/careers/",
@@ -240,7 +244,6 @@ async function seed() {
         {
           userId: SEED_USER_ID,
           companyId: companyByName.Microsoft.id,
-          resumeDocumentId: resume.id,
           jobTitle: "Software Engineer Graduate",
           jobType: "graduate",
           jobUrl: "https://careers.microsoft.com/",
@@ -257,7 +260,6 @@ async function seed() {
         {
           userId: SEED_USER_ID,
           companyId: companyByName.Sage.id,
-          resumeDocumentId: resume.id,
           jobTitle: "Graduate Software Engineer",
           jobType: "graduate",
           jobUrl: "https://www.sage.com/en-gb/company/careers/",
@@ -275,7 +277,6 @@ async function seed() {
         {
           userId: SEED_USER_ID,
           companyId: companyByName.Revolut.id,
-          resumeDocumentId: resume.id,
           jobTitle: "Graduate Software Engineer",
           jobType: "graduate",
           jobUrl: "https://www.revolut.com/careers/",
@@ -293,7 +294,6 @@ async function seed() {
         {
           userId: SEED_USER_ID,
           companyId: companyByName.Amazon.id,
-          resumeDocumentId: resume.id,
           jobTitle: "Software Development Engineer",
           jobType: "graduate",
           jobUrl: "https://www.amazon.jobs/",
@@ -310,7 +310,6 @@ async function seed() {
         {
           userId: SEED_USER_ID,
           companyId: companyByName.Monzo.id,
-          resumeDocumentId: resume.id,
           jobTitle: "Backend Engineer",
           jobType: "full_time",
           jobUrl: "https://monzo.com/careers/",
@@ -328,10 +327,6 @@ async function seed() {
       .returning();
 
     console.log(`✓ Created ${applications.length} applications`);
-
-    // --------------------------------------------------
-    // 6. Status history
-    // --------------------------------------------------
 
     const googleApplication = applications.find(
       (application) =>
@@ -357,9 +352,46 @@ async function seed() {
       (application) => application.companyId === companyByName.Revolut.id,
     )!;
 
+    const amazonApplication = applications.find(
+      (application) => application.companyId === companyByName.Amazon.id,
+    )!;
+
     const monzoBackendApplication = applications.find(
       (application) => application.jobTitle === "Backend Engineer",
     )!;
+
+    // --------------------------------------------------
+    // 5a. Application <-> Document links
+    // --------------------------------------------------
+    // Every application below reuses the same CV. Google and Monzo
+    // (graduate role) also have a tailored cover letter attached.
+    // Amazon (wishlist) intentionally has no documents linked yet.
+
+    await tx.insert(applicationDocumentsTable).values([
+      { applicationId: googleApplication.id, documentId: resume.id },
+      {
+        applicationId: googleApplication.id,
+        documentId: googleCoverLetter.id,
+      },
+
+      { applicationId: monzoGraduateApplication.id, documentId: resume.id },
+      {
+        applicationId: monzoGraduateApplication.id,
+        documentId: monzoCoverLetter.id,
+      },
+
+      { applicationId: microsoftApplication.id, documentId: resume.id },
+      { applicationId: sageApplication.id, documentId: resume.id },
+      { applicationId: revolutApplication.id, documentId: resume.id },
+      { applicationId: monzoBackendApplication.id, documentId: resume.id },
+      // amazonApplication: no documents linked (wishlist, not yet tailored)
+    ]);
+
+    console.log("✓ Linked documents to applications");
+
+    // --------------------------------------------------
+    // 6. Status history
+    // --------------------------------------------------
 
     await tx.insert(applicationStatusHistoryTable).values([
       // Google:
