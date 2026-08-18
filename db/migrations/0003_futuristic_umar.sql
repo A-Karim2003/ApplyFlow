@@ -1,0 +1,1 @@
+ALTER TABLE "documents" ALTER COLUMN "document_type" SET NOT NULL;
