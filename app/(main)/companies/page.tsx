@@ -1,4 +1,4 @@
-import { getCompaniesPageData } from "@/lib/data";
+import { getCompaniesPageData } from "@/lib/data/companies";
 import { CompaniesGrid } from "./companies-grid";
 
 export default async function CompaniesPage() {
