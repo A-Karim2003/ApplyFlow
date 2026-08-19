@@ -1,7 +1,17 @@
 "use server";
 
-import type { InferInsertModel, InferSelectModel } from "drizzle-orm";
+import {
+  and,
+  eq,
+  type InferInsertModel,
+  type InferSelectModel,
+} from "drizzle-orm";
 import { documentsTable } from "@/db/schema/documents";
+import { getSession } from "@/lib/data/session";
+import { db } from "@/db";
+import { revalidatePath } from "next/cache";
+import { Result } from "@/types";
+import { applicationDocumentsTable } from "@/db/schema";
 
 export type Document = InferSelectModel<typeof documentsTable>;
 export type NewDocument = InferInsertModel<typeof documentsTable>;
@@ -17,6 +27,41 @@ export async function updateDocument(
   throw new Error("Not implemented yet.");
 }
 
-export async function deleteDocument(id: Document["id"]): Promise<void> {
-  throw new Error("Not implemented yet.");
+export async function deleteDocument(id: number): Promise<Result<Document>> {
+  const session = await getSession();
+  if (!session) return { success: false, error: "Not authenticated" };
+
+  try {
+    //? Guard document deletion if there are linked applications
+    const links = await db
+      .select({ applicationId: applicationDocumentsTable.applicationId })
+      .from(applicationDocumentsTable)
+      .where(eq(applicationDocumentsTable.documentId, id));
+
+    if (links.length > 0) {
+      return {
+        success: false,
+        error: `This document is linked to ${links.length} application${links.length > 1 ? "s" : ""}. Unlink it before deleting.`,
+      };
+    }
+
+    const result = await db
+      .delete(documentsTable)
+      .where(
+        and(
+          eq(documentsTable.id, id),
+          eq(documentsTable.userId, session.user.id),
+        ),
+      )
+      .returning();
+
+    if (result.length === 0) {
+      return { success: false, error: "Document not found" };
+    }
+
+    revalidatePath("/documents");
+    return { success: true, data: result[0] };
+  } catch {
+    return { success: false, error: "Failed to delete document" };
+  }
 }

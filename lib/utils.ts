@@ -51,5 +51,12 @@ export function formatSalaryRange(
   return `Up to ${formatter.format(maxSalary ?? 0)}`;
 }
 
-const wait = (seconds: number) =>
+export const wait = (seconds: number) =>
   new Promise((resolve) => setTimeout(resolve, seconds * 1000));
+
+export function formatFileSize(bytes: number | null): string {
+  if (bytes === null) return "Unknown size";
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
