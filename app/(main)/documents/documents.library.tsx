@@ -64,6 +64,10 @@ export function DocumentsLibrary({
     return docAppMap;
   }, [applicationDocuments]);
 
+  function handleUpload() {
+    // Implementation for handling document upload
+  }
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -81,12 +85,12 @@ export function DocumentsLibrary({
           </TabsList>
         </Tabs>
 
-        {/* <UploadDocumentModal onUpload={handleUpload}>
+        <UploadDocumentModal onUpload={handleUpload}>
           <Button>
             <UploadIcon data-icon="inline-start" />
             Upload document
           </Button>
-        </UploadDocumentModal> */}
+        </UploadDocumentModal>
       </div>
 
       {filteredDocuments.length === 0 ? (

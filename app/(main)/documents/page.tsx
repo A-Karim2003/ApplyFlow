@@ -8,8 +8,6 @@ export default async function DocumentsPage() {
 
   const { documents, applicationDocuments } = result.data;
 
-  console.log(applicationDocuments);
-
   return (
     <div className="flex flex-col">
       <div className="px-4 pb-8 pt-6 md:px-8">
