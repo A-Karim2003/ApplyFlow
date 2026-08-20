@@ -32,8 +32,9 @@ import {
   XIcon,
 } from "lucide-react";
 
-const ACCEPTED = ".pdf,.doc,.docx,.png,.jpg,.jpeg";
-const MAX_BYTES = 10 * 1024 * 1024; // 10 MB
+const ACCEPTED = ".pdf,.doc,.docx,.png,.jpg,.jpeg,.txt,.md";
+const MAX_BYTES = 5 * 1024 * 1024; // 5 MB
+const MAX_FILES = 5;
 
 type DocType = Document["documentType"];
 
@@ -87,33 +88,53 @@ export default function UploadDocumentModal({
   const [open, setOpen] = useState(false);
   const [staged, setStaged] = useState<StagedFile[]>([]);
   const [dragging, setDragging] = useState(false);
+  const [limitMessage, setLimitMessage] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const inputRef = useRef<HTMLInputElement>(null);
 
   function reset() {
     setStaged([]);
     setDragging(false);
+    setLimitMessage(null);
   }
 
   function addFiles(fileList: FileList | null) {
     if (!fileList) return;
 
-    const newStagedFiles: StagedFile[] = [];
-    for (const file of Array.from(fileList)) {
+    const incoming = Array.from(fileList);
+    const remainingSlots = MAX_FILES - staged.length;
+
+    if (remainingSlots <= 0) {
+      setLimitMessage(`You can only upload up to ${MAX_FILES} files at once.`);
+      return;
+    }
+
+    const accepted = incoming.slice(0, remainingSlots);
+    const rejected = incoming.length - accepted.length;
+
+    setLimitMessage(
+      rejected > 0
+        ? `Only ${remainingSlots} more file${remainingSlots > 1 ? "s" : ""} could be added (max ${MAX_FILES}). ${rejected} file${rejected > 1 ? "s" : ""} skipped.`
+        : null,
+    );
+
+    const newStagedFiles: StagedFile[] = accepted.map((file) => {
       const oversize = file.size > MAX_BYTES;
-      newStagedFiles.push({
+      return {
         id: `${file.name}-${file.size}-${crypto.randomUUID()}`,
         file,
         docType: guessDocType(file.name),
         status: oversize ? "error" : "valid",
-        error: oversize ? "Exceeds 10 MB limit" : undefined,
-      });
-    }
+        error: oversize ? "Exceeds 5 MB limit" : undefined,
+      };
+    });
+
     setStaged((current) => [...current, ...newStagedFiles]);
   }
 
   function removeFile(id: string) {
     setStaged((current) => current.filter((f) => f.id !== id));
+    setLimitMessage(null);
   }
 
   function updateDocType(id: string, docType: DocType) {
@@ -130,14 +151,13 @@ export default function UploadDocumentModal({
   }
 
   function handleUpload() {
-    const valid = staged.filter((f) => f.status === "valid");
-    if (valid.length === 0) return;
+    if (staged.length === 0 || hasErrors) return;
 
     // TODO: once S3 + createDocument are wired up, this becomes a real
     // async upload (presigned URL PUT, then createDocument server
     // action) instead of an immediate pass-through.
     startTransition(() => {
-      const docs: PendingDocumentUpload[] = valid.map((item) => ({
+      const docs: PendingDocumentUpload[] = staged.map((item) => ({
         filename: item.file.name,
         documentType: item.docType,
         fileType: item.file.type || fileExtension(item.file.name),
@@ -150,7 +170,9 @@ export default function UploadDocumentModal({
     });
   }
 
-  const validCount = staged.filter((f) => f.status === "valid").length;
+  const hasErrors = staged.some((f) => f.status === "error");
+  const atFileLimit = staged.length >= MAX_FILES;
+  const canUpload = staged.length > 0 && !hasErrors;
 
   return (
     <Dialog
@@ -165,8 +187,8 @@ export default function UploadDocumentModal({
         <DialogHeader>
           <DialogTitle>Upload documents</DialogTitle>
           <DialogDescription>
-            Add resumes, cover letters, or other files. PDF, DOC, DOCX, or
-            images up to 10 MB.
+            Add resumes, cover letters, or other files. PDF, DOC, DOCX, TXT, MD,
+            or images up to 5 MB. Up to {MAX_FILES} files at a time.
           </DialogDescription>
         </DialogHeader>
 
@@ -174,8 +196,10 @@ export default function UploadDocumentModal({
           {/* Dropzone */}
           <Button
             type="button"
-            onClick={() => inputRef.current?.click()}
+            onClick={() => !atFileLimit && inputRef.current?.click()}
+            disabled={atFileLimit}
             onDragOver={(e) => {
+              if (atFileLimit) return;
               e.preventDefault();
               setDragging(true);
             }}
@@ -184,29 +208,38 @@ export default function UploadDocumentModal({
                 setDragging(false);
               }
             }}
-            onDrop={handleDrop}
+            onDrop={atFileLimit ? undefined : handleDrop}
             className={cn(
               "flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed px-6 py-8 text-center transition-colors",
-              dragging
-                ? "border-primary bg-accent"
-                : "border-border bg-muted/40 hover:border-primary/50 hover:bg-accent/50",
+              atFileLimit
+                ? "cursor-not-allowed border-border bg-muted/20 opacity-60"
+                : dragging
+                  ? "border-primary bg-accent"
+                  : "border-border bg-muted/40 hover:border-primary/50 hover:bg-accent/50",
             )}
           >
             <span className="flex size-11 items-center justify-center rounded-full bg-primary/10 text-primary">
               <UploadCloudIcon className="size-5" />
             </span>
             <span className="text-sm font-medium text-foreground">
-              Drag &amp; drop files here, or{" "}
-              <span className="text-primary">browse</span>
+              {atFileLimit ? (
+                `Maximum of ${MAX_FILES} files reached`
+              ) : (
+                <>
+                  Drag &amp; drop files here, or{" "}
+                  <span className="text-primary">browse</span>
+                </>
+              )}
             </span>
             <span className="text-xs text-muted-foreground">
-              PDF, DOC, DOCX, PNG, JPG — max 10 MB each
+              PDF, DOC, DOCX, TXT, MD, PNG, JPG — max 5 MB each
             </span>
             <input
               ref={inputRef}
               type="file"
               accept={ACCEPTED}
               multiple
+              disabled={atFileLimit}
               className="hidden"
               onChange={(e) => {
                 addFiles(e.target.files);
@@ -214,6 +247,12 @@ export default function UploadDocumentModal({
               }}
             />
           </Button>
+
+          {limitMessage && (
+            <p className="text-xs text-destructive text-center">
+              {limitMessage}
+            </p>
+          )}
 
           {/* Staged file list */}
           {staged.length > 0 && (
@@ -304,6 +343,12 @@ export default function UploadDocumentModal({
               })}
             </ul>
           )}
+
+          {hasErrors && (
+            <p className="text-xs text-destructive text-center">
+              Remove the file(s) with errors above to continue.
+            </p>
+          )}
         </div>
 
         <DialogFooter>
@@ -314,14 +359,11 @@ export default function UploadDocumentModal({
               </Button>
             }
           />
-          <Button
-            onClick={handleUpload}
-            disabled={validCount === 0 || isPending}
-          >
+          <Button onClick={handleUpload} disabled={!canUpload || isPending}>
             {isPending
               ? "Uploading…"
-              : validCount > 0
-                ? `Upload ${validCount} file${validCount > 1 ? "s" : ""}`
+              : staged.length > 0
+                ? `Upload ${staged.length} file${staged.length > 1 ? "s" : ""}`
                 : "Upload"}
           </Button>
         </DialogFooter>
