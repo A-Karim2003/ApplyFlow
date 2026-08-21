@@ -32,7 +32,7 @@ import {
   XIcon,
 } from "lucide-react";
 
-const ACCEPTED = ".pdf,.doc,.docx,.png,.jpg,.jpeg,.txt,.md";
+const ACCEPTED = ".pdf,.doc,.docx,.txt,.md,.png,.jpg,.jpeg";
 const MAX_BYTES = 5 * 1024 * 1024; // 5 MB
 const MAX_FILES = 5;
 
@@ -101,24 +101,53 @@ export default function UploadDocumentModal({
   function addFiles(fileList: FileList | null) {
     if (!fileList) return;
 
-    const incoming = Array.from(fileList);
-    const remainingSlots = MAX_FILES - staged.length;
+    const incomingFiles = Array.from(fileList);
 
-    if (remainingSlots <= 0) {
-      setLimitMessage(`You can only upload up to ${MAX_FILES} files at once.`);
-      return;
+    /*
+      Reject files whose name matches one already staged (or matches
+      another file earlier in this same batch). Prevents silently
+      staging two files with the same name
+    */
+
+    // set is used for lookup performance not for keeping staged files names unique
+    const stagedNames = new Set(staged.map((f) => f.file.name.toLowerCase()));
+    const duplicateNames: string[] = [];
+    const dedupedFiles: File[] = [];
+
+    for (const file of incomingFiles) {
+      const fileName = file.name.toLowerCase();
+
+      // Collects duplicate names
+      if (stagedNames.has(fileName)) {
+        duplicateNames.push(file.name);
+        continue;
+      }
+      // add file name to staged names later duplication check
+      stagedNames.add(fileName);
+
+      // collects unique files
+      dedupedFiles.push(file);
     }
 
-    const accepted = incoming.slice(0, remainingSlots);
-    const rejected = incoming.length - accepted.length;
+    const remainingSlots = MAX_FILES - staged.length;
 
-    setLimitMessage(
-      rejected > 0
-        ? `Only ${remainingSlots} more file${remainingSlots > 1 ? "s" : ""} could be added (max ${MAX_FILES}). ${rejected} file${rejected > 1 ? "s" : ""} skipped.`
-        : null,
-    );
+    const acceptedFiles = dedupedFiles.slice(0, remainingSlots);
+    const rejectedByLimit = dedupedFiles.length - acceptedFiles.length;
 
-    const newStagedFiles: StagedFile[] = accepted.map((file) => {
+    const messages: string[] = [];
+    if (duplicateNames.length > 0) {
+      messages.push(
+        `${duplicateNames.length} file${duplicateNames.length > 1 ? "s" : ""} skipped — already staged (remove the existing one first): ${duplicateNames.join(", ")}`,
+      );
+    }
+    if (rejectedByLimit > 0) {
+      messages.push(
+        `${rejectedByLimit} file${rejectedByLimit > 1 ? "s" : ""} skipped — max ${MAX_FILES} files at once.`,
+      );
+    }
+    setLimitMessage(messages.length > 0 ? messages.join(" ") : null);
+
+    const newStagedFiles: StagedFile[] = acceptedFiles.map((file) => {
       const oversize = file.size > MAX_BYTES;
       return {
         id: `${file.name}-${file.size}-${crypto.randomUUID()}`,
@@ -187,8 +216,8 @@ export default function UploadDocumentModal({
         <DialogHeader>
           <DialogTitle>Upload documents</DialogTitle>
           <DialogDescription>
-            Add resumes, cover letters, or other files. PDF, DOC, DOCX, TXT, MD,
-            or images up to 5 MB. Up to {MAX_FILES} files at a time.
+            Add resumes, cover letters, or other files. PDF, DOC, DOCX, or
+            images up to 5 MB. Up to {MAX_FILES} files at a time.
           </DialogDescription>
         </DialogHeader>
 
