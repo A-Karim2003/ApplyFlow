@@ -212,18 +212,18 @@ export default function UploadDocumentModal({
       }}
     >
       <DialogTrigger render={children as React.ReactElement} />
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-xl flex flex-col">
         <DialogHeader>
           <DialogTitle>Upload documents</DialogTitle>
           <DialogDescription>
-            Add resumes, cover letters, or other files. PDF, DOC, DOCX, or
-            images up to 5 MB. Up to {MAX_FILES} files at a time.
+            Upload PDF, DOC, DOCX, TXT, MD, or image files up to 5 MB each. You
+            can upload up to {MAX_FILES} files at a time.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 overflow-x-hidden">
           {/* Dropzone */}
-          <Button
+          <button
             type="button"
             onClick={() => !atFileLimit && inputRef.current?.click()}
             disabled={atFileLimit}
@@ -239,7 +239,7 @@ export default function UploadDocumentModal({
             }}
             onDrop={atFileLimit ? undefined : handleDrop}
             className={cn(
-              "flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed px-6 py-8 text-center transition-colors",
+              "flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed px-6 py-8 text-center transition-colors",
               atFileLimit
                 ? "cursor-not-allowed border-border bg-muted/20 opacity-60"
                 : dragging
@@ -275,10 +275,10 @@ export default function UploadDocumentModal({
                 e.target.value = "";
               }}
             />
-          </Button>
+          </button>
 
           {limitMessage && (
-            <p className="text-xs text-destructive text-center">
+            <p className="text-xs text-destructive text-center truncate">
               {limitMessage}
             </p>
           )}
@@ -374,7 +374,7 @@ export default function UploadDocumentModal({
           )}
 
           {hasErrors && (
-            <p className="text-xs text-destructive text-center">
+            <p className="text-xs text-destructive text-center truncate">
               Remove the file(s) with errors above to continue.
             </p>
           )}
