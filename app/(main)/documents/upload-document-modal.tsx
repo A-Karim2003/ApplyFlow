@@ -42,6 +42,7 @@ type DocType = Document["documentType"];
 // createDocument are wired up, the parent turns these into real
 // Document rows (id, storageKey, createdAt come from the server).
 export type PendingDocumentUpload = {
+  file: File;
   filename: string;
   documentType: DocType;
   fileType: string;
@@ -98,6 +99,7 @@ export default function UploadDocumentModal({
     setLimitMessage(null);
   }
 
+  // This function is for adding files to the staging area
   function addFiles(fileList: FileList | null) {
     if (!fileList) return;
 
@@ -187,6 +189,7 @@ export default function UploadDocumentModal({
     // action) instead of an immediate pass-through.
     startTransition(() => {
       const docs: PendingDocumentUpload[] = staged.map((item) => ({
+        file: item.file,
         filename: item.file.name,
         documentType: item.docType,
         fileType: item.file.type || fileExtension(item.file.name),

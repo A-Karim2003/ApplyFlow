@@ -26,7 +26,9 @@ import { useMemo, useState } from "react";
 import type { Document, DocumentsPageData } from "@/lib/data/documents";
 import { DOCUMENT_TYPE_OPTIONS } from "@/lib/constants";
 import { formatFileSize } from "@/lib/utils";
-import UploadDocumentModal from "./upload-document-modal";
+import UploadDocumentModal, {
+  PendingDocumentUpload,
+} from "./upload-document-modal";
 import { DocumentsEmptyState } from "./document-empty-state";
 
 const CATEGORY_ICON = {
@@ -64,7 +66,8 @@ export function DocumentsLibrary({
     return docAppMap;
   }, [applicationDocuments]);
 
-  function handleUpload() {
+  function handleUpload(docs: PendingDocumentUpload[]) {
+    console.log(docs);
     // Implementation for handling document upload
   }
 
