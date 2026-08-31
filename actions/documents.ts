@@ -16,8 +16,29 @@ import { applicationDocumentsTable } from "@/db/schema";
 export type Document = InferSelectModel<typeof documentsTable>;
 export type NewDocument = InferInsertModel<typeof documentsTable>;
 
-export async function createDocument(data: NewDocument): Promise<Document> {
-  throw new Error("Not implemented yet.");
+export async function createDocument(
+  data: Omit<NewDocument, "userId">,
+): Promise<Result<Document>> {
+  const session = await getSession();
+  if (!session) return { success: false, error: "Not authenticated" };
+
+  try {
+    const result = await db
+      .insert(documentsTable)
+      .values({
+        ...data,
+        userId: session.user.id,
+      })
+      .returning();
+
+    if (result.length === 0)
+      return { success: false, error: "Document could not be uploaded" };
+
+    revalidatePath("/documents");
+    return { success: true, data: result[0] };
+  } catch {
+    return { success: false, error: "Failed to upload document" };
+  }
 }
 
 export async function updateDocument(

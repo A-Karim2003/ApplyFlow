@@ -34,6 +34,7 @@ import {
   generatePresignedUploadUrl,
   PresignedUploadResult,
 } from "@/lib/s3/presigned-upload";
+import { createDocument } from "@/actions/documents";
 
 const CATEGORY_ICON = {
   cv: FileTextIcon,
@@ -89,7 +90,6 @@ export function DocumentsLibrary({
             headers: { "Content-Type": doc.fileType },
             body: doc.file,
           });
-
           if (!response.ok) {
             throw new Error(
               `Failed to upload "${doc.filename}": ${response.status} ${response.statusText}`,
@@ -99,6 +99,28 @@ export function DocumentsLibrary({
       );
     } catch (error) {
       console.error("Error occurred while uploading documents:", error);
+      throw error;
+    }
+
+    try {
+      const createResults = await Promise.all(
+        docs.map((doc, index) => {
+          const { key } = presignedUrls[index];
+          return createDocument({
+            filename: doc.filename,
+            documentType: doc.documentType,
+            fileType: doc.fileType,
+            fileSize: doc.fileSize,
+            storageKey: key,
+          });
+        }),
+      );
+
+      createResults.forEach((result) => {
+        if (!result.success) throw new Error(result.error);
+      });
+    } catch (error) {
+      console.error("Error occurred while creating document records:", error);
       throw error;
     }
   }
