@@ -1,4 +1,3 @@
-// lib/s3/object-key.ts
 import { randomUUID } from "crypto";
 
 function sanitiseFilename(filename: string): string {

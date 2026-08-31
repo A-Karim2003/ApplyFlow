@@ -9,7 +9,7 @@ import { Result } from "@/types";
 
 const UPLOAD_URL_EXPIRY_SECONDS = 60; // presigned URL valid for 60 seconds
 
-type PresignedUploadResult = {
+export type PresignedUploadResult = {
   presignedUrl: string;
   key: string;
 };

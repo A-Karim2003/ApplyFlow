@@ -79,7 +79,7 @@ function guessDocType(name: string): DocType {
 
 interface UploadDocumentModalProps {
   children: React.ReactNode;
-  onUpload: (docs: PendingDocumentUpload[]) => void;
+  onUpload: (docs: PendingDocumentUpload[]) => Promise<void>;
 }
 
 export default function UploadDocumentModal({
@@ -184,10 +184,7 @@ export default function UploadDocumentModal({
   function handleUpload() {
     if (staged.length === 0 || hasErrors) return;
 
-    // TODO: once S3 + createDocument are wired up, this becomes a real
-    // async upload (presigned URL PUT, then createDocument server
-    // action) instead of an immediate pass-through.
-    startTransition(() => {
+    startTransition(async () => {
       const docs: PendingDocumentUpload[] = staged.map((item) => ({
         file: item.file,
         filename: item.file.name,
@@ -196,9 +193,13 @@ export default function UploadDocumentModal({
         fileSize: item.file.size,
       }));
 
-      onUpload(docs);
-      setOpen(false);
-      reset();
+      try {
+        await onUpload(docs);
+        setOpen(false);
+        reset();
+      } catch {
+        setLimitMessage("Upload failed. Please try again.");
+      }
     });
   }
 

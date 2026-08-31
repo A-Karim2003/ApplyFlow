@@ -30,6 +30,10 @@ import UploadDocumentModal, {
   PendingDocumentUpload,
 } from "./upload-document-modal";
 import { DocumentsEmptyState } from "./document-empty-state";
+import {
+  generatePresignedUploadUrl,
+  PresignedUploadResult,
+} from "@/lib/s3/presigned-upload";
 
 const CATEGORY_ICON = {
   cv: FileTextIcon,
@@ -66,9 +70,37 @@ export function DocumentsLibrary({
     return docAppMap;
   }, [applicationDocuments]);
 
-  function handleUpload(docs: PendingDocumentUpload[]) {
-    console.log(docs);
-    // Implementation for handling document upload
+  async function handleUpload(docs: PendingDocumentUpload[]) {
+    const presignedResults = await Promise.all(
+      docs.map((doc) => generatePresignedUploadUrl(doc.filename, doc.fileType)),
+    );
+
+    const presignedUrls = presignedResults.map((result) => {
+      if (!result.success) throw new Error(result.error);
+      return result.data;
+    });
+
+    try {
+      await Promise.all(
+        docs.map(async (doc, index) => {
+          const { presignedUrl } = presignedUrls[index];
+          const response = await fetch(presignedUrl, {
+            method: "PUT",
+            headers: { "Content-Type": doc.fileType },
+            body: doc.file,
+          });
+
+          if (!response.ok) {
+            throw new Error(
+              `Failed to upload "${doc.filename}": ${response.status} ${response.statusText}`,
+            );
+          }
+        }),
+      );
+    } catch (error) {
+      console.error("Error occurred while uploading documents:", error);
+      throw error;
+    }
   }
 
   return (
