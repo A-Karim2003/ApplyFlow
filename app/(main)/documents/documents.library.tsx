@@ -20,6 +20,7 @@ import {
   LinkIcon,
   Trash2Icon,
   UploadIcon,
+  EyeIcon,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 
@@ -30,11 +31,9 @@ import UploadDocumentModal, {
   PendingDocumentUpload,
 } from "./upload-document-modal";
 import { DocumentsEmptyState } from "./document-empty-state";
-import {
-  generatePresignedUploadUrl,
-  PresignedUploadResult,
-} from "@/lib/s3/presigned-upload";
+import { generatePresignedUploadUrl } from "@/lib/s3/presigned-upload";
 import { createDocument } from "@/actions/documents";
+import { generatePresignedViewUrl } from "@/lib/s3/presigned-view";
 
 const CATEGORY_ICON = {
   cv: FileTextIcon,
@@ -71,6 +70,7 @@ export function DocumentsLibrary({
     return docAppMap;
   }, [applicationDocuments]);
 
+  //* Uploads document to S3 and saves the key to db
   async function handleUpload(docs: PendingDocumentUpload[]) {
     const presignedResults = await Promise.all(
       docs.map((doc) => generatePresignedUploadUrl(doc.filename, doc.fileType)),
@@ -121,6 +121,17 @@ export function DocumentsLibrary({
       });
     } catch (error) {
       console.error("Error occurred while creating document records:", error);
+      throw error;
+    }
+  }
+
+  async function handleViewDocument(documentId: number) {
+    try {
+      const result = await generatePresignedViewUrl(documentId);
+      if (!result.success) throw new Error(result.error);
+      window.open(result.data.presignedUrl, "_blank");
+    } catch (error) {
+      console.error("Error occurred while generating view URL:", error);
       throw error;
     }
   }
@@ -185,6 +196,12 @@ export function DocumentsLibrary({
                       />
                       <DropdownMenuContent align="end">
                         <DropdownMenuGroup>
+                          <DropdownMenuItem
+                            onClick={() => handleViewDocument(document.id)}
+                          >
+                            <EyeIcon />
+                            View
+                          </DropdownMenuItem>
                           <DropdownMenuItem>
                             <DownloadIcon />
                             Download
