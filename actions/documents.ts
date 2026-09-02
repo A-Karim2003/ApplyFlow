@@ -12,6 +12,7 @@ import { db } from "@/db";
 import { revalidatePath } from "next/cache";
 import { Result } from "@/types";
 import { applicationDocumentsTable } from "@/db/schema";
+import { deleteObject } from "@/lib/s3/delete-object";
 
 export type Document = InferSelectModel<typeof documentsTable>;
 export type NewDocument = InferInsertModel<typeof documentsTable>;
@@ -57,7 +58,16 @@ export async function deleteDocument(id: number): Promise<Result<Document>> {
     const links = await db
       .select({ applicationId: applicationDocumentsTable.applicationId })
       .from(applicationDocumentsTable)
-      .where(eq(applicationDocumentsTable.documentId, id));
+      .innerJoin(
+        documentsTable,
+        eq(applicationDocumentsTable.documentId, documentsTable.id),
+      )
+      .where(
+        and(
+          eq(applicationDocumentsTable.documentId, id),
+          eq(documentsTable.userId, session.user.id),
+        ),
+      );
 
     if (links.length > 0) {
       return {
@@ -76,8 +86,14 @@ export async function deleteDocument(id: number): Promise<Result<Document>> {
       )
       .returning();
 
-    if (result.length === 0) {
+    if (result.length === 0)
       return { success: false, error: "Document not found" };
+
+    //? Once deleted from DB, delete the associated file from S3
+    try {
+      await deleteObject(result[0].storageKey);
+    } catch (error) {
+      console.error("Failed to delete S3 object (orphaned):", error);
     }
 
     revalidatePath("/documents");

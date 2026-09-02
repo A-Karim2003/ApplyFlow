@@ -33,7 +33,7 @@ import UploadDocumentModal, {
 } from "./upload-document-modal";
 import { DocumentsEmptyState } from "./document-empty-state";
 import { generatePresignedUploadUrl } from "@/lib/s3/presigned-upload";
-import { createDocument } from "@/actions/documents";
+import { createDocument, deleteDocument } from "@/actions/documents";
 import { generatePresignedViewUrl } from "@/lib/s3/presigned-view";
 import { generatePresignedDownloadUrl } from "@/lib/s3/presigned-download";
 
@@ -151,6 +151,20 @@ export function DocumentsLibrary({
     }
   }
 
+  async function handleDeleteDocument(documentId: number) {
+    try {
+      const deleteResult = await deleteDocument(documentId);
+      if (!deleteResult.success) throw new Error(deleteResult.error);
+      toast.success("Document deleted successfully.");
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "unable to delete the document",
+      );
+    }
+  }
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -227,7 +241,10 @@ export function DocumentsLibrary({
                             <LinkIcon />
                             Link to application
                           </DropdownMenuItem>
-                          <DropdownMenuItem variant="destructive">
+                          <DropdownMenuItem
+                            variant="destructive"
+                            onClick={() => handleDeleteDocument(document.id)}
+                          >
                             <Trash2Icon />
                             Delete
                           </DropdownMenuItem>
