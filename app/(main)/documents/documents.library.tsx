@@ -22,6 +22,7 @@ import {
   UploadIcon,
   EyeIcon,
 } from "lucide-react";
+import { toast } from "react-toastify";
 import { useMemo, useState } from "react";
 
 import type { Document, DocumentsPageData } from "@/lib/data/documents";
@@ -34,6 +35,7 @@ import { DocumentsEmptyState } from "./document-empty-state";
 import { generatePresignedUploadUrl } from "@/lib/s3/presigned-upload";
 import { createDocument } from "@/actions/documents";
 import { generatePresignedViewUrl } from "@/lib/s3/presigned-view";
+import { generatePresignedDownloadUrl } from "@/lib/s3/presigned-download";
 
 const CATEGORY_ICON = {
   cv: FileTextIcon,
@@ -132,7 +134,20 @@ export function DocumentsLibrary({
       window.open(result.data.presignedUrl, "_blank");
     } catch (error) {
       console.error("Error occurred while generating view URL:", error);
-      throw error;
+      toast.error("Unable to open the document. Please try again.");
+    }
+  }
+
+  async function handleDownloadDocument(documentId: number) {
+    try {
+      const presignedResult = await generatePresignedDownloadUrl(documentId);
+
+      if (!presignedResult.success) throw new Error(presignedResult.error);
+
+      window.location.href = presignedResult.data.presignedUrl;
+    } catch (error) {
+      console.error("Error occurred while generating download URL:", error);
+      toast.error("Unable to download the document. Please try again.");
     }
   }
 
@@ -202,7 +217,9 @@ export function DocumentsLibrary({
                             <EyeIcon />
                             View
                           </DropdownMenuItem>
-                          <DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => handleDownloadDocument(document.id)}
+                          >
                             <DownloadIcon />
                             Download
                           </DropdownMenuItem>
