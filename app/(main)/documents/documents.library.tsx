@@ -27,7 +27,7 @@ import { useMemo, useState } from "react";
 
 import type { Document, DocumentsPageData } from "@/lib/data/documents";
 import { DOCUMENT_TYPE_OPTIONS } from "@/lib/constants";
-import { formatFileSize } from "@/lib/utils";
+import { formatFileSize, formatDocumentType } from "@/lib/utils";
 import UploadDocumentModal, {
   PendingDocumentUpload,
 } from "./upload-document-modal";
@@ -260,7 +260,8 @@ export function DocumentsLibrary({
                       {document.filename}
                     </span>
                     <span className="text-xs text-muted-foreground">
-                      {document.fileType} · {formatFileSize(document.fileSize)}
+                      {formatDocumentType(document.fileType!)} ·{" "}
+                      {formatFileSize(document.fileSize)}
                     </span>
                   </div>
                   <div className="flex flex-col gap-2">

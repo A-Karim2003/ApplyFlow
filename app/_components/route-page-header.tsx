@@ -70,12 +70,6 @@ function getHeaderConfig(
       title: "Documents",
       description:
         "Your resumes, cover letters, and certificates in one vault.",
-      action: (
-        <Button variant="outline">
-          <Upload data-icon="inline-start" />
-          Upload document
-        </Button>
-      ),
     };
   }
 
