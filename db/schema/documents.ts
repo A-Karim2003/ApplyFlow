@@ -19,7 +19,7 @@ export const documentsTable = pgTable(
 
     filename: t.text("filename").notNull(),
 
-    documentType: documentTypeEnum("document_type"),
+    documentType: documentTypeEnum("document_type").notNull(),
 
     storageKey: t.text("storage_key").notNull(),
 

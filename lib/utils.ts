@@ -51,5 +51,39 @@ export function formatSalaryRange(
   return `Up to ${formatter.format(maxSalary ?? 0)}`;
 }
 
-const wait = (seconds: number) =>
+export const wait = (seconds: number) =>
   new Promise((resolve) => setTimeout(resolve, seconds * 1000));
+
+export function formatFileSize(bytes: number | null): string {
+  if (bytes === null) return "Unknown size";
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+export function formatDocumentType(fileType: string) {
+  const normalizedFileType = fileType.toLowerCase();
+
+  if (normalizedFileType.startsWith("image/")) return "Image";
+
+  const documentTypeLabels: Record<string, string> = {
+    "application/pdf": "PDF",
+    "application/msword": "DOC",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+      "DOCX",
+    "application/vnd.ms-excel": "XLS",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "XLSX",
+    "application/vnd.ms-powerpoint": "PPT",
+    "application/vnd.openxmlformats-officedocument.presentationml.presentation":
+      "PPTX",
+    "text/plain": "TXT",
+    "text/csv": "CSV",
+    "application/zip": "ZIP",
+  };
+
+  return (
+    documentTypeLabels[normalizedFileType] ??
+    fileType.split("/").at(-1)?.toUpperCase() ??
+    fileType
+  );
+}

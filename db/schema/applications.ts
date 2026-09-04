@@ -50,18 +50,6 @@ export const applicationsTable = pgTable(
         onDelete: "restrict",
       }),
 
-    resumeDocumentId: t
-      .integer("resume_document_id")
-      .references(() => documentsTable.id, {
-        onDelete: "set null",
-      }),
-
-    coverLetterDocumentId: t
-      .integer("cover_letter_document_id")
-      .references(() => documentsTable.id, {
-        onDelete: "set null",
-      }),
-
     jobTitle: t.text("job_title").notNull(),
     jobType: jobTypeEnum("job_type").notNull(),
     jobUrl: t.text("job_url"),
