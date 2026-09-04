@@ -23,7 +23,7 @@ import {
   EyeIcon,
 } from "lucide-react";
 import { toast } from "react-toastify";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useTransition } from "react";
 
 import type { Document, DocumentsPageData } from "@/lib/data/documents";
 import { DOCUMENT_TYPE_OPTIONS } from "@/lib/constants";
@@ -32,8 +32,14 @@ import UploadDocumentModal, {
   PendingDocumentUpload,
 } from "./upload-document-modal";
 import { DocumentsEmptyState } from "./document-empty-state";
+import { ViewLinkedApplicationsModal } from "./link-document-modal";
 import { generatePresignedUploadUrl } from "@/lib/s3/presigned-upload";
-import { createDocument, deleteDocument } from "@/actions/documents";
+import {
+  createDocument,
+  deleteDocument,
+  getLinkedApplicationsForDocument,
+  type LinkedApplication,
+} from "@/actions/documents";
 import { generatePresignedViewUrl } from "@/lib/s3/presigned-view";
 import { generatePresignedDownloadUrl } from "@/lib/s3/presigned-download";
 
@@ -50,6 +56,15 @@ export function DocumentsLibrary({
   const [documentTypeFilter, setDocumentTypeFilter] = useState<
     Document["documentType"] | "all"
   >("all");
+  const [linkModalOpen, setLinkModalOpen] = useState(false);
+  const [selectedDocumentId, setSelectedDocumentId] = useState<number | null>(
+    null,
+  );
+
+  const [isPending, startTransition] = useTransition();
+  const [linkedApps, setLinkedApps] = useState<LinkedApplication[] | null>(
+    null,
+  );
 
   const filteredDocuments = useMemo(() => {
     return documents.filter(
@@ -61,11 +76,12 @@ export function DocumentsLibrary({
 
   //? For each document, find the list of linked applications
   const linkedApplicationsByDocumentId = useMemo(() => {
-    const docAppMap = new Map<number, typeof applicationDocuments>();
+    //? Use document ID as the key values are application IDs
+    const docAppMap = new Map<number, number[]>();
 
     applicationDocuments.forEach((application) => {
       const list = docAppMap.get(application.documentId) || [];
-      list.push(application);
+      list.push(application.applicationId);
       docAppMap.set(application.documentId, list);
     });
 
@@ -165,6 +181,19 @@ export function DocumentsLibrary({
     }
   }
 
+  function handleOpenLinkedApplications(documentId: number) {
+    setSelectedDocumentId(documentId);
+    startTransition(async () => {
+      const result = await getLinkedApplicationsForDocument(documentId);
+      if (result.success) {
+        setLinkedApps(result.data);
+        setLinkModalOpen(true); // modal only opens when data is ready
+      } else {
+        toast.error("Failed to load linked applications");
+      }
+    });
+  }
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -226,7 +255,9 @@ export function DocumentsLibrary({
                       <DropdownMenuContent align="end">
                         <DropdownMenuGroup>
                           <DropdownMenuItem
-                            onClick={() => handleViewDocument(document.id)}
+                            onClick={() => {
+                              handleViewDocument(document.id);
+                            }}
                           >
                             <EyeIcon />
                             View
@@ -237,9 +268,14 @@ export function DocumentsLibrary({
                             <DownloadIcon />
                             Download
                           </DropdownMenuItem>
-                          <DropdownMenuItem>
+                          <DropdownMenuItem
+                            disabled={isPending}
+                            onClick={() =>
+                              handleOpenLinkedApplications(document.id)
+                            }
+                          >
                             <LinkIcon />
-                            Link to application
+                            View linked applications
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             variant="destructive"
@@ -278,6 +314,20 @@ export function DocumentsLibrary({
             );
           })}
         </div>
+      )}
+
+      {selectedDocumentId && linkedApps && (
+        <ViewLinkedApplicationsModal
+          documentId={selectedDocumentId}
+          applications={linkedApps}
+          isOpen={linkModalOpen}
+          onOpenChange={setLinkModalOpen}
+          onUnlink={(applicationId) =>
+            setLinkedApps((prev) =>
+              prev ? prev.filter((app) => app.id !== applicationId) : prev,
+            )
+          }
+        />
       )}
     </div>
   );

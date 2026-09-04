@@ -11,7 +11,11 @@ import { getSession } from "@/lib/data/session";
 import { db } from "@/db";
 import { revalidatePath } from "next/cache";
 import { Result } from "@/types";
-import { applicationDocumentsTable } from "@/db/schema";
+import {
+  applicationDocumentsTable,
+  applicationsTable,
+  companiesTable,
+} from "@/db/schema";
 import { deleteObject } from "@/lib/s3/delete-object";
 
 export type Document = InferSelectModel<typeof documentsTable>;
@@ -40,13 +44,6 @@ export async function createDocument(
   } catch {
     return { success: false, error: "Failed to upload document" };
   }
-}
-
-export async function updateDocument(
-  id: Document["id"],
-  data: Partial<NewDocument>,
-): Promise<Document> {
-  throw new Error("Not implemented yet.");
 }
 
 export async function deleteDocument(id: number): Promise<Result<Document>> {
@@ -100,5 +97,92 @@ export async function deleteDocument(id: number): Promise<Result<Document>> {
     return { success: true, data: result[0] };
   } catch {
     return { success: false, error: "Failed to delete document" };
+  }
+}
+
+export type LinkedApplication = {
+  id: number;
+  companyId: number;
+  companyName: string;
+  jobTitle: string;
+};
+
+export async function getLinkedApplicationsForDocument(
+  documentId: number,
+): Promise<Result<LinkedApplication[]>> {
+  const session = await getSession();
+  if (!session) return { success: false, error: "Not authenticated" };
+
+  try {
+    const applications = await db
+      .select({
+        id: applicationsTable.id,
+        companyId: applicationsTable.companyId,
+        companyName: companiesTable.name,
+        jobTitle: applicationsTable.jobTitle,
+      })
+      .from(applicationDocumentsTable)
+      .innerJoin(
+        applicationsTable,
+        eq(applicationDocumentsTable.applicationId, applicationsTable.id),
+      )
+      .innerJoin(
+        companiesTable,
+        eq(applicationsTable.companyId, companiesTable.id),
+      )
+      .innerJoin(
+        documentsTable,
+        eq(applicationDocumentsTable.documentId, documentsTable.id),
+      )
+      .where(
+        and(
+          eq(applicationDocumentsTable.documentId, documentId),
+          eq(documentsTable.userId, session.user.id),
+        ),
+      );
+
+    return { success: true, data: applications };
+  } catch {
+    return { success: false, error: "Failed to fetch linked applications" };
+  }
+}
+
+export async function unlinkDocumentFromApplication(
+  documentId: number,
+  applicationId: number,
+): Promise<Result<void>> {
+  const session = await getSession();
+  if (!session) return { success: false, error: "Not authenticated" };
+
+  try {
+    //? Verify document belongs to user (extra safety check)
+    const document = await db
+      .select()
+      .from(documentsTable)
+      .where(
+        and(
+          eq(documentsTable.id, documentId),
+          eq(documentsTable.userId, session.user.id),
+        ),
+      );
+
+    if (document.length === 0) {
+      return { success: false, error: "Document not found" };
+    }
+
+    //? Delete the link
+    await db
+      .delete(applicationDocumentsTable)
+      .where(
+        and(
+          eq(applicationDocumentsTable.documentId, documentId),
+          eq(applicationDocumentsTable.applicationId, applicationId),
+        ),
+      );
+
+    revalidatePath("/documents");
+    return { success: true, data: undefined };
+  } catch {
+    return { success: false, error: "Failed to unlink document" };
   }
 }
