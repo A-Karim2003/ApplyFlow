@@ -1,7 +1,6 @@
 import { pgEnum, pgTable, index, check } from "drizzle-orm/pg-core";
 import { user } from "./auth-schema";
 import { companiesTable } from "./companies";
-import { documentsTable } from "./documents";
 import { sql } from "drizzle-orm";
 
 export const workModeEnum = pgEnum("work_mode", ["remote", "hybrid", "onsite"]);
