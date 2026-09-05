@@ -26,7 +26,7 @@ export const STATUS_OPTIONS = applicationStatusEnum.enumValues.map(
 );
 /*============================Job Type=============================*/
 
-type JobType = (typeof jobTypeEnum.enumValues)[number];
+export type JobType = (typeof jobTypeEnum.enumValues)[number];
 
 const JOB_TYPES: Record<JobType, string> = {
   full_time: "Full-time",
@@ -44,7 +44,7 @@ export const JOB_TYPE_OPTIONS = jobTypeEnum.enumValues.map((type) => ({
 
 /*===========================Work Mode=============================*/
 
-type WorkMode = (typeof workModeEnum.enumValues)[number];
+export type WorkMode = (typeof workModeEnum.enumValues)[number];
 
 const WORK_MODES: Record<WorkMode, string> = {
   remote: "Remote",
@@ -76,3 +76,29 @@ export const APPLICATION_SOURCE_OPTIONS = applicationSourceEnum.enumValues.map(
     value: source,
   }),
 );
+
+export type ApplicationSortKey = "recent" | "oldest" | "company";
+
+export const APPLICATION_SORT_OPTIONS: {
+  label: string;
+  value: ApplicationSortKey;
+}[] = [
+  { label: "Date applied (newest)", value: "recent" },
+  { label: "Date applied (oldest)", value: "oldest" },
+  { label: "Company (A-Z)", value: "company" },
+];
+
+export const APPLICATION_STATUS_FILTER = {
+  label: "Status",
+  options: [{ label: "All", value: "all" }, ...STATUS_OPTIONS],
+};
+
+export const APPLICATION_JOB_TYPE_FILTER = {
+  label: "Job type",
+  options: [{ label: "All", value: "all" }, ...JOB_TYPE_OPTIONS],
+};
+
+export const APPLICATION_WORK_MODE_FILTER = {
+  label: "Work mode",
+  options: [{ label: "All", value: "all" }, ...WORK_MODE_OPTIONS],
+};
