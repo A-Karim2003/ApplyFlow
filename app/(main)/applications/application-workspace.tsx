@@ -1,8 +1,16 @@
 "use client";
 
-import { useState } from "react";
-import { LayoutGrid, List, Search } from "lucide-react";
+import { useMemo, useOptimistic, useState, useTransition } from "react";
+import { LayoutGrid, List, Search, SearchX } from "lucide-react";
+import { toast } from "react-toastify";
 
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
 import {
   InputGroup,
   InputGroupAddon,
@@ -16,7 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   APPLICATION_JOB_TYPE_FILTER,
   APPLICATION_SORT_OPTIONS,
@@ -27,6 +35,13 @@ import {
   type JobType,
   type WorkMode,
 } from "@/lib/constants";
+import {
+  type UpdateApplicationProp,
+  updateApplicationStatus,
+} from "@/actions/applications";
+import { ApplicationsPageData } from "@/lib/data/applications";
+import { cn } from "@/lib/utils";
+import KanbanBoard from "./kanban-board";
 
 type ApplicationFilters = {
   status: ApplicationStatus | "all";
@@ -44,15 +59,79 @@ const FILTER_CONFIGS = [
   options: { label: string; value: string }[];
 }[];
 
-export function ApplicationsWorkspace() {
+export function ApplicationsWorkspace({ applications }: ApplicationsPageData) {
   const [query, setQuery] = useState<string>("");
   const [filters, setFilters] = useState<ApplicationFilters>({
     status: "all",
     jobType: "all",
     workMode: "all",
   });
-
   const [sort, setSort] = useState<ApplicationSortKey>("recent");
+
+  const [isPending, startTransition] = useTransition();
+
+  const [optimisticApplications, applyOptimisticMove] = useOptimistic(
+    applications,
+    (state, { id, newStatus }: UpdateApplicationProp) => {
+      return state.map((item) =>
+        item.application.id === id
+          ? { ...item, application: { ...item.application, status: newStatus } }
+          : item,
+      );
+    },
+  );
+
+  function moveApplication({ id, newStatus }: UpdateApplicationProp) {
+    startTransition(async () => {
+      applyOptimisticMove({ id, newStatus });
+
+      const result = await updateApplicationStatus({ id, newStatus });
+
+      if (!result.success) {
+        toast.error("Unable to update status. Please try again.");
+      }
+    });
+  }
+
+  const filteredAndSorted = useMemo(() => {
+    const filtered = optimisticApplications.filter(
+      ({ application, company }) => {
+        const normalizedQuery = query.trim().toLowerCase();
+        const matchesQuery =
+          normalizedQuery === "" ||
+          application.jobTitle.toLowerCase().includes(normalizedQuery) ||
+          company.name.toLowerCase().includes(normalizedQuery) ||
+          (application.location?.toLowerCase().includes(normalizedQuery) ??
+            false);
+
+        const matchesStatus =
+          filters.status === "all" || application.status === filters.status;
+        const matchesJobType =
+          filters.jobType === "all" || application.jobType === filters.jobType;
+        const matchesWorkMode =
+          filters.workMode === "all" ||
+          application.workMode === filters.workMode;
+
+        return (
+          matchesQuery && matchesStatus && matchesJobType && matchesWorkMode
+        );
+      },
+    );
+
+    return [...filtered].sort((a, b) => {
+      if (sort === "company")
+        return a.company.name.localeCompare(b.company.name);
+
+      const aDate = a.application.appliedAt
+        ? new Date(a.application.appliedAt).getTime()
+        : 0;
+      const bDate = b.application.appliedAt
+        ? new Date(b.application.appliedAt).getTime()
+        : 0;
+
+      return sort === "recent" ? bDate - aDate : aDate - bDate;
+    });
+  }, [optimisticApplications, query, filters, sort]);
 
   return (
     <Tabs defaultValue="kanban" className="flex flex-col gap-5">
@@ -70,7 +149,6 @@ export function ApplicationsWorkspace() {
           </InputGroup>
 
           {FILTER_CONFIGS.map((filter) => {
-            // used for rendering selected option
             const selectedOption = filter.options.find(
               (option) => option.value === filters[filter.key],
             );
@@ -138,6 +216,36 @@ export function ApplicationsWorkspace() {
           </TabsTrigger>
         </TabsList>
       </div>
+
+      {filteredAndSorted.length === 0 ? (
+        <Empty className="rounded-xl border border-dashed">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <SearchX />
+            </EmptyMedia>
+            <EmptyTitle>No applications found</EmptyTitle>
+            <EmptyDescription>
+              Try adjusting your search or filters to find what you&apos;re
+              looking for.
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
+      ) : (
+        <div
+          aria-busy={isPending}
+          className={cn(isPending && "pointer-events-none opacity-90")}
+        >
+          <TabsContent value="kanban" className="mt-0">
+            <KanbanBoard
+              applications={filteredAndSorted}
+              onMove={moveApplication}
+            />
+          </TabsContent>
+          <TabsContent value="list" className="mt-0">
+            {/* <ListView applications={filteredAndSorted} /> */}
+          </TabsContent>
+        </div>
+      )}
     </Tabs>
   );
 }

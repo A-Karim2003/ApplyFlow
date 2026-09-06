@@ -102,3 +102,74 @@ export const APPLICATION_WORK_MODE_FILTER = {
   label: "Work mode",
   options: [{ label: "All", value: "all" }, ...WORK_MODE_OPTIONS],
 };
+
+/*========================Application Source========================*/
+export const STATUS_COLUMN_STYLES: Record<
+  ApplicationStatus,
+  {
+    header: string;
+    body: string;
+    bodyOver: string;
+    ring: string;
+    dropBorder: string;
+    dropBorderOver: string;
+  }
+> = {
+  wishlist: {
+    header: "bg-[color-mix(in_oklch,var(--muted-foreground)_16%,var(--card))]",
+    body: "bg-[color-mix(in_oklch,var(--muted-foreground)_6%,var(--card))]",
+    bodyOver:
+      "bg-[color-mix(in_oklch,var(--muted-foreground)_12%,var(--card))]",
+    ring: "ring-[color-mix(in_oklch,var(--muted-foreground)_55%,transparent)]",
+    dropBorder:
+      "border-[color-mix(in_oklch,var(--muted-foreground)_32%,transparent)]",
+    dropBorderOver:
+      "border-[color-mix(in_oklch,var(--muted-foreground)_55%,transparent)]",
+  },
+  applied: {
+    header: "bg-[color-mix(in_oklch,var(--chart-2)_16%,var(--card))]",
+    body: "bg-[color-mix(in_oklch,var(--chart-2)_6%,var(--card))]",
+    bodyOver: "bg-[color-mix(in_oklch,var(--chart-2)_12%,var(--card))]",
+    ring: "ring-[color-mix(in_oklch,var(--chart-2)_55%,transparent)]",
+    dropBorder: "border-[color-mix(in_oklch,var(--chart-2)_32%,transparent)]",
+    dropBorderOver:
+      "border-[color-mix(in_oklch,var(--chart-2)_55%,transparent)]",
+  },
+  online_assessment: {
+    header: "bg-[color-mix(in_oklch,var(--chart-5)_16%,var(--card))]",
+    body: "bg-[color-mix(in_oklch,var(--chart-5)_6%,var(--card))]",
+    bodyOver: "bg-[color-mix(in_oklch,var(--chart-5)_12%,var(--card))]",
+    ring: "ring-[color-mix(in_oklch,var(--chart-5)_55%,transparent)]",
+    dropBorder: "border-[color-mix(in_oklch,var(--chart-5)_32%,transparent)]",
+    dropBorderOver:
+      "border-[color-mix(in_oklch,var(--chart-5)_55%,transparent)]",
+  },
+  interview: {
+    header: "bg-[color-mix(in_oklch,var(--primary)_16%,var(--card))]",
+    body: "bg-[color-mix(in_oklch,var(--primary)_6%,var(--card))]",
+    bodyOver: "bg-[color-mix(in_oklch,var(--primary)_12%,var(--card))]",
+    ring: "ring-[color-mix(in_oklch,var(--primary)_55%,transparent)]",
+    dropBorder: "border-[color-mix(in_oklch,var(--primary)_32%,transparent)]",
+    dropBorderOver:
+      "border-[color-mix(in_oklch,var(--primary)_55%,transparent)]",
+  },
+  offer: {
+    header: "bg-[color-mix(in_oklch,var(--chart-1)_16%,var(--card))]",
+    body: "bg-[color-mix(in_oklch,var(--chart-1)_6%,var(--card))]",
+    bodyOver: "bg-[color-mix(in_oklch,var(--chart-1)_12%,var(--card))]",
+    ring: "ring-[color-mix(in_oklch,var(--chart-1)_55%,transparent)]",
+    dropBorder: "border-[color-mix(in_oklch,var(--chart-1)_32%,transparent)]",
+    dropBorderOver:
+      "border-[color-mix(in_oklch,var(--chart-1)_55%,transparent)]",
+  },
+  rejected: {
+    header: "bg-[color-mix(in_oklch,var(--destructive)_16%,var(--card))]",
+    body: "bg-[color-mix(in_oklch,var(--destructive)_6%,var(--card))]",
+    bodyOver: "bg-[color-mix(in_oklch,var(--destructive)_12%,var(--card))]",
+    ring: "ring-[color-mix(in_oklch,var(--destructive)_55%,transparent)]",
+    dropBorder:
+      "border-[color-mix(in_oklch,var(--destructive)_32%,transparent)]",
+    dropBorderOver:
+      "border-[color-mix(in_oklch,var(--destructive)_55%,transparent)]",
+  },
+};

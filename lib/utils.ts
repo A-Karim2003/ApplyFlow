@@ -87,3 +87,18 @@ export function formatDocumentType(fileType: string) {
     fileType
   );
 }
+
+export function formatDate(date: Date | string) {
+  const formatted = new Date(date).toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+
+  const time = new Date(date).toLocaleTimeString("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  return `${formatted}, ${time}`;
+}

@@ -15,7 +15,7 @@ import { revalidatePath } from "next/cache";
 export type NewApplication = InferInsertModel<typeof applicationsTable>;
 export type Application = InferSelectModel<typeof applicationsTable>;
 
-type UpdateApplicationProp = {
+export type UpdateApplicationProp = {
   id: Application["id"];
   newStatus: Application["status"];
 };
