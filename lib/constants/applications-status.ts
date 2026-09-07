@@ -110,6 +110,7 @@ export const STATUS_COLUMN_STYLES: Record<
     header: string;
     body: string;
     bodyOver: string;
+    border: string;
     ring: string;
     dropBorder: string;
     dropBorderOver: string;
@@ -120,6 +121,8 @@ export const STATUS_COLUMN_STYLES: Record<
     body: "bg-[color-mix(in_oklch,var(--muted-foreground)_6%,var(--card))]",
     bodyOver:
       "bg-[color-mix(in_oklch,var(--muted-foreground)_12%,var(--card))]",
+    border:
+      "border-[color-mix(in_oklch,var(--muted-foreground)_28%,var(--border))]",
     ring: "ring-[color-mix(in_oklch,var(--muted-foreground)_55%,transparent)]",
     dropBorder:
       "border-[color-mix(in_oklch,var(--muted-foreground)_32%,transparent)]",
@@ -127,36 +130,45 @@ export const STATUS_COLUMN_STYLES: Record<
       "border-[color-mix(in_oklch,var(--muted-foreground)_55%,transparent)]",
   },
   applied: {
-    header: "bg-[color-mix(in_oklch,var(--chart-2)_16%,var(--card))]",
-    body: "bg-[color-mix(in_oklch,var(--chart-2)_6%,var(--card))]",
-    bodyOver: "bg-[color-mix(in_oklch,var(--chart-2)_12%,var(--card))]",
-    ring: "ring-[color-mix(in_oklch,var(--chart-2)_55%,transparent)]",
-    dropBorder: "border-[color-mix(in_oklch,var(--chart-2)_32%,transparent)]",
+    header: "bg-[color-mix(in_oklch,var(--status-applied)_16%,var(--card))]",
+    body: "bg-[color-mix(in_oklch,var(--status-applied)_6%,var(--card))]",
+    bodyOver: "bg-[color-mix(in_oklch,var(--status-applied)_12%,var(--card))]",
+    border:
+      "border-[color-mix(in_oklch,var(--status-applied)_28%,var(--border))]",
+    ring: "ring-[color-mix(in_oklch,var(--status-applied)_55%,transparent)]",
+    dropBorder:
+      "border-[color-mix(in_oklch,var(--status-applied)_32%,transparent)]",
     dropBorderOver:
-      "border-[color-mix(in_oklch,var(--chart-2)_55%,transparent)]",
+      "border-[color-mix(in_oklch,var(--status-applied)_55%,transparent)]",
   },
   online_assessment: {
     header: "bg-[color-mix(in_oklch,var(--chart-5)_16%,var(--card))]",
     body: "bg-[color-mix(in_oklch,var(--chart-5)_6%,var(--card))]",
     bodyOver: "bg-[color-mix(in_oklch,var(--chart-5)_12%,var(--card))]",
+    border: "border-[color-mix(in_oklch,var(--chart-5)_28%,var(--border))]",
     ring: "ring-[color-mix(in_oklch,var(--chart-5)_55%,transparent)]",
     dropBorder: "border-[color-mix(in_oklch,var(--chart-5)_32%,transparent)]",
     dropBorderOver:
       "border-[color-mix(in_oklch,var(--chart-5)_55%,transparent)]",
   },
   interview: {
-    header: "bg-[color-mix(in_oklch,var(--primary)_16%,var(--card))]",
-    body: "bg-[color-mix(in_oklch,var(--primary)_6%,var(--card))]",
-    bodyOver: "bg-[color-mix(in_oklch,var(--primary)_12%,var(--card))]",
-    ring: "ring-[color-mix(in_oklch,var(--primary)_55%,transparent)]",
-    dropBorder: "border-[color-mix(in_oklch,var(--primary)_32%,transparent)]",
+    header: "bg-[color-mix(in_oklch,var(--status-interview)_16%,var(--card))]",
+    body: "bg-[color-mix(in_oklch,var(--status-interview)_6%,var(--card))]",
+    bodyOver:
+      "bg-[color-mix(in_oklch,var(--status-interview)_12%,var(--card))]",
+    border:
+      "border-[color-mix(in_oklch,var(--status-interview)_28%,var(--border))]",
+    ring: "ring-[color-mix(in_oklch,var(--status-interview)_55%,transparent)]",
+    dropBorder:
+      "border-[color-mix(in_oklch,var(--status-interview)_32%,transparent)]",
     dropBorderOver:
-      "border-[color-mix(in_oklch,var(--primary)_55%,transparent)]",
+      "border-[color-mix(in_oklch,var(--status-interview)_55%,transparent)]",
   },
   offer: {
     header: "bg-[color-mix(in_oklch,var(--chart-1)_16%,var(--card))]",
     body: "bg-[color-mix(in_oklch,var(--chart-1)_6%,var(--card))]",
     bodyOver: "bg-[color-mix(in_oklch,var(--chart-1)_12%,var(--card))]",
+    border: "border-[color-mix(in_oklch,var(--chart-1)_28%,var(--border))]",
     ring: "ring-[color-mix(in_oklch,var(--chart-1)_55%,transparent)]",
     dropBorder: "border-[color-mix(in_oklch,var(--chart-1)_32%,transparent)]",
     dropBorderOver:
@@ -166,6 +178,7 @@ export const STATUS_COLUMN_STYLES: Record<
     header: "bg-[color-mix(in_oklch,var(--destructive)_16%,var(--card))]",
     body: "bg-[color-mix(in_oklch,var(--destructive)_6%,var(--card))]",
     bodyOver: "bg-[color-mix(in_oklch,var(--destructive)_12%,var(--card))]",
+    border: "border-[color-mix(in_oklch,var(--destructive)_28%,var(--border))]",
     ring: "ring-[color-mix(in_oklch,var(--destructive)_55%,transparent)]",
     dropBorder:
       "border-[color-mix(in_oklch,var(--destructive)_32%,transparent)]",

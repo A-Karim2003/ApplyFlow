@@ -11,20 +11,20 @@ export const STATUS_STYLES: Record<
     pill: "bg-muted text-muted-foreground",
   },
   applied: {
-    dot: "bg-[var(--chart-2)]",
-    pill: "bg-secondary text-secondary-foreground",
+    dot: "bg-[var(--status-applied)]",
+    pill: "bg-[color-mix(in_oklch,var(--status-applied)_16%,var(--card))] text-[color-mix(in_oklch,var(--status-applied)_60%,var(--foreground))]",
   },
   online_assessment: {
     dot: "bg-[var(--chart-5)]",
     pill: "bg-[color-mix(in_oklch,var(--chart-5)_16%,var(--card))] text-[color-mix(in_oklch,var(--chart-5)_60%,var(--foreground))]",
   },
   interview: {
-    dot: "bg-primary",
-    pill: "bg-[color-mix(in_oklch,var(--primary)_14%,var(--card))] text-[color-mix(in_oklch,var(--primary)_55%,var(--foreground))]",
+    dot: "bg-[var(--status-interview)]",
+    pill: "bg-[color-mix(in_oklch,var(--status-interview)_14%,var(--card))] text-[color-mix(in_oklch,var(--status-interview)_55%,var(--foreground))]",
   },
   offer: {
-    dot: "bg-primary-foreground",
-    pill: "bg-primary text-primary-foreground",
+    dot: "bg-[var(--chart-1)]",
+    pill: "bg-[color-mix(in_oklch,var(--chart-1)_16%,var(--card))] text-[color-mix(in_oklch,var(--chart-1)_60%,var(--foreground))]",
   },
   rejected: {
     dot: "bg-destructive",

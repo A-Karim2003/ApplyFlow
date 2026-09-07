@@ -92,17 +92,25 @@ export function ApplicationsWorkspace({ applications }: ApplicationsPageData) {
       }
     });
   }
-
   const filteredAndSorted = useMemo(() => {
+    const normalizedQuery = query.trim().toLowerCase();
+
     const filtered = optimisticApplications.filter(
       ({ application, company }) => {
-        const normalizedQuery = query.trim().toLowerCase();
+        /*
+            returns application if the search Query matches  any
+            applications job title, company name, or location
+        */
         const matchesQuery =
           normalizedQuery === "" ||
           application.jobTitle.toLowerCase().includes(normalizedQuery) ||
           company.name.toLowerCase().includes(normalizedQuery) ||
           (application.location?.toLowerCase().includes(normalizedQuery) ??
             false);
+
+        /*
+            returns application if the filter matches the application's status
+        */
 
         const matchesStatus =
           filters.status === "all" || application.status === filters.status;
@@ -112,6 +120,7 @@ export function ApplicationsWorkspace({ applications }: ApplicationsPageData) {
           filters.workMode === "all" ||
           application.workMode === filters.workMode;
 
+        //   Returns only the application that matches the entire filter
         return (
           matchesQuery && matchesStatus && matchesJobType && matchesWorkMode
         );
@@ -217,6 +226,7 @@ export function ApplicationsWorkspace({ applications }: ApplicationsPageData) {
         </TabsList>
       </div>
 
+      {/*=======Render Kanban Board & List=======*/}
       {filteredAndSorted.length === 0 ? (
         <Empty className="rounded-xl border border-dashed">
           <EmptyHeader>

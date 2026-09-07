@@ -1,21 +1,16 @@
 "use client";
 
-import * as React from "react";
 import { STATUS_STYLES } from "@/app/_components/status-badge";
 import {
   STATUS_OPTIONS,
   STATUS_COLUMN_STYLES,
-  type ApplicationStatus,
 } from "@/lib/constants/applications-status";
 
 import { type UpdateApplicationProp } from "@/actions/applications";
 
 import { cn } from "@/lib/utils";
 
-import {
-  type ApplicationWithCompany,
-  type Application,
-} from "@/lib/data/applications";
+import { type ApplicationWithCompany } from "@/lib/data/applications";
 import { KanbanApplicationCard } from "./kanban-application-card";
 
 type KanbanBoardProps = {
@@ -27,19 +22,6 @@ export default function KanbanBoard({
   applications,
   onMove,
 }: KanbanBoardProps) {
-  const [dragOver, setDragOver] = React.useState<ApplicationStatus | null>(
-    null,
-  );
-  const [draggingId, setDraggingId] = React.useState<Application["id"] | null>(
-    null,
-  );
-
-  function handleDrop(status: ApplicationStatus) {
-    if (draggingId != null) onMove(draggingId, status);
-    setDraggingId(null);
-    setDragOver(null);
-  }
-
   return (
     <div className="flex gap-4 overflow-x-auto pb-4">
       {STATUS_OPTIONS.map(({ value: status, label }) => {
@@ -47,28 +29,14 @@ export default function KanbanBoard({
           (a) => a.application.status === status,
         );
         const columnStyle = STATUS_COLUMN_STYLES[status];
-        const isOver = dragOver === status;
 
         return (
+          // section represents a column for each status
           <section
             key={status}
-            onDragOver={(e) => {
-              e.preventDefault();
-              if (dragOver !== status) setDragOver(status);
-            }}
-            onDragLeave={(e) => {
-              if (!e.currentTarget.contains(e.relatedTarget as Node)) {
-                setDragOver((current) => (current === status ? null : current));
-              }
-            }}
-            onDrop={() => handleDrop(status)}
             className={cn(
-              "flex w-72 shrink-0 flex-col overflow-hidden rounded-xl transition-shadow",
-              isOver &&
-                cn(
-                  "ring-2 ring-offset-2 ring-offset-background",
-                  columnStyle.ring,
-                ),
+              "flex w-72 shrink-0 flex-col overflow-hidden rounded-xl border transition-shadow",
+              columnStyle.border,
             )}
           >
             <header
@@ -92,35 +60,22 @@ export default function KanbanBoard({
             <div
               className={cn(
                 "flex min-h-112 flex-1 flex-col gap-2.5 p-3 transition-colors",
-                isOver ? columnStyle.bodyOver : columnStyle.body,
+                columnStyle.body,
               )}
             >
               {items.length > 0 ? (
                 items.map((item) => (
-                  <div
+                  <KanbanApplicationCard
                     key={item.application.id}
-                    draggable
-                    onDragStart={() => setDraggingId(item.application.id)}
-                    onDragEnd={() => {
-                      setDraggingId(null);
-                      setDragOver(null);
-                    }}
-                    className={cn(
-                      "transition-opacity",
-                      draggingId === item.application.id && "opacity-40",
-                    )}
-                  >
-                    <KanbanApplicationCard application={item} />
-                  </div>
+                    application={item}
+                  />
                 ))
               ) : (
                 <div
                   className={cn(
                     "flex flex-col items-center justify-center gap-0.5 rounded-lg border border-dashed py-6 text-center transition-colors",
-                    isOver
-                      ? columnStyle.dropBorderOver
-                      : columnStyle.dropBorder,
-                    isOver ? "text-foreground/70" : "text-muted-foreground/70",
+                    columnStyle.dropBorder,
+                    "text-muted-foreground/70",
                   )}
                 >
                   <span className="text-sm font-medium">Drop jobs here</span>
