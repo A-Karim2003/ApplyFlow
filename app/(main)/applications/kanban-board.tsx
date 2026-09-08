@@ -4,6 +4,7 @@ import { STATUS_STYLES } from "@/app/_components/status-badge";
 import {
   STATUS_OPTIONS,
   STATUS_COLUMN_STYLES,
+  ApplicationStatus,
 } from "@/lib/constants/applications-status";
 
 import { type UpdateApplicationProp } from "@/actions/applications";
@@ -22,12 +23,25 @@ export default function KanbanBoard({
   applications,
   onMove,
 }: KanbanBoardProps) {
+  const applicationsByStatus = applications.reduce(
+    (groups, application) => {
+      const status = application.application.status;
+
+      //* initalises group based on status
+      if (!groups[status]) groups[status] = [];
+
+      groups[status].push(application);
+
+      return groups;
+    },
+    {} as Record<ApplicationStatus, ApplicationWithCompany[]>,
+  );
+
   return (
     <div className="flex gap-4 overflow-x-auto pb-4">
       {STATUS_OPTIONS.map(({ value: status, label }) => {
-        const items = applications.filter(
-          (a) => a.application.status === status,
-        );
+        //Get only the data for the spefic column
+        const applications = applicationsByStatus[status];
         const columnStyle = STATUS_COLUMN_STYLES[status];
 
         return (
@@ -53,7 +67,7 @@ export default function KanbanBoard({
                 {label}
               </span>
               <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-card px-1.5 text-xs font-semibold tabular-nums text-muted-foreground shadow-xs">
-                {items.length}
+                {applications.length}
               </span>
             </header>
 
@@ -63,8 +77,8 @@ export default function KanbanBoard({
                 columnStyle.body,
               )}
             >
-              {items.length > 0 ? (
-                items.map((item) => (
+              {applications.length > 0 ? (
+                applications.map((item) => (
                   <KanbanApplicationCard
                     key={item.application.id}
                     application={item}

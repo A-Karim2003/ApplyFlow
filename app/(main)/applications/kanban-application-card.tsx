@@ -1,5 +1,6 @@
 // components/applications/kanban-application-card.tsx
 import CompanyLogo from "@/app/_components/company-logo";
+import { Card } from "@/components/ui/card";
 import type { ApplicationWithCompany } from "@/lib/data/applications";
 import { formatDate } from "@/lib/utils";
 import { MapPin, Calendar } from "lucide-react";
@@ -12,7 +13,7 @@ export function KanbanApplicationCard({
   const { application: app, company } = application;
 
   return (
-    <article className="group flex cursor-grab flex-col gap-3 rounded-lg border bg-card p-3 shadow-xs transition-shadow hover:shadow-sm active:cursor-grabbing">
+    <Card className="flex cursor-grab flex-col gap-3 rounded-lg p-3 shadow-xs transition-shadow hover:shadow-sm active:cursor-grabbing">
       <div className="flex flex-col gap-2">
         <h3 className="text-pretty text-sm font-semibold leading-snug text-foreground">
           {app.jobTitle}
@@ -38,6 +39,6 @@ export function KanbanApplicationCard({
           {app.appliedAt ? formatDate(app.appliedAt) : "Date not set"}
         </span>
       </div>
-    </article>
+    </Card>
   );
 }
