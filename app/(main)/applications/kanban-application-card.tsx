@@ -1,9 +1,10 @@
-// components/applications/kanban-application-card.tsx
 import CompanyLogo from "@/app/_components/company-logo";
 import { Card } from "@/components/ui/card";
 import type { ApplicationWithCompany } from "@/lib/data/applications";
-import { formatDate } from "@/lib/utils";
+import { cn, formatDate } from "@/lib/utils";
 import { MapPin, Calendar } from "lucide-react";
+
+import { useDraggable } from "@dnd-kit/react";
 
 export function KanbanApplicationCard({
   application,
@@ -12,8 +13,22 @@ export function KanbanApplicationCard({
 }) {
   const { application: app, company } = application;
 
+  //? Create draggable elements
+  const { isDragging, ref } = useDraggable({
+    id: app.id,
+    data: {
+      status: application.application.status,
+    },
+  });
+
   return (
-    <Card className="flex cursor-grab flex-col gap-3 rounded-lg p-3 shadow-xs transition-shadow hover:shadow-sm active:cursor-grabbing">
+    <Card
+      ref={ref}
+      className={cn(
+        "flex cursor-grab flex-col gap-3 rounded-lg p-3 shadow-xs transition-shadow hover:shadow-sm active:cursor-grabbing",
+        isDragging && "scale-105 rotate-2 shadow-lg",
+      )}
+    >
       <div className="flex flex-col gap-2">
         <h3 className="text-pretty text-sm font-semibold leading-snug text-foreground">
           {app.jobTitle}
