@@ -132,3 +132,15 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* ================ Kanban Board ================= */
+
+.column-grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+.column-grid-item {
+  width: 100%;
+}

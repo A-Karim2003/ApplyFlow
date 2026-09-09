@@ -25,7 +25,7 @@ export function KanbanApplicationCard({
     <Card
       ref={ref}
       className={cn(
-        "flex cursor-grab flex-col gap-3 rounded-lg p-3 shadow-xs transition-shadow hover:shadow-sm active:cursor-grabbing",
+        "min-h-28.75 flex cursor-grab flex-col gap-3 rounded-lg p-3 shadow-xs transition-shadow hover:shadow-sm active:cursor-grabbing",
         isDragging && "scale-105 rotate-2 shadow-lg",
       )}
     >

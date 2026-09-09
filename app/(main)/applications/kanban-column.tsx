@@ -16,7 +16,7 @@ type KanbanColumnProp = {
   applications: ApplicationWithCompany[];
 };
 
-export function KanbanColumn({
+export default function KanbanColumn({
   status,
   label,
   applications,
@@ -29,7 +29,7 @@ export function KanbanColumn({
     <section
       ref={ref}
       className={cn(
-        "flex w-72 shrink-0 flex-col overflow-hidden rounded-xl border transition-shadow",
+        "flex flex-col overflow-hidden rounded-xl border transition-shadow column-grid-item",
         columnStyle.border,
         isDropTarget &&
           cn("ring-2 ring-offset-2 ring-offset-background", columnStyle.ring),
@@ -53,9 +53,10 @@ export function KanbanColumn({
         </span>
       </header>
 
+      {/* Card list */}
       <div
         className={cn(
-          "flex min-h-112 flex-1 flex-col gap-2.5 p-3 transition-colors",
+          "flex min-h-125 flex-1 flex-col gap-2.5 p-3 transition-colors max-h-150 h-full overflow-scroll",
           isDropTarget ? columnStyle.bodyOver : columnStyle.body,
         )}
       >
@@ -77,7 +78,7 @@ export function KanbanColumn({
             )}
           >
             <span className="text-sm font-medium">Drop jobs here</span>
-            <span className="text-xs">or drag a card to update</span>
+            <span className="text-xs">Add one with “+ Add application”</span>
           </div>
         )}
       </div>

@@ -9,7 +9,7 @@ import { type UpdateApplicationProp } from "@/actions/applications";
 
 import { type ApplicationWithCompany } from "@/lib/data/applications";
 
-import { KanbanColumn } from "./kanban-column";
+import KanbanColumn from "./kanban-column";
 import { DragDropProvider } from "@dnd-kit/react";
 
 type KanbanBoardProps = {
@@ -59,7 +59,7 @@ export default function KanbanBoard({
         onMove({ id: applicationId, newStatus: columnStatus });
       }}
     >
-      <div className="flex gap-4 overflow-x-auto p-1 pb-4">
+      <div className="column-grid-container p-1 pb-4 ">
         {" "}
         {STATUS_OPTIONS.map(({ value: status, label }) => (
           <KanbanColumn

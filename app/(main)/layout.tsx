@@ -24,7 +24,7 @@ export default async function Layout({
   return (
     <SidebarProvider>
       <AppSidebar />
-      <SidebarInset>
+      <SidebarInset className="overflow-x-hidden">
         <RoutePageHeader userName={displayName} todayLabel={todayLabel} />
         {children}
       </SidebarInset>
@@ -33,7 +33,7 @@ export default async function Layout({
         autoClose={2000}
         closeOnClick={false}
         transition={Bounce}
-      />{" "}
+      />
     </SidebarProvider>
   );
 }

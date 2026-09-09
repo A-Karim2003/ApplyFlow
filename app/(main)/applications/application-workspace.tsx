@@ -241,10 +241,7 @@ export function ApplicationsWorkspace({ applications }: ApplicationsPageData) {
           </EmptyHeader>
         </Empty>
       ) : (
-        <div
-          aria-busy={isPending}
-          className={cn(isPending && "pointer-events-none opacity-90")}
-        >
+        <div aria-busy={isPending} className={cn(isPending && "opacity-90")}>
           <TabsContent value="kanban" className="mt-0">
             <KanbanBoard
               applications={filteredAndSorted}
