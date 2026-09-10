@@ -42,6 +42,7 @@ import {
 import { ApplicationsPageData } from "@/lib/data/applications";
 import { cn } from "@/lib/utils";
 import KanbanBoard from "./kanban-board";
+import ListView from "./applicationsTable/list-view";
 
 type ApplicationFilters = {
   status: ApplicationStatus | "all";
@@ -249,7 +250,7 @@ export function ApplicationsWorkspace({ applications }: ApplicationsPageData) {
             />
           </TabsContent>
           <TabsContent value="list" className="mt-0">
-            {/* <ListView applications={filteredAndSorted} /> */}
+            <ListView applications={filteredAndSorted} />
           </TabsContent>
         </div>
       )}
