@@ -15,16 +15,28 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import { type UpdateApplicationProp } from "@/actions/applications";
+
 type ListViewProps = {
   applications: ApplicationWithCompany[];
+  onMove: ({ id, newStatus }: UpdateApplicationProp) => void;
 };
 
-export default function ListView({ applications }: ListViewProps) {
+export default function ListView({ applications, onMove }: ListViewProps) {
   const table = useTable({
     features,
     columns,
     data: applications,
     getRowId: (row) => String(row.application.id),
+    state: {
+      pagination: {
+        pageIndex: 0,
+        pageSize: 10,
+      },
+    },
+    meta: {
+      onStatusChange: onMove,
+    },
   });
 
   return (
@@ -77,10 +89,10 @@ export default function ListView({ applications }: ListViewProps) {
       </div>
 
       {/* Pagination — only worth showing once there's more than one page */}
-      {table.getPageCount() && (
+      {table.getPageCount() > 1 && (
         <div className="flex items-center justify-end gap-3">
           <span className="text-sm text-muted-foreground">
-            Page {table.atoms.pagination.get().pageIndex + 1} of{" "}
+            Page {table.state.pagination.pageIndex + 1} of{" "}
             {table.getPageCount()}
           </span>
 

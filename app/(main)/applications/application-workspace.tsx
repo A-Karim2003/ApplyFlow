@@ -250,7 +250,10 @@ export function ApplicationsWorkspace({ applications }: ApplicationsPageData) {
             />
           </TabsContent>
           <TabsContent value="list" className="mt-0">
-            <ListView applications={filteredAndSorted} />
+            <ListView
+              applications={filteredAndSorted}
+              onMove={moveApplication}
+            />
           </TabsContent>
         </div>
       )}

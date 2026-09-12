@@ -5,15 +5,34 @@ import {
   createPaginatedRowModel,
   rowPaginationFeature,
   tableFeatures,
+  metaHelper,
 } from "@tanstack/react-table";
 import { type ApplicationWithCompany } from "@/lib/data/applications";
-import { formatDate, formatEnumLabel } from "@/lib/utils";
-import { StatusBadge } from "@/app/_components/status-badge";
+import { type UpdateApplicationProp } from "@/actions/applications";
+
+import { cn, formatDate, formatEnumLabel } from "@/lib/utils";
+import { STATUS_STYLES, StatusBadge } from "@/app/_components/status-badge";
 import CompanyLogo from "@/app/_components/company-logo";
+import {
+  STATUS_OPTIONS,
+  type ApplicationStatus,
+} from "@/lib/constants/applications-status";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { ChevronDown } from "lucide-react";
+
+type ApplicationTableMeta = {
+  onStatusChange: (props: UpdateApplicationProp) => void;
+};
 
 export const features = tableFeatures({
   rowPaginationFeature,
   paginatedRowModel: createPaginatedRowModel(),
+  tableMeta: metaHelper<ApplicationTableMeta>(),
 });
 
 const columnHelper = createColumnHelper<
@@ -45,7 +64,56 @@ export const columns = columnHelper.columns([
   columnHelper.accessor("application.status", {
     id: "status",
     header: "Status",
-    cell: (info) => <StatusBadge status={info.getValue()} />,
+    cell: (info) => {
+      const status = info.getValue();
+      const applicationId = info.row.original.application.id;
+      const onStatusChange = info.table.options.meta?.onStatusChange;
+
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            render={
+              <button
+                type="button"
+                className={cn(
+                  "flex w-40 cursor-pointer items-center justify-between rounded-md px-2.5 py-1 text-xs font-medium whitespace-nowrap",
+                  STATUS_STYLES[status].pill,
+                )}
+              >
+                <span className="flex items-center gap-1.5">
+                  <span
+                    className={cn(
+                      "size-1.5 rounded-full",
+                      STATUS_STYLES[status].dot,
+                    )}
+                    aria-hidden
+                  />
+                  {formatEnumLabel(status)}
+                </span>
+                <ChevronDown className="size-3.5 shrink-0 opacity-70" />
+              </button>
+            }
+          />
+          <DropdownMenuContent align="start">
+            {STATUS_OPTIONS.map(({ value }) => (
+              <DropdownMenuItem
+                key={value}
+                disabled={value === status}
+                onClick={() =>
+                  onStatusChange?.({
+                    id: applicationId,
+                    newStatus: value,
+                  })
+                }
+              >
+                {" "}
+                <StatusBadge status={value as ApplicationStatus} />{" "}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      );
+    },
   }),
   columnHelper.accessor("application.appliedAt", {
     id: "dateApplied",
