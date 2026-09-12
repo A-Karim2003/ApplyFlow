@@ -19,7 +19,7 @@ const columnHelper = createColumnHelper<
   ApplicationWithCompany
 >();
 
-export const columns = [
+export const columns = columnHelper.columns([
   columnHelper.accessor("application.jobTitle", {
     id: "jobTitle",
     header: "Job Title",
@@ -46,4 +46,4 @@ export const columns = [
     id: "location",
     header: "Location",
   }),
-];
+]);
