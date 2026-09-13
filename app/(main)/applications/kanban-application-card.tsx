@@ -8,8 +8,10 @@ import { useDraggable } from "@dnd-kit/react";
 
 export function KanbanApplicationCard({
   application,
+  onOpenApplication,
 }: {
   application: ApplicationWithCompany;
+  onOpenApplication: (id: number) => void;
 }) {
   const { application: app, company } = application;
 
@@ -25,9 +27,10 @@ export function KanbanApplicationCard({
     <Card
       ref={ref}
       className={cn(
-        "min-h-28.75 flex cursor-grab flex-col gap-3 rounded-lg p-3 shadow-xs transition-shadow hover:shadow-sm active:cursor-grabbing",
+        "min-h-28.75 flex cursor-pointer flex-col gap-3 rounded-lg p-3 shadow-xs transition-shadow hover:shadow-sm",
         isDragging && "scale-105 rotate-2 shadow-lg",
       )}
+      onClick={() => onOpenApplication(app.id)}
     >
       <div className="flex flex-col gap-2">
         <h3 className="text-pretty text-sm font-semibold leading-snug text-foreground">

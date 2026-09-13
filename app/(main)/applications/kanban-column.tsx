@@ -14,12 +14,14 @@ type KanbanColumnProp = {
   status: ApplicationStatus;
   label: string;
   applications: ApplicationWithCompany[];
+  onOpenApplication: (id: number) => void;
 };
 
 export default function KanbanColumn({
   status,
   label,
   applications,
+  onOpenApplication,
 }: KanbanColumnProp) {
   //? Create droppable elements
   const { isDropTarget, ref } = useDroppable({ id: status });
@@ -65,6 +67,7 @@ export default function KanbanColumn({
             <KanbanApplicationCard
               key={item.application.id}
               application={item}
+              onOpenApplication={onOpenApplication}
             />
           ))
         ) : (

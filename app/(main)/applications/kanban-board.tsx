@@ -15,11 +15,13 @@ import { DragDropProvider } from "@dnd-kit/react";
 type KanbanBoardProps = {
   applications: ApplicationWithCompany[];
   onMove: ({ id, newStatus }: UpdateApplicationProp) => void;
+  onOpenApplication: (id: number) => void;
 };
 
 export default function KanbanBoard({
   applications,
   onMove,
+  onOpenApplication,
 }: KanbanBoardProps) {
   const applicationsByStatus = applications.reduce(
     (groups, application) => {
@@ -67,6 +69,7 @@ export default function KanbanBoard({
             status={status}
             label={label}
             applications={applicationsByStatus[status] ?? []}
+            onOpenApplication={onOpenApplication}
           />
         ))}
       </div>

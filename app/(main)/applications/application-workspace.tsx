@@ -43,6 +43,7 @@ import { ApplicationsPageData } from "@/lib/data/applications";
 import { cn } from "@/lib/utils";
 import KanbanBoard from "./kanban-board";
 import ListView from "./applicationsTable/list-view";
+import ApplicationDetailsDialog from "./application-details-dialog";
 
 type ApplicationFilters = {
   status: ApplicationStatus | "all";
@@ -61,6 +62,12 @@ const FILTER_CONFIGS = [
 }[];
 
 export function ApplicationsWorkspace({ applications }: ApplicationsPageData) {
+  // selectedApplicationId and dialogOpen are for managing the application details dialog
+  const [selectedApplicationId, setSelectedApplicationId] = useState<
+    number | null
+  >(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+
   const [query, setQuery] = useState<string>("");
   const [filters, setFilters] = useState<ApplicationFilters>({
     status: "all",
@@ -143,120 +150,148 @@ export function ApplicationsWorkspace({ applications }: ApplicationsPageData) {
     });
   }, [optimisticApplications, query, filters, sort]);
 
+  const selectedApplication = useMemo(
+    () =>
+      filteredAndSorted.find(
+        (a) => a.application.id === selectedApplicationId,
+      ) ?? null,
+    [filteredAndSorted, selectedApplicationId],
+  );
+
+  function openApplication(id: number) {
+    setSelectedApplicationId(id);
+    setDialogOpen(true);
+  }
   return (
-    <Tabs defaultValue="kanban" className="flex flex-col gap-5">
-      <div className="flex flex-col gap-3 border-y py-3 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex flex-1 flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:items-center">
-          <InputGroup className="w-full sm:max-w-xs">
-            <InputGroupAddon>
-              <Search />
-            </InputGroupAddon>
-            <InputGroupInput
-              placeholder="Search title, company, location..."
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-            />
-          </InputGroup>
+    <>
+      <Tabs defaultValue="kanban" className="flex flex-col gap-5">
+        <div className="flex flex-col gap-3 border-y py-3 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-1 flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:items-center">
+            <InputGroup className="w-full sm:max-w-xs">
+              <InputGroupAddon>
+                <Search />
+              </InputGroupAddon>
+              <InputGroupInput
+                placeholder="Search title, company, location..."
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+              />
+            </InputGroup>
 
-          {FILTER_CONFIGS.map((filter) => {
-            const selectedOption = filter.options.find(
-              (option) => option.value === filters[filter.key],
-            );
+            {FILTER_CONFIGS.map((filter) => {
+              const selectedOption = filter.options.find(
+                (option) => option.value === filters[filter.key],
+              );
 
-            return (
-              <Select
-                key={filter.key}
-                value={filters[filter.key]}
-                onValueChange={(value) =>
-                  setFilters((prev) => ({ ...prev, [filter.key]: value }))
-                }
-              >
-                <SelectTrigger className="w-full sm:w-55">
-                  <SelectValue>
-                    {filter.label}: {selectedOption?.label}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    {filter.options.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            );
-          })}
+              return (
+                <Select
+                  key={filter.key}
+                  value={filters[filter.key]}
+                  onValueChange={(value) =>
+                    setFilters((prev) => ({ ...prev, [filter.key]: value }))
+                  }
+                >
+                  <SelectTrigger className="w-full sm:w-55">
+                    <SelectValue>
+                      {filter.label}: {selectedOption?.label}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      {filter.options.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              );
+            })}
 
-          <Select
-            value={sort}
-            onValueChange={(value) => setSort(value as ApplicationSortKey)}
-          >
-            <SelectTrigger className="w-full sm:w-40">
-              <SelectValue>
-                Sort:{" "}
-                {
-                  APPLICATION_SORT_OPTIONS.find(
-                    (option) => option.value === sort,
-                  )?.label
-                }
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                {APPLICATION_SORT_OPTIONS.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+            <Select
+              value={sort}
+              onValueChange={(value) => setSort(value as ApplicationSortKey)}
+            >
+              <SelectTrigger className="w-full sm:w-40">
+                <SelectValue>
+                  Sort:{" "}
+                  {
+                    APPLICATION_SORT_OPTIONS.find(
+                      (option) => option.value === sort,
+                    )?.label
+                  }
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {APPLICATION_SORT_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <TabsList className="w-full shrink-0 sm:w-auto">
+            <TabsTrigger value="kanban">
+              <LayoutGrid data-icon="inline-start" />
+              Kanban
+            </TabsTrigger>
+            <TabsTrigger value="list">
+              <List data-icon="inline-start" />
+              List
+            </TabsTrigger>
+          </TabsList>
         </div>
 
-        <TabsList className="w-full shrink-0 sm:w-auto">
-          <TabsTrigger value="kanban">
-            <LayoutGrid data-icon="inline-start" />
-            Kanban
-          </TabsTrigger>
-          <TabsTrigger value="list">
-            <List data-icon="inline-start" />
-            List
-          </TabsTrigger>
-        </TabsList>
-      </div>
+        {/*=======Render Kanban Board & List=======*/}
+        {filteredAndSorted.length === 0 ? (
+          <Empty className="rounded-xl border border-dashed">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <SearchX />
+              </EmptyMedia>
+              <EmptyTitle>No applications found</EmptyTitle>
+              <EmptyDescription>
+                Try adjusting your search or filters to find what you&apos;re
+                looking for.
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        ) : (
+          <div aria-busy={isPending} className={cn(isPending && "opacity-90")}>
+            <TabsContent value="kanban" className="mt-0">
+              <KanbanBoard
+                applications={filteredAndSorted}
+                onMove={moveApplication}
+                onOpenApplication={openApplication}
+              />
+            </TabsContent>
+            <TabsContent value="list" className="mt-0">
+              <ListView
+                applications={filteredAndSorted}
+                onMove={moveApplication}
+                onOpenApplication={openApplication}
+              />
+            </TabsContent>
+          </div>
+        )}
+      </Tabs>
 
-      {/*=======Render Kanban Board & List=======*/}
-      {filteredAndSorted.length === 0 ? (
-        <Empty className="rounded-xl border border-dashed">
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <SearchX />
-            </EmptyMedia>
-            <EmptyTitle>No applications found</EmptyTitle>
-            <EmptyDescription>
-              Try adjusting your search or filters to find what you&apos;re
-              looking for.
-            </EmptyDescription>
-          </EmptyHeader>
-        </Empty>
-      ) : (
-        <div aria-busy={isPending} className={cn(isPending && "opacity-90")}>
-          <TabsContent value="kanban" className="mt-0">
-            <KanbanBoard
-              applications={filteredAndSorted}
-              onMove={moveApplication}
-            />
-          </TabsContent>
-          <TabsContent value="list" className="mt-0">
-            <ListView
-              applications={filteredAndSorted}
-              onMove={moveApplication}
-            />
-          </TabsContent>
-        </div>
-      )}
-    </Tabs>
+      <ApplicationDetailsDialog
+        application={selectedApplication}
+        companies={Array.from(
+          new Map(
+            applications.map(({ company }) => [company.id, company]),
+          ).values(),
+        )}
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        onStatusChange={moveApplication}
+      />
+    </>
   );
 }

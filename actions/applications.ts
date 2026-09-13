@@ -73,3 +73,52 @@ export async function updateApplicationStatus({
     return { success: false, error: "Could not update application status" };
   }
 }
+
+export type UpdateApplicationDetailsProp = {
+  applicationId: Application["id"];
+  values: Partial<
+    Pick<
+      NewApplication,
+      | "jobTitle"
+      | "jobType"
+      | "source"
+      | "location"
+      | "workMode"
+      | "jobUrl"
+      | "salaryMin"
+      | "salaryMax"
+      | "applicationDeadline"
+      | "appliedAt"
+      | "notes"
+    >
+  >;
+};
+
+export async function updateApplicationDetails({
+  applicationId,
+  values,
+}: UpdateApplicationDetailsProp): Promise<Result<Application>> {
+  const session = await getSession();
+  if (!session) return { success: false, error: "Not authenticated" };
+
+  try {
+    const [result] = await db
+      .update(applicationsTable)
+      .set(values)
+      .where(
+        and(
+          eq(applicationsTable.id, applicationId),
+          eq(applicationsTable.userId, session.user.id),
+        ),
+      )
+      .returning();
+
+    if (!result) return { success: false, error: "Not found" };
+
+    revalidatePath("/applications");
+    return { success: true, data: result };
+  } catch (error) {
+    console.error(error);
+    return { success: false, error: "Could not update application" };
+  }
+}

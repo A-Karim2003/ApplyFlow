@@ -20,9 +20,14 @@ import { type UpdateApplicationProp } from "@/actions/applications";
 type ListViewProps = {
   applications: ApplicationWithCompany[];
   onMove: ({ id, newStatus }: UpdateApplicationProp) => void;
+  onOpenApplication: (id: number) => void;
 };
 
-export default function ListView({ applications, onMove }: ListViewProps) {
+export default function ListView({
+  applications,
+  onMove,
+  onOpenApplication,
+}: ListViewProps) {
   const table = useTable({
     features,
     columns,
@@ -36,6 +41,7 @@ export default function ListView({ applications, onMove }: ListViewProps) {
     },
     meta: {
       onStatusChange: onMove,
+      onOpenApplication,
     },
   });
 
@@ -63,7 +69,11 @@ export default function ListView({ applications, onMove }: ListViewProps) {
           <TableBody>
             {table.getRowModel().rows.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id} className="hover:bg-muted/50">
+                <TableRow
+                  key={row.id}
+                  className="cursor-pointer hover:bg-muted/50"
+                  onClick={() => onOpenApplication(row.original.application.id)}
+                >
                   {row.getAllCells().map((cell, index) => (
                     <TableCell
                       key={cell.id}

@@ -27,6 +27,7 @@ import { ChevronDown } from "lucide-react";
 
 type ApplicationTableMeta = {
   onStatusChange: (props: UpdateApplicationProp) => void;
+  onOpenApplication: (id: number) => void;
 };
 
 export const features = tableFeatures({
