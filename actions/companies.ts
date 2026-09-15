@@ -2,7 +2,7 @@
 
 import { and, eq, type InferInsertModel } from "drizzle-orm";
 import { companiesTable } from "@/db/schema/companies";
-import { getSession } from "@/lib/data/session";
+import { requireSession } from "@/lib/data/session";
 import { Result } from "@/types";
 import { db } from "@/db";
 import { revalidatePath } from "next/cache";
@@ -15,8 +15,7 @@ type CreateCompanyInput = Omit<NewCompany, "userId">;
 export async function createCompany(
   data: CreateCompanyInput,
 ): Promise<Result<NewCompany>> {
-  const session = await getSession();
-  if (!session) return { success: false, error: "User not authenticated" };
+  const session = await requireSession();
 
   try {
     const result = await db
@@ -37,8 +36,7 @@ export async function updateCompany(
   id: number,
   data: Omit<NewCompany, "userId">,
 ): Promise<Result<Company>> {
-  const session = await getSession();
-  if (!session) return { success: false, error: "User not authenticated" };
+  const session = await requireSession();
 
   try {
     const result = await db
@@ -64,8 +62,7 @@ export async function updateCompany(
 }
 
 export async function deleteCompany(id: number): Promise<Result<Company>> {
-  const session = await getSession();
-  if (!session) return { success: false, error: "User not authenticated" };
+  const session = await requireSession();
 
   try {
     const result = await db

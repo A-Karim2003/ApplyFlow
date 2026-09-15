@@ -5,7 +5,7 @@ import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { MapPin, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { STATUS_COLUMN_STYLES } from "@/lib/constants";
 
 import {
@@ -41,6 +41,7 @@ import { type ApplicationWithCompany } from "@/lib/data/applications";
 import {
   type UpdateApplicationProp,
   updateApplicationDetails,
+  deleteApplication,
 } from "@/actions/applications";
 import { jobTypeEnum, applicationSourceEnum, workModeEnum } from "@/db/schema";
 import { toast } from "react-toastify";
@@ -89,6 +90,7 @@ export default function ApplicationDetailsDialog({
   onStatusChange,
 }: ApplicationDetailsDialogProps) {
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [isDeleting, startDeleteTransition] = useTransition();
 
   const {
     register,
@@ -123,16 +125,23 @@ export default function ApplicationDetailsDialog({
   const status = app.status as ApplicationStatus;
 
   async function submit(values: ApplicationDetailsForm) {
-    console.log(values);
-    console.log("dirtyFields", dirtyFields);
+    const changedValues = Object.fromEntries(
+      Object.entries(dirtyFields).map(([key]) => [
+        key,
+        values[key as keyof ApplicationDetailsForm],
+      ]),
+    ) as Partial<ApplicationDetailsForm>;
+
+    if (Object.keys(changedValues).length === 0) return; // nothing to save
+
     try {
       const result = await updateApplicationDetails({
         applicationId: app.id,
-        values,
+        values: changedValues,
       });
 
       if (result.success) {
-        reset(values); // clears isDirty; dialog stays open
+        reset(values);
         toast.success("Application updated");
       } else {
         toast.error(result.error ?? "Could not update application");
@@ -143,9 +152,22 @@ export default function ApplicationDetailsDialog({
     }
   }
 
-  function deleteApplication() {
-    // TODO: Implement application deletion functionality.
-    onOpenChange(false);
+  function handleDeleteApplication() {
+    startDeleteTransition(async () => {
+      try {
+        const result = await deleteApplication(app.id);
+
+        if (result.success) {
+          onOpenChange(false);
+          toast.success("Application deleted");
+        } else {
+          toast.error(result.error ?? "Could not delete application");
+        }
+      } catch (error) {
+        console.error(error);
+        toast.error("Something went wrong. Please try again.");
+      }
+    });
   }
 
   return (
@@ -482,9 +504,11 @@ export default function ApplicationDetailsDialog({
                     <Button
                       type="button"
                       variant="destructive"
-                      onClick={deleteApplication}
+                      disabled={isDeleting}
+                      onClick={handleDeleteApplication}
                     >
-                      Delete
+                      {isDeleting && <SpinnerEllipsis />}
+                      {isDeleting ? "Deleting" : "Delete"}
                     </Button>
                   </div>
                 </div>
@@ -493,7 +517,10 @@ export default function ApplicationDetailsDialog({
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={() => onOpenChange(false)}
+                    onClick={() => {
+                      onOpenChange(false);
+                      reset();
+                    }}
                   >
                     Close
                   </Button>

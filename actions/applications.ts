@@ -7,7 +7,7 @@ import {
   type InferSelectModel,
 } from "drizzle-orm";
 import { applicationsTable, applicationStatusHistoryTable } from "@/db/schema";
-import { getSession } from "@/lib/data/session";
+import { requireSession } from "@/lib/data/session";
 import { Result } from "@/types";
 import { db } from "@/db";
 import { revalidatePath } from "next/cache";
@@ -24,8 +24,7 @@ export async function updateApplicationStatus({
   id,
   newStatus,
 }: UpdateApplicationProp): Promise<Result<Application>> {
-  const session = await getSession();
-  if (!session) return { success: false, error: "Not authenticated" };
+  const session = await requireSession();
 
   try {
     const result = await db.transaction(async (tx) => {
@@ -98,8 +97,7 @@ export async function updateApplicationDetails({
   applicationId,
   values,
 }: UpdateApplicationDetailsProp): Promise<Result<Application>> {
-  const session = await getSession();
-  if (!session) return { success: false, error: "Not authenticated" };
+  const session = await requireSession();
 
   try {
     const [result] = await db
@@ -120,5 +118,31 @@ export async function updateApplicationDetails({
   } catch (error) {
     console.error(error);
     return { success: false, error: "Could not update application" };
+  }
+}
+
+export async function deleteApplication(
+  applicationId: Application["id"],
+): Promise<Result<Application>> {
+  const session = await requireSession();
+
+  try {
+    const [result] = await db
+      .delete(applicationsTable)
+      .where(
+        and(
+          eq(applicationsTable.id, applicationId),
+          eq(applicationsTable.userId, session.user.id),
+        ),
+      )
+      .returning();
+
+    if (!result) return { success: false, error: "Not found" };
+
+    revalidatePath("/applications");
+    return { success: true, data: result };
+  } catch (error) {
+    console.error(error);
+    return { success: false, error: "Could not delete application" };
   }
 }

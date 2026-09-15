@@ -7,7 +7,7 @@ import {
   type InferSelectModel,
 } from "drizzle-orm";
 import { documentsTable } from "@/db/schema/documents";
-import { getSession } from "@/lib/data/session";
+import { requireSession } from "@/lib/data/session";
 import { db } from "@/db";
 import { revalidatePath } from "next/cache";
 import { Result } from "@/types";
@@ -24,8 +24,7 @@ export type NewDocument = InferInsertModel<typeof documentsTable>;
 export async function createDocument(
   data: Omit<NewDocument, "userId">,
 ): Promise<Result<Document>> {
-  const session = await getSession();
-  if (!session) return { success: false, error: "Not authenticated" };
+  const session = await requireSession();
 
   try {
     const result = await db
@@ -47,8 +46,7 @@ export async function createDocument(
 }
 
 export async function deleteDocument(id: number): Promise<Result<Document>> {
-  const session = await getSession();
-  if (!session) return { success: false, error: "Not authenticated" };
+  const session = await requireSession();
 
   try {
     //? Guard document deletion if there are linked applications
@@ -110,8 +108,7 @@ export type LinkedApplication = {
 export async function getLinkedApplicationsForDocument(
   documentId: number,
 ): Promise<Result<LinkedApplication[]>> {
-  const session = await getSession();
-  if (!session) return { success: false, error: "Not authenticated" };
+  const session = await requireSession();
 
   try {
     const applications = await db
@@ -151,8 +148,7 @@ export async function unlinkDocumentFromApplication(
   documentId: number,
   applicationId: number,
 ): Promise<Result<void>> {
-  const session = await getSession();
-  if (!session) return { success: false, error: "Not authenticated" };
+  const session = await requireSession();
 
   try {
     //? Verify document belongs to user (extra safety check)

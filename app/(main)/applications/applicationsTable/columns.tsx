@@ -71,48 +71,47 @@ export const columns = columnHelper.columns([
       const onStatusChange = info.table.options.meta?.onStatusChange;
 
       return (
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            render={
-              <button
-                type="button"
-                className={cn(
-                  "flex w-40 cursor-pointer items-center justify-between rounded-md px-2.5 py-1 text-xs font-medium whitespace-nowrap",
-                  STATUS_STYLES[status].pill,
-                )}
-              >
-                <span className="flex items-center gap-1.5">
-                  <span
-                    className={cn(
-                      "size-1.5 rounded-full",
-                      STATUS_STYLES[status].dot,
-                    )}
-                    aria-hidden
-                  />
-                  {formatEnumLabel(status)}
-                </span>
-                <ChevronDown className="size-3.5 shrink-0 opacity-70" />
-              </button>
-            }
-          />
-          <DropdownMenuContent align="start">
-            {STATUS_OPTIONS.map(({ value }) => (
-              <DropdownMenuItem
-                key={value}
-                disabled={value === status}
-                onClick={() =>
-                  onStatusChange?.({
-                    id: applicationId,
-                    newStatus: value,
-                  })
-                }
-              >
-                {" "}
-                <StatusBadge status={value as ApplicationStatus} />{" "}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div onClick={(e) => e.stopPropagation()}>
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              render={
+                <button
+                  type="button"
+                  className={cn(
+                    "flex w-40 cursor-pointer items-center justify-between rounded-md px-2.5 py-1 text-xs font-medium whitespace-nowrap",
+                    STATUS_STYLES[status].pill,
+                  )}
+                >
+                  <span className="flex items-center gap-1.5">
+                    <span
+                      className={cn(
+                        "size-1.5 rounded-full",
+                        STATUS_STYLES[status].dot,
+                      )}
+                      aria-hidden
+                    />
+                    {formatEnumLabel(status)}
+                  </span>
+                  <ChevronDown className="size-3.5 shrink-0 opacity-70" />
+                </button>
+              }
+            />
+            <DropdownMenuContent align="start">
+              {STATUS_OPTIONS.map(({ value }) => (
+                <DropdownMenuItem
+                  key={value}
+                  disabled={value === status}
+                  onClick={() =>
+                    onStatusChange?.({ id: applicationId, newStatus: value })
+                  }
+                >
+                  {" "}
+                  <StatusBadge status={value as ApplicationStatus} />{" "}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       );
     },
   }),

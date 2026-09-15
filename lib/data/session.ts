@@ -1,4 +1,5 @@
 import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { auth } from "../auth";
 
 export type Session = NonNullable<
@@ -13,4 +14,12 @@ export async function getSession(): Promise<Session | null> {
   } catch {
     return null;
   }
+}
+
+export async function requireSession() {
+  const session = await getSession();
+  if (!session) {
+    redirect("/sign-in");
+  }
+  return session;
 }
