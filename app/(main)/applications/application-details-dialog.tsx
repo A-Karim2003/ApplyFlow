@@ -43,6 +43,8 @@ import {
   updateApplicationDetails,
 } from "@/actions/applications";
 import { jobTypeEnum, applicationSourceEnum, workModeEnum } from "@/db/schema";
+import { toast } from "react-toastify";
+import SpinnerEllipsis from "@/components/shadcn-space/spinner/spinner-05";
 
 const applicationDetailsSchema = z
   .object({
@@ -93,7 +95,7 @@ export default function ApplicationDetailsDialog({
     control,
     handleSubmit,
     reset,
-    formState: { errors, isDirty, isSubmitting },
+    formState: { errors, isDirty, dirtyFields, isSubmitting },
   } = useForm<ApplicationDetailsFormInput, unknown, ApplicationDetailsForm>({
     resolver: zodResolver(applicationDetailsSchema),
     values: application
@@ -121,11 +123,24 @@ export default function ApplicationDetailsDialog({
   const status = app.status as ApplicationStatus;
 
   async function submit(values: ApplicationDetailsForm) {
-    const result = await updateApplicationDetails({
-      applicationId: app.id,
-      values,
-    });
-    if (result.success) reset(values); // clears isDirty; dialog stays open
+    console.log(values);
+    console.log("dirtyFields", dirtyFields);
+    try {
+      const result = await updateApplicationDetails({
+        applicationId: app.id,
+        values,
+      });
+
+      if (result.success) {
+        reset(values); // clears isDirty; dialog stays open
+        toast.success("Application updated");
+      } else {
+        toast.error(result.error ?? "Could not update application");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Something went wrong. Please try again.");
+    }
   }
 
   function deleteApplication() {
@@ -483,7 +498,8 @@ export default function ApplicationDetailsDialog({
                     Close
                   </Button>
                   <Button type="submit" disabled={!isDirty || isSubmitting}>
-                    {isSubmitting ? "Saving..." : "Save changes"}
+                    Save changes
+                    {isSubmitting && <SpinnerEllipsis />}
                   </Button>
                 </>
               )}
