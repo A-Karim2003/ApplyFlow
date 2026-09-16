@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useOptimistic, useState, useTransition } from "react";
-import { LayoutGrid, List, Search, SearchX } from "lucide-react";
+import { FilterX, LayoutGrid, List, Search, SearchX } from "lucide-react";
 import { toast } from "react-toastify";
 
 import {
@@ -44,6 +44,7 @@ import { cn } from "@/lib/utils";
 import KanbanBoard from "./kanban-board";
 import ListView from "./applicationsTable/list-view";
 import ApplicationDetailsDialog from "./application-details-dialog";
+import { Button } from "@/components/ui/button";
 
 type ApplicationFilters = {
   status: ApplicationStatus | "all";
@@ -62,7 +63,7 @@ const FILTER_CONFIGS = [
 }[];
 
 export function ApplicationsWorkspace({ applications }: ApplicationsPageData) {
-  // selectedApplicationId and dialogOpen are for managing the application details dialog
+  // selectedApplicationId and dialogOpen are for managing the application details dialog (modal)
   const [selectedApplicationId, setSelectedApplicationId] = useState<
     number | null
   >(null);
@@ -100,6 +101,20 @@ export function ApplicationsWorkspace({ applications }: ApplicationsPageData) {
       }
     });
   }
+
+  //* Checks if filter exist for rendering clear filter button
+  const hasActiveFilters =
+    query !== "" ||
+    filters.status !== "all" ||
+    filters.jobType !== "all" ||
+    filters.workMode !== "all";
+
+  function clearFilters() {
+    setQuery("");
+    setFilters({ status: "all", jobType: "all", workMode: "all" });
+    setSort("recent");
+  }
+
   const filteredAndSorted = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
 
@@ -223,6 +238,7 @@ export function ApplicationsWorkspace({ applications }: ApplicationsPageData) {
                   }
                 </SelectValue>
               </SelectTrigger>
+
               <SelectContent>
                 <SelectGroup>
                   {APPLICATION_SORT_OPTIONS.map((option) => (
@@ -233,6 +249,18 @@ export function ApplicationsWorkspace({ applications }: ApplicationsPageData) {
                 </SelectGroup>
               </SelectContent>
             </Select>
+
+            {hasActiveFilters && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="text-muted-foreground hover:text-foreground"
+                onClick={clearFilters}
+              >
+                <FilterX data-icon="inline-start" />
+                Clear filters
+              </Button>
+            )}
           </div>
 
           <TabsList className="w-full shrink-0 sm:w-auto">

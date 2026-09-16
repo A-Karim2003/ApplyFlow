@@ -46,6 +46,8 @@ import {
 import { jobTypeEnum, applicationSourceEnum, workModeEnum } from "@/db/schema";
 import { toast } from "react-toastify";
 import SpinnerEllipsis from "@/components/shadcn-space/spinner/spinner-05";
+import { DatePicker } from "./date-picker";
+import { DatePickerWithPresets } from "./date-picker-with-presets";
 
 const applicationDetailsSchema = z
   .object({
@@ -425,22 +427,30 @@ export default function ApplicationDetailsDialog({
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="applicationDeadline">
-                    Application deadline
-                  </Label>
-                  <Input
-                    id="applicationDeadline"
-                    type="date"
-                    {...register("applicationDeadline")}
+                  <Label>Date applied</Label>
+                  <Controller
+                    control={control}
+                    name="appliedAt"
+                    render={({ field }) => (
+                      <DatePicker
+                        value={field.value}
+                        onChange={field.onChange}
+                      />
+                    )}
                   />
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="appliedAt">Date applied</Label>
-                  <Input
-                    id="appliedAt"
-                    type="date"
-                    {...register("appliedAt")}
+                  <Label>Application deadline</Label>
+                  <Controller
+                    control={control}
+                    name="applicationDeadline"
+                    render={({ field }) => (
+                      <DatePickerWithPresets
+                        value={field.value}
+                        onChange={field.onChange}
+                      />
+                    )}
                   />
                 </div>
 
