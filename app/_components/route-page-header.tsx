@@ -46,14 +46,6 @@ function getHeaderConfig(
     return {
       title: "Applications",
       description: "Track every role you've applied to across its lifecycle.",
-      action: (
-        <AddApplicationForm>
-          <Button>
-            <Plus data-icon="inline-start" />
-            Add application
-          </Button>
-        </AddApplicationForm>
-      ),
     };
   }
 

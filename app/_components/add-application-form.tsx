@@ -1,6 +1,7 @@
 "use client";
 
-import * as React from "react";
+import { useState } from "react";
+
 import {
   Sheet,
   SheetTrigger,
@@ -49,7 +50,7 @@ export function AddApplicationForm({
 }: {
   children: React.ReactNode;
 }) {
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
 
   const resumes = documents.filter(
     (document) => document.documentType === "cv",
@@ -81,7 +82,9 @@ export function AddApplicationForm({
           <div className="flex-1 overflow-y-auto p-4">
             <FieldGroup>
               <Field>
-                <FieldLabel htmlFor="job-title">Job title</FieldLabel>
+                <FieldLabel htmlFor="job-title">
+                  Job title <span className="text-destructive">*</span>
+                </FieldLabel>
                 <Input
                   id="job-title"
                   placeholder="e.g. Software Engineer, New Grad"
@@ -89,7 +92,9 @@ export function AddApplicationForm({
               </Field>
 
               <Field>
-                <FieldLabel htmlFor="company">Company</FieldLabel>
+                <FieldLabel htmlFor="company">
+                  Company <span className="text-destructive">*</span>
+                </FieldLabel>
                 <Select>
                   <SelectTrigger id="company" className="w-full">
                     <SelectValue placeholder="Select a company" />
@@ -109,7 +114,7 @@ export function AddApplicationForm({
               <div className="grid grid-cols-2 gap-3">
                 <Field>
                   <FieldLabel htmlFor="status">Status</FieldLabel>
-                  <Select defaultValue="Wishlist">
+                  <Select defaultValue="wishlist">
                     <SelectTrigger id="status" className="w-full">
                       <SelectValue placeholder="Status" />
                     </SelectTrigger>
@@ -126,8 +131,10 @@ export function AddApplicationForm({
                 </Field>
 
                 <Field>
-                  <FieldLabel htmlFor="job-type">Job type</FieldLabel>
-                  <Select defaultValue="Full-time">
+                  <FieldLabel htmlFor="job-type">
+                    Job type <span className="text-destructive">*</span>
+                  </FieldLabel>
+                  <Select>
                     <SelectTrigger id="job-type" className="w-full">
                       <SelectValue placeholder="Job type" />
                     </SelectTrigger>
@@ -148,29 +155,32 @@ export function AddApplicationForm({
               </div>
 
               <Field>
-                <FieldLabel>Work mode</FieldLabel>
-                <ToggleGroup defaultValue={["Remote"]} className="w-full">
-                  <ToggleGroup className="w-full gap-2">
-                    {WORK_MODE_OPTIONS.map((workModeOption) => (
-                      <ToggleGroupItem
-                        key={workModeOption.value}
-                        value={workModeOption.value}
-                        className="flex-1 border border-input data-pressed:border-primary data-pressed:bg-primary data-pressed:text-primary-foreground"
-                      >
-                        {workModeOption.label}
-                      </ToggleGroupItem>
-                    ))}
-                  </ToggleGroup>
+                <FieldLabel>Work mode (optional)</FieldLabel>
+                <ToggleGroup defaultValue={["remote"]} className="w-full gap-2">
+                  {WORK_MODE_OPTIONS.map((workModeOption) => (
+                    <ToggleGroupItem
+                      key={workModeOption.value}
+                      value={workModeOption.value}
+                      className="flex-1 border border-input data-pressed:border-primary data-pressed:bg-primary data-pressed:text-primary-foreground"
+                    >
+                      {workModeOption.label}
+                    </ToggleGroupItem>
+                  ))}
                 </ToggleGroup>
               </Field>
 
               <Field>
-                <FieldLabel htmlFor="location">Location</FieldLabel>
-                <Input id="location" placeholder="e.g. San Francisco, CA" />
+                <FieldLabel htmlFor="location">
+                  Location{" "}
+                  <span className="text-muted-foreground">(optional)</span>
+                </FieldLabel>
+                <Input id="location" placeholder="e.g. London, UK" />
               </Field>
 
               <Field>
-                <FieldLabel htmlFor="source">Source</FieldLabel>
+                <FieldLabel htmlFor="source">
+                  Source <span className="text-destructive">*</span>
+                </FieldLabel>
                 <Select>
                   <SelectTrigger id="source" className="w-full">
                     <SelectValue placeholder="Where did you find this role?" />
@@ -202,7 +212,10 @@ export function AddApplicationForm({
 
               <div className="grid grid-cols-2 gap-3">
                 <Field>
-                  <FieldLabel htmlFor="salary-min">Salary min</FieldLabel>
+                  <FieldLabel htmlFor="salary-min">
+                    Salary min{" "}
+                    <span className="text-muted-foreground">(optional)</span>
+                  </FieldLabel>
                   <Input
                     id="salary-min"
                     type="number"
@@ -210,8 +223,12 @@ export function AddApplicationForm({
                     inputMode="numeric"
                   />
                 </Field>
+
                 <Field>
-                  <FieldLabel htmlFor="salary-max">Salary max</FieldLabel>
+                  <FieldLabel htmlFor="salary-max">
+                    Salary max{" "}
+                    <span className="text-muted-foreground">(optional)</span>
+                  </FieldLabel>
                   <Input
                     id="salary-max"
                     type="number"
@@ -223,17 +240,27 @@ export function AddApplicationForm({
 
               <div className="grid grid-cols-2 gap-3">
                 <Field>
-                  <FieldLabel htmlFor="applied-at">Date applied</FieldLabel>
+                  <FieldLabel htmlFor="applied-at">
+                    Date applied{" "}
+                    <span className="text-muted-foreground">(optional)</span>
+                  </FieldLabel>
                   <Input id="applied-at" type="date" />
                 </Field>
+
                 <Field>
-                  <FieldLabel htmlFor="deadline">Deadline</FieldLabel>
+                  <FieldLabel htmlFor="deadline">
+                    Deadline{" "}
+                    <span className="text-muted-foreground">(optional)</span>
+                  </FieldLabel>
                   <Input id="deadline" type="date" />
                 </Field>
               </div>
 
               <Field>
-                <FieldLabel htmlFor="resume">Resume</FieldLabel>
+                <FieldLabel htmlFor="resume">
+                  Resume{" "}
+                  <span className="text-muted-foreground">(optional)</span>
+                </FieldLabel>
                 <Select>
                   <SelectTrigger id="resume" className="w-full">
                     <SelectValue placeholder="Attach a resume" />
@@ -251,7 +278,10 @@ export function AddApplicationForm({
               </Field>
 
               <Field>
-                <FieldLabel htmlFor="cover-letter">Cover letter</FieldLabel>
+                <FieldLabel htmlFor="cover-letter">
+                  Cover letter{" "}
+                  <span className="text-muted-foreground">(optional)</span>
+                </FieldLabel>
                 <Select>
                   <SelectTrigger id="cover-letter" className="w-full">
                     <SelectValue placeholder="Attach a cover letter" />
@@ -269,7 +299,10 @@ export function AddApplicationForm({
               </Field>
 
               <Field>
-                <FieldLabel htmlFor="notes">Notes</FieldLabel>
+                <FieldLabel htmlFor="notes">
+                  Notes{" "}
+                  <span className="text-muted-foreground">(optional)</span>
+                </FieldLabel>
                 <Textarea
                   id="notes"
                   placeholder="Referrals, contacts, prep reminders…"
