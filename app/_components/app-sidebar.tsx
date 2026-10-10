@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState, useTransition } from "react";
+import { toast } from "react-toastify";
 import {
   LayoutDashboard,
   Briefcase,
@@ -26,6 +28,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { AddApplicationForm } from "./add-application-form";
+import { getAddApplicationFormData } from "@/actions/applications/get-add-application-form-data";
+import type { Company } from "@/lib/data/companies";
+import type { Document } from "@/lib/data/documents";
+import SpinnerEllipsis from "@/components/shadcn-space/spinner/spinner-05";
 
 const navItems = [
   { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -37,6 +43,24 @@ const navItems = [
 
 export function AppSidebar() {
   const pathname = usePathname();
+  const [open, setOpen] = useState(false); // For sidebar
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [documents, setDocuments] = useState<Document[]>([]);
+  const [isPending, startTransition] = useTransition();
+
+  function handleAddApplicationClick() {
+    startTransition(async () => {
+      const result = await getAddApplicationFormData();
+      if (!result.success) {
+        toast.error(result.error);
+        return;
+      }
+
+      setCompanies(result.data.companies);
+      setDocuments(result.data.documents);
+      setOpen(true);
+    });
+  }
 
   return (
     <Sidebar>
@@ -49,10 +73,24 @@ export function AppSidebar() {
             ApplyFlow
           </span>
         </Link>
-        <AddApplicationForm>
-          <Button className="w-full justify-center" size="lg">
-            <Plus data-icon="inline-start" />
-            Add Job Application
+        <AddApplicationForm
+          open={open}
+          onOpenChange={setOpen}
+          companies={companies}
+          documents={documents}
+        >
+          <Button
+            className="w-full justify-center"
+            size="lg"
+            onClick={handleAddApplicationClick}
+            disabled={isPending}
+          >
+            {isPending ? (
+              <SpinnerEllipsis />
+            ) : (
+              <Plus data-icon="inline-start" />
+            )}
+            {isPending ? "Loading" : "Add Job Application"}
           </Button>
         </AddApplicationForm>
       </SidebarHeader>

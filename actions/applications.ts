@@ -10,7 +10,7 @@ import { applicationsTable, applicationStatusHistoryTable } from "@/db/schema";
 import { requireSession } from "@/lib/data/session";
 import { Result } from "@/types";
 import { db } from "@/db";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 
 export type NewApplication = InferInsertModel<typeof applicationsTable>;
 export type Application = InferSelectModel<typeof applicationsTable>;
@@ -65,6 +65,7 @@ export async function updateApplicationStatus({
       return result;
     });
 
+    updateTag(`applications-${session.user.id}`);
     revalidatePath("/applications");
     return { success: true, data: result[0] };
   } catch (error) {
@@ -113,6 +114,7 @@ export async function updateApplicationDetails({
 
     if (!result) return { success: false, error: "Not found" };
 
+    updateTag(`applications-${session.user.id}`);
     revalidatePath("/applications");
     return { success: true, data: result };
   } catch (error) {
@@ -139,6 +141,7 @@ export async function deleteApplication(
 
     if (!result) return { success: false, error: "Not found" };
 
+    updateTag(`applications-${session.user.id}`);
     revalidatePath("/applications");
     return { success: true, data: result };
   } catch (error) {

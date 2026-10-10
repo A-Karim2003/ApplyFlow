@@ -2,9 +2,10 @@ import type { InferSelectModel } from "drizzle-orm";
 import { desc, eq } from "drizzle-orm";
 import { companiesTable } from "../../db/schema/companies";
 import { applicationsTable } from "../../db/schema/applications";
-import { getSession } from "./session";
+import { getSession, requireSession } from "./session";
 import { db } from "@/db";
 import { Result } from "@/types";
+import { cacheLife, cacheTag } from "next/cache";
 
 export type Company = InferSelectModel<typeof companiesTable>;
 export type Application = InferSelectModel<typeof applicationsTable>;
@@ -15,19 +16,54 @@ export type CompaniesPageData = {
   applications: Application[];
 };
 
+export const COMPANIESCACHETAG = (userId: Company["userId"]) =>
+  `companies-${userId}`;
+
+async function getCompaniesCached(
+  userId: Company["userId"],
+): Promise<Company[]> {
+  "use cache";
+  cacheLife("minutes");
+  cacheTag(COMPANIESCACHETAG(userId));
+
+  return db
+    .select()
+    .from(companiesTable)
+    .where(eq(companiesTable.userId, userId));
+}
+
 export async function getCompanies(): Promise<Result<Company[]>> {
-  const session = await getSession();
-  if (!session) return { success: false, error: "Not authenticated" };
+  const session = await requireSession();
 
   try {
-    const companies = await db
-      .select()
-      .from(companiesTable)
-      .where(eq(companiesTable.userId, session.user.id));
+    const companies = await getCompaniesCached(session.user.id);
     return { success: true, data: companies };
   } catch {
     return { success: false, error: "Failed to fetch companies" };
   }
+}
+
+async function getCompaniesPageDataCached(
+  userId: string,
+): Promise<CompaniesPageData> {
+  "use cache";
+  cacheLife("minutes");
+  cacheTag(COMPANIESCACHETAG(userId), `applications-${userId}`);
+
+  const [companies, applications] = await Promise.all([
+    db
+      .select()
+      .from(companiesTable)
+      .where(eq(companiesTable.userId, userId))
+      .orderBy(desc(companiesTable.createdAt)),
+    db
+      .select()
+      .from(applicationsTable)
+      .where(eq(applicationsTable.userId, userId))
+      .orderBy(desc(applicationsTable.createdAt)),
+  ]);
+
+  return { companies, applications };
 }
 
 export async function getCompaniesPageData(): Promise<
@@ -37,20 +73,8 @@ export async function getCompaniesPageData(): Promise<
   if (!session) return { success: false, error: "Not authenticated" };
 
   try {
-    const [companies, applications] = await Promise.all([
-      db
-        .select()
-        .from(companiesTable)
-        .where(eq(companiesTable.userId, session.user.id))
-        .orderBy(desc(companiesTable.createdAt)),
-      db
-        .select()
-        .from(applicationsTable)
-        .where(eq(applicationsTable.userId, session.user.id))
-        .orderBy(desc(applicationsTable.createdAt)),
-    ]);
-
-    return { success: true, data: { companies, applications } };
+    const data = await getCompaniesPageDataCached(session.user.id);
+    return { success: true, data };
   } catch {
     return { success: false, error: "Failed to fetch companies page data" };
   }

@@ -9,7 +9,7 @@ import {
 import { documentsTable } from "@/db/schema/documents";
 import { requireSession } from "@/lib/data/session";
 import { db } from "@/db";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { Result } from "@/types";
 import {
   applicationDocumentsTable,
@@ -17,6 +17,10 @@ import {
   companiesTable,
 } from "@/db/schema";
 import { deleteObject } from "@/lib/s3/delete-object";
+import {
+  APPLICATIONDOCUMENTSCACHETAG,
+  DOCUMENTSCACHETAG,
+} from "@/lib/data/documents";
 
 export type Document = InferSelectModel<typeof documentsTable>;
 export type NewDocument = InferInsertModel<typeof documentsTable>;
@@ -38,6 +42,7 @@ export async function createDocument(
     if (result.length === 0)
       return { success: false, error: "Document could not be uploaded" };
 
+    updateTag(DOCUMENTSCACHETAG(session.user.id));
     revalidatePath("/documents");
     return { success: true, data: result[0] };
   } catch {
@@ -91,6 +96,8 @@ export async function deleteDocument(id: number): Promise<Result<Document>> {
       console.error("Failed to delete S3 object (orphaned):", error);
     }
 
+    updateTag(DOCUMENTSCACHETAG(session.user.id));
+    updateTag(APPLICATIONDOCUMENTSCACHETAG(session.user.id));
     revalidatePath("/documents");
     return { success: true, data: result[0] };
   } catch {
@@ -176,6 +183,7 @@ export async function unlinkDocumentFromApplication(
         ),
       );
 
+    updateTag(APPLICATIONDOCUMENTSCACHETAG(session.user.id));
     revalidatePath("/documents");
     return { success: true, data: undefined };
   } catch {

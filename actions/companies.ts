@@ -5,8 +5,8 @@ import { companiesTable } from "@/db/schema/companies";
 import { requireSession } from "@/lib/data/session";
 import { Result } from "@/types";
 import { db } from "@/db";
-import { revalidatePath } from "next/cache";
-import type { Company } from "@/lib/data/companies";
+import { revalidatePath, updateTag } from "next/cache";
+import { COMPANIESCACHETAG, type Company } from "@/lib/data/companies";
 
 export type NewCompany = InferInsertModel<typeof companiesTable>;
 
@@ -23,6 +23,7 @@ export async function createCompany(
       .values({ ...data, userId: session.user.id })
       .returning();
 
+    updateTag(COMPANIESCACHETAG(session.user.id));
     revalidatePath("/companies");
 
     return { success: true, data: result[0] };
@@ -53,7 +54,9 @@ export async function updateCompany(
     if (result.length === 0)
       return { success: false, error: "Company not found" };
 
+    updateTag(COMPANIESCACHETAG(session.user.id));
     revalidatePath("/companies");
+
     return { success: true, data: result[0] };
   } catch (error) {
     console.error("updateCompany failed:", error);
@@ -79,6 +82,7 @@ export async function deleteCompany(id: number): Promise<Result<Company>> {
       return { success: false, error: "Company not found" };
     }
 
+    updateTag(COMPANIESCACHETAG(session.user.id));
     revalidatePath("/companies");
     return { success: true, data: result[0] };
   } catch (error) {

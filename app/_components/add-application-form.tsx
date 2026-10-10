@@ -1,10 +1,7 @@
 "use client";
 
-import { useState } from "react";
-
 import {
   Sheet,
-  SheetTrigger,
   SheetContent,
   SheetHeader,
   SheetTitle,
@@ -35,23 +32,25 @@ import {
   STATUS_OPTIONS,
   JOB_TYPE_OPTIONS,
   WORK_MODE_OPTIONS,
-  DOCUMENT_TYPE_OPTIONS,
 } from "@/lib/constants/";
+import type { Company } from "@/lib/data/companies";
+import type { Document } from "@/lib/data/documents";
 
-const companies = [] as Array<{ id: string; name: string }>;
-const documents = [] as Array<{
-  id: string;
-  filename?: string;
-  documentType?: (typeof DOCUMENT_TYPE_OPTIONS)[number]["value"] | null;
-}>;
+type AddApplicationFormProps = {
+  children: React.ReactNode;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  companies: Company[];
+  documents: Document[];
+};
 
 export function AddApplicationForm({
   children,
-}: {
-  children: React.ReactNode;
-}) {
-  const [open, setOpen] = useState(false);
-
+  open,
+  onOpenChange,
+  companies,
+  documents,
+}: AddApplicationFormProps) {
   const resumes = documents.filter(
     (document) => document.documentType === "cv",
   );
@@ -59,14 +58,14 @@ export function AddApplicationForm({
     (document) => document.documentType === "cover_letter",
   );
 
-  function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
-    setOpen(false);
+    onOpenChange(false);
   }
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger render={children as React.ReactElement} />
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      {children}
       <SheetContent className="flex w-full flex-col gap-0 p-0 sm:max-w-md">
         <SheetHeader className="border-b">
           <SheetTitle className="font-serif text-xl">
