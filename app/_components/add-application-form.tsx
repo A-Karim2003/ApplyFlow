@@ -55,18 +55,17 @@ import {
 } from "@/db/schema";
 import type { Company } from "@/lib/data/companies";
 import type { Document } from "@/lib/data/documents";
+
 /*
   The company is one of two shapes:
   "type" tells the server which one it got.
-  existing -> only the id is needed. 
+  existing -> only the id is needed.
   new -> only the name is needed and id will be retrieved from db once company is inserted.
  */
-
 const companySchema = z.discriminatedUnion(
   "type",
   [
     z.object({ type: z.literal("existing"), id: z.number().int().positive() }),
-
     z.object({
       type: z.literal("new"),
       name: z.string().trim().min(1, "Company name is required"),
@@ -98,7 +97,9 @@ const addApplicationSchema = z
   })
   .refine(
     (data) =>
-      !data.salaryMin || !data.salaryMax || data.salaryMin <= data.salaryMax,
+      data.salaryMin === undefined ||
+      data.salaryMax === undefined ||
+      data.salaryMin <= data.salaryMax,
     {
       message: "Min salary must be ≤ max salary",
       path: ["salaryMax"],
@@ -106,6 +107,7 @@ const addApplicationSchema = z
   );
 
 type ApplicationFormValues = z.infer<typeof addApplicationSchema>;
+type CompanyValue = z.infer<typeof companySchema>;
 
 //? "" -> undefined so an empty salary box isn't turned into 0
 const toOptionalNumber = (value: unknown) =>
@@ -118,8 +120,6 @@ type AddApplicationFormProps = {
   companies: Company[];
   documents: Document[];
 };
-
-type CompanyOption = { id: number; label: string };
 
 export function AddApplicationForm({
   children,
@@ -140,98 +140,23 @@ export function AddApplicationForm({
     control,
     handleSubmit,
     reset,
-    resetField, // Resets one specific field to its default value.
-    setValue, // Sets one specific field to a value you choose.
     formState: { errors, isSubmitting },
   } = useForm<ApplicationFormValues>({
     resolver: zodResolver(addApplicationSchema),
     defaultValues: {
       jobTitle: "",
-      company: undefined,
       status: "wishlist",
-      jobType: undefined,
-      source: undefined,
-      workMode: undefined,
       location: "",
       jobUrl: "",
-      salaryMin: undefined,
-      salaryMax: undefined,
       appliedAt: "",
       applicationDeadline: "",
-      resumeId: undefined,
-      coverLetterId: undefined,
       notes: "",
     },
   });
 
-  //* used for the combobox input
-  const companyOptions = useMemo<CompanyOption[]>(
-    () => companies.map((c) => ({ id: c.id, label: c.name })),
-    [companies],
-  );
-
-  const [selectedCompany, setSelectedCompany] = useState<CompanyOption | null>(
-    null,
-  );
-  const [companyQuery, setCompanyQuery] = useState("");
-  const [isAddingCompany, setIsAddingCompany] = useState(false);
-  const [newCompanyName, setNewCompanyName] = useState("");
-  const [confirmedNewCompany, setConfirmedNewCompany] = useState<string | null>(
-    null,
-  );
-
-  function handleSelectCompany(option: CompanyOption | null) {
-    setSelectedCompany(option);
-    if (option) {
-      setValue(
-        "company",
-        { type: "existing", id: option.id },
-        { shouldValidate: true },
-      );
-    } else {
-      resetField("company"); //? back to undefined
-    }
-  }
-
-  // used to add a new company from the company house api
-  function startAddingCompany() {
-    //? Prefill with whatever the user had typed in the combobox
-    setNewCompanyName(companyQuery.trim());
-    setIsAddingCompany(true);
-  }
-
-  function confirmNewCompany() {
-    const name = newCompanyName.trim();
-    if (!name) return;
-    setConfirmedNewCompany(name);
-    setSelectedCompany(null);
-    setIsAddingCompany(false);
-    setCompanyQuery("");
-    setValue("company", { type: "new", name }, { shouldValidate: true });
-  }
-
-  function backToPicking() {
-    setIsAddingCompany(false);
-    setNewCompanyName("");
-  }
-
-  function changeCompany() {
-    setConfirmedNewCompany(null);
-    setNewCompanyName("");
-    setCompanyQuery("");
-    resetField("company");
-  }
-
-  //? Single place that resets everything: Cancel, Escape, overlay click and successful submit
+  //? Reset when the sheet closes (Cancel, Escape, overlay click, successful submit), not when submit starts
   function handleOpenChange(next: boolean) {
-    if (!next) {
-      reset();
-      setSelectedCompany(null);
-      setCompanyQuery("");
-      setIsAddingCompany(false);
-      setNewCompanyName("");
-      setConfirmedNewCompany(null);
-    }
+    if (!next) reset();
     onOpenChange(next);
   }
 
@@ -280,102 +205,18 @@ export function AddApplicationForm({
                 <FieldLabel htmlFor="company">
                   Company <span className="text-destructive">*</span>
                 </FieldLabel>
-
-                {confirmedNewCompany ? (
-                  //? Mode 3: a new company has been confirmed
-                  <div className="flex items-center gap-2">
-                    <Input
-                      id="company"
-                      value={confirmedNewCompany}
-                      readOnly
-                      className="flex-1"
+                <Controller
+                  control={control}
+                  name="company"
+                  render={({ field }) => (
+                    <CompanyPicker
+                      value={field.value}
+                      onChange={field.onChange}
+                      companies={companies}
+                      invalid={!!errors.company}
                     />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={changeCompany}
-                    >
-                      Change
-                    </Button>
-                  </div>
-                ) : isAddingCompany ? (
-                  //? Mode 2: inline add (Companies House search will slot in here later)
-                  <div className="flex flex-col gap-2">
-                    <Input
-                      id="company"
-                      autoFocus
-                      value={newCompanyName}
-                      onChange={(e) => setNewCompanyName(e.target.value)}
-                      onKeyDown={(e) => {
-                        //? Stop Enter from submitting the whole application form
-                        if (e.key === "Enter") {
-                          e.preventDefault();
-                          confirmNewCompany();
-                        }
-                      }}
-                      placeholder="Company name"
-                    />
-                    <div className="flex items-center justify-between gap-2">
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={backToPicking}
-                      >
-                        <ArrowLeft data-icon="inline-start" /> Back
-                      </Button>
-                      <Button
-                        type="button"
-                        size="sm"
-                        disabled={!newCompanyName.trim()}
-                        onClick={confirmNewCompany}
-                      >
-                        Use this company
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  //? Mode 1: pick from existing companies (max 5), last row is always "Add company"
-                  <Combobox
-                    items={companyOptions}
-                    value={selectedCompany}
-                    onValueChange={handleSelectCompany}
-                    inputValue={companyQuery}
-                    onInputValueChange={setCompanyQuery}
-                    isItemEqualToValue={(a, b) => a.id === b.id}
-                    limit={5}
-                  >
-                    <ComboboxInput
-                      id="company"
-                      placeholder="Search or select a company"
-                      aria-invalid={!!errors.company}
-                    />
-                    <ComboboxContent>
-                      <ComboboxEmpty>No matching companies.</ComboboxEmpty>
-                      <ComboboxList>
-                        {(item: CompanyOption) => (
-                          <ComboboxItem key={item.id} value={item}>
-                            {item.label}
-                          </ComboboxItem>
-                        )}
-                      </ComboboxList>
-                      <div className="border-t p-1">
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          className="w-full justify-start"
-                          onClick={startAddingCompany}
-                        >
-                          <Plus data-icon="inline-start" />
-                          {companyQuery.trim()
-                            ? `Add "${companyQuery.trim()}"`
-                            : "Add company"}
-                        </Button>
-                      </div>
-                    </ComboboxContent>
-                  </Combobox>
-                )}
+                  )}
+                />
                 {errors.company && (
                   <FieldError>{errors.company.message}</FieldError>
                 )}
@@ -396,7 +237,7 @@ export function AddApplicationForm({
                           <SelectValue placeholder="Status">
                             {
                               STATUS_OPTIONS.find(
-                                (o) => o.value === field.value,
+                                (option) => option.value === field.value,
                               )?.label
                             }
                           </SelectValue>
@@ -438,7 +279,7 @@ export function AddApplicationForm({
                           <SelectValue placeholder="Job type">
                             {
                               JOB_TYPE_OPTIONS.find(
-                                (o) => o.value === field.value,
+                                (option) => option.value === field.value,
                               )?.label
                             }
                           </SelectValue>
@@ -522,7 +363,7 @@ export function AddApplicationForm({
                         <SelectValue placeholder="Where did you find this role?">
                           {
                             APPLICATION_SOURCE_OPTIONS.find(
-                              (o) => o.value === field.value,
+                              (option) => option.value === field.value,
                             )?.label
                           }
                         </SelectValue>
@@ -723,17 +564,164 @@ export function AddApplicationForm({
                 </Button>
               }
             />
-            <Button
-              type="submit"
-              className="flex-1"
-              disabled={isSubmitting}
-              onClick={() => reset()}
-            >
+            <Button type="submit" className="flex-1" disabled={isSubmitting}>
               Add application
             </Button>
           </SheetFooter>
         </form>
       </SheetContent>
     </Sheet>
+  );
+}
+
+type CompanyOption = { id: number; label: string };
+
+type CompanyPickerProps = {
+  value: CompanyValue | undefined;
+  onChange: (value: CompanyValue | undefined) => void;
+  companies: Company[];
+  invalid: boolean;
+};
+
+//? The form (via Controller) owns the selected company. This component only owns UI-only state:
+//? the combobox text, whether the inline add input is open, and its draft name.
+//? Mode is derived: value.type === "new" -> confirmed, isAdding -> inline add, otherwise -> combobox.
+function CompanyPicker({
+  value,
+  onChange,
+  companies,
+  invalid,
+}: CompanyPickerProps) {
+  const [query, setQuery] = useState("");
+  const [isAdding, setIsAdding] = useState(false);
+  const [newName, setNewName] = useState("");
+
+  //? Memoised so item references stay stable between renders
+  const options = useMemo<CompanyOption[]>(
+    () => companies.map((c) => ({ id: c.id, label: c.name })),
+    [companies],
+  );
+
+  function SearchNewCompany() {
+    //? Prefill with whatever the user had typed in the combobox
+    setNewName(query.trim());
+    setIsAdding(true);
+  }
+
+  function confirmNew() {
+    const name = newName.trim();
+    if (!name) return;
+    onChange({ type: "new", name });
+    setIsAdding(false);
+    setQuery("");
+  }
+
+  function backToPicking() {
+    setIsAdding(false);
+    setNewName("");
+  }
+
+  function changeCompany() {
+    onChange(undefined);
+    setNewName("");
+    setQuery("");
+  }
+
+  //* Mode 3: a new company has been confirmed
+  if (value?.type === "new") {
+    return (
+      <div className="flex items-center gap-2">
+        <Input id="company" value={value.name} readOnly className="flex-1" />
+        <Button type="button" variant="outline" onClick={changeCompany}>
+          Change
+        </Button>
+      </div>
+    );
+  }
+
+  //* Mode 2: inline add - add company using Companies House api (Companies House search will slot in here later)
+  if (isAdding) {
+    return (
+      <div className="flex flex-col gap-2">
+        <Input
+          id="company"
+          autoFocus
+          value={newName}
+          onChange={(e) => setNewName(e.target.value)}
+          onKeyDown={(e) => {
+            //? Stop Enter from submitting the whole application form
+            if (e.key === "Enter") {
+              e.preventDefault();
+              confirmNew();
+            }
+          }}
+          placeholder="Company name"
+        />
+        <div className="flex items-center justify-between gap-2">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={backToPicking}
+          >
+            <ArrowLeft data-icon="inline-start" /> Back
+          </Button>
+          {/* This button is a fallback for a company that is in neither your database nor Companies House */}
+          <Button
+            type="button"
+            size="sm"
+            disabled={!newName.trim()}
+            onClick={confirmNew}
+          >
+            Use this company
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  //* Mode 1: default mode - pick from existing companies (max 5), last row is always "Add company"
+  const selectedId = value?.type === "existing" ? value.id : undefined;
+  const selected = options.find((option) => option.id === selectedId) ?? null;
+
+  return (
+    <Combobox
+      items={options}
+      value={selected}
+      onValueChange={(option) =>
+        onChange(option ? { type: "existing", id: option.id } : undefined)
+      }
+      inputValue={query}
+      onInputValueChange={setQuery}
+      limit={5}
+    >
+      <ComboboxInput
+        id="company"
+        placeholder="Search or select a company"
+        aria-invalid={invalid}
+      />
+      <ComboboxContent>
+        <ComboboxEmpty>No matching companies.</ComboboxEmpty>
+        <ComboboxList>
+          {(item: CompanyOption) => (
+            <ComboboxItem key={item.id} value={item}>
+              {item.label}
+            </ComboboxItem>
+          )}
+        </ComboboxList>
+        <div className="border-t p-1">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="w-full justify-start"
+            onClick={SearchNewCompany}
+          >
+            <Plus data-icon="inline-start" />
+            {query.trim() ? `Add "${query.trim()}"` : "Add company"}
+          </Button>
+        </div>
+      </ComboboxContent>
+    </Combobox>
   );
 }
