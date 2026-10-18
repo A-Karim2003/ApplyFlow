@@ -149,3 +149,7 @@ export async function deleteApplication(
     return { success: false, error: "Could not delete application" };
   }
 }
+
+export async function addApplication(newApplication: NewApplication) {
+  const session = await requireSession();
+}

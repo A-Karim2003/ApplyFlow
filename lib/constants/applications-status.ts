@@ -59,7 +59,8 @@ export const WORK_MODE_OPTIONS = workModeEnum.enumValues.map((mode) => ({
 
 /*========================Application Source========================*/
 
-type ApplicationSource = (typeof applicationSourceEnum.enumValues)[number];
+export type ApplicationSource =
+  (typeof applicationSourceEnum.enumValues)[number];
 
 const APPLICATION_SOURCES: Record<ApplicationSource, string> = {
   linkedin: "LinkedIn",

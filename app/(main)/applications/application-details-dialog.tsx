@@ -43,7 +43,6 @@ import {
   updateApplicationDetails,
   deleteApplication,
 } from "@/actions/applications";
-import { jobTypeEnum, applicationSourceEnum, workModeEnum } from "@/db/schema";
 import { toast } from "react-toastify";
 import SpinnerEllipsis from "@/components/shadcn-space/spinner/spinner-05";
 import { DatePicker } from "./date-picker";
@@ -53,10 +52,12 @@ const applicationDetailsSchema = z
   .object({
     jobTitle: z.string().min(1, "Job title is required"),
     companyId: z.coerce.number().int().positive("Company is required"),
-    jobType: z.enum(jobTypeEnum.enumValues),
-    source: z.enum(applicationSourceEnum.enumValues),
+    jobType: z.enum(JOB_TYPE_OPTIONS.map((option) => option.value)),
+    source: z.enum(APPLICATION_SOURCE_OPTIONS.map((option) => option.value)),
     location: z.string().optional(),
-    workMode: z.enum(workModeEnum.enumValues).optional(),
+    workMode: z
+      .enum(WORK_MODE_OPTIONS.map((option) => option.value))
+      .optional(),
     jobUrl: z.union([z.url("Enter a valid URL"), z.literal("")]).optional(),
     salaryMin: z.coerce.number().nonnegative().optional(),
     salaryMax: z.coerce.number().nonnegative().optional(),

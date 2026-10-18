@@ -12,6 +12,13 @@ export type NewCompany = InferInsertModel<typeof companiesTable>;
 
 type CreateCompanyInput = Omit<NewCompany, "userId">;
 
+export type CompanySearchResult = {
+  name: string;
+  companyNumber: string;
+  companyType: string;
+  location?: string;
+};
+
 export async function createCompany(
   data: CreateCompanyInput,
 ): Promise<Result<NewCompany>> {
