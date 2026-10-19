@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { ArrowLeft, Plus } from "lucide-react";
 
 import {
@@ -14,8 +14,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-import { CompanyValue } from "./add-application-form";
+import type { CompanyValue } from "./add-application-form";
 import type { Company } from "@/lib/data/companies";
+import type { SearchResult } from "@/types";
 
 type CompanyOption = { id: number; label: string };
 
@@ -26,12 +27,8 @@ type CompanyPickerProps = {
   invalid: boolean;
 };
 
-const API_KEY = process.env.COMPANIES_HOUSE_API_KEY;
-// if (!API_KEY) throw new Error("Companies House API key is missing");
+const MIN_SEARCH_LENGTH = 2;
 
-//? The form (via Controller) owns the selected company. This component only owns UI-only state:
-//? the combobox text, whether the inline add input is open, and its draft name.
-//? Mode is derived: value.type === "new" -> confirmed, isAdding -> inline add, otherwise -> combobox.
 export default function CompanyPicker({
   value,
   onChange,
@@ -41,6 +38,9 @@ export default function CompanyPicker({
   const [query, setQuery] = useState("");
   const [isAdding, setIsAdding] = useState(false);
   const [newName, setNewName] = useState("");
+  const [results, setResults] = useState<SearchResult[]>([]);
+
+  const searchTerm = newName.trim();
 
   //? Memoised so item references stay stable between renders
   const options = useMemo<CompanyOption[]>(
@@ -48,52 +48,51 @@ export default function CompanyPicker({
     [companies],
   );
 
+  //? Search 300ms after the user stops typing. The cleanup cancels the previous timer on every change.
+  useEffect(() => {
+    if (!isAdding || searchTerm.length < MIN_SEARCH_LENGTH) return;
+
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(
+          `/api/companies/search?q=${encodeURIComponent(searchTerm)}`,
+        );
+        const body = await res.json();
+        if (body.success) setResults(body.data);
+      } catch {
+        //? Search is a bonus; the user can still use the name as typed
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [isAdding, searchTerm]);
+
   function startAdding() {
     //? Prefill with whatever the user had typed in the combobox
     setNewName(query.trim());
     setIsAdding(true);
   }
 
-  function confirmNew() {
-    const name = newName.trim();
-    if (!name) return;
-    onChange({ type: "new", name });
+  //? Used for "Use this company" (name only) and for a clicked Companies House result
+  function confirmNew(name: string, companiesHouseNumber?: string) {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    onChange({ type: "new", name: trimmed, companiesHouseNumber });
     setIsAdding(false);
     setQuery("");
+    setResults([]);
   }
 
   function backToPicking() {
     setIsAdding(false);
     setNewName("");
+    setResults([]);
   }
 
   function changeCompany() {
     onChange(undefined);
     setNewName("");
     setQuery("");
-  }
-
-  async function searchCompanies(query: string) {
-    // TODO: Implement Companies House API search
-
-    if (query.length < 2) return [];
-
-    const params = new URLSearchParams({
-      q: query,
-      items_per_page: "5",
-    });
-
-    const res = await fetch(
-      `https://api.company-information.service.gov.uk/search/companies?${params}`,
-      {
-        headers: {
-          Authorization: `Basic ${Buffer.from(`${API_KEY}:`).toString("base64")}`,
-        },
-      },
-    );
-
-    const data = await res.json();
-    console.log(data);
   }
 
   //* Mode 3: a new company has been confirmed
@@ -108,7 +107,7 @@ export default function CompanyPicker({
     );
   }
 
-  //* Mode 2: inline add - add company using Companies House api (Companies House search will slot in here later)
+  //* Mode 2: inline add with Companies House results
   if (isAdding) {
     return (
       <div className="flex flex-col gap-2">
@@ -121,11 +120,33 @@ export default function CompanyPicker({
             //? Stop Enter from submitting the whole application form
             if (e.key === "Enter") {
               e.preventDefault();
-              confirmNew();
+              confirmNew(newName);
             }
           }}
           placeholder="Company name"
         />
+
+        {/* Results from the last search; hidden when the input is too short */}
+        {searchTerm.length >= MIN_SEARCH_LENGTH && results.length > 0 && (
+          <ul className="rounded-md border text-sm">
+            {results.map((result) => (
+              <li key={result.companyNumber}>
+                <button
+                  type="button"
+                  className="w-full px-2 py-1.5 text-left hover:bg-muted"
+                  onClick={() => confirmNew(result.name, result.companyNumber)}
+                >
+                  <span className="block font-medium">{result.name}</span>
+                  <span className="block text-xs text-muted-foreground">
+                    {result.companyNumber}
+                    {result.locality && ` · ${result.locality}`}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+
         <div className="flex items-center justify-between gap-2">
           <Button
             type="button"
@@ -135,12 +156,12 @@ export default function CompanyPicker({
           >
             <ArrowLeft data-icon="inline-start" /> Back
           </Button>
-          {/* This button is a fallback for a company that is in neither database nor Companies House */}
+          {/* Fallback for a company that is in neither your list nor Companies House */}
           <Button
             type="button"
             size="sm"
             disabled={!newName.trim()}
-            onClick={confirmNew}
+            onClick={() => confirmNew(newName)}
           >
             Use this company
           </Button>
@@ -149,7 +170,7 @@ export default function CompanyPicker({
     );
   }
 
-  //* Mode 1: default mode - pick from existing companies (max 5), last row is always "Add company"
+  //* Mode 1: pick from existing companies (max 5), last row is always "Add company"
   const selectedId = value?.type === "existing" ? value.id : undefined;
   const selected = options.find((option) => option.id === selectedId) ?? null;
 
