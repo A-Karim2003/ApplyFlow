@@ -16,7 +16,7 @@ import { Input } from "@/components/ui/input";
 
 import type { CompanyValue } from "./add-application-form";
 import type { Company } from "@/lib/data/companies";
-import type { SearchResult } from "@/types";
+import type { Result, SearchResult } from "@/types";
 
 type CompanyOption = { id: number; label: string };
 
@@ -39,6 +39,7 @@ export default function CompanyPicker({
   const [isAdding, setIsAdding] = useState(false);
   const [newName, setNewName] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
+  const [searchFailed, setSearchFailed] = useState(false);
 
   const searchTerm = newName.trim();
 
@@ -57,10 +58,16 @@ export default function CompanyPicker({
         const res = await fetch(
           `/api/companies/search?q=${encodeURIComponent(searchTerm)}`,
         );
-        const body = await res.json();
-        if (body.success) setResults(body.data);
+        const body: Result<SearchResult[]> = await res.json();
+
+        if (body.success) {
+          setSearchFailed(false);
+          setResults(body.data);
+        } else {
+          setSearchFailed(true);
+        }
       } catch {
-        //? Search is a bonus; the user can still use the name as typed
+        setSearchFailed(true);
       }
     }, 300);
 
@@ -74,10 +81,10 @@ export default function CompanyPicker({
   }
 
   //? Used for "Use this company" (name only) and for a clicked Companies House result
-  function confirmNew(name: string, companiesHouseNumber?: string) {
-    const trimmed = name.trim();
-    if (!trimmed) return;
-    onChange({ type: "new", name: trimmed, companiesHouseNumber });
+  function confirmNew(name: string, companyHouseNumber?: string) {
+    const companyName = name.trim();
+    if (!companyName) return;
+    onChange({ type: "new", name: companyName, companyHouseNumber });
     setIsAdding(false);
     setQuery("");
     setResults([]);
@@ -85,6 +92,7 @@ export default function CompanyPicker({
 
   function backToPicking() {
     setIsAdding(false);
+    setSearchFailed(false);
     setNewName("");
     setResults([]);
   }
@@ -126,6 +134,12 @@ export default function CompanyPicker({
           placeholder="Company name"
         />
 
+        {searchFailed && searchTerm.length >= MIN_SEARCH_LENGTH && (
+          <p className="text-sm text-muted-foreground">
+            Company search is unavailable. You can still use the name as typed.
+          </p>
+        )}
+
         {/* Results from the last search; hidden when the input is too short */}
         {searchTerm.length >= MIN_SEARCH_LENGTH && results.length > 0 && (
           <ul className="rounded-md border text-sm">
@@ -139,7 +153,7 @@ export default function CompanyPicker({
                   <span className="block font-medium">{result.name}</span>
                   <span className="block text-xs text-muted-foreground">
                     {result.companyNumber}
-                    {result.locality && ` · ${result.locality}`}
+                    {result?.location && ` · ${result.location}`}
                   </span>
                 </button>
               </li>
@@ -156,7 +170,7 @@ export default function CompanyPicker({
           >
             <ArrowLeft data-icon="inline-start" /> Back
           </Button>
-          {/* Fallback for a company that is in neither your list nor Companies House */}
+          {/* Fallback for a company that is in neither database nor Companies House */}
           <Button
             type="button"
             size="sm"

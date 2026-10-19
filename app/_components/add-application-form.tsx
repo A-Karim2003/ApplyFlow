@@ -55,6 +55,7 @@ const companySchema = z.discriminatedUnion(
     z.object({
       type: z.literal("new"),
       name: z.string().trim().min(1, "Company name is required"),
+      companyHouseNumber: z.string().optional(),
     }),
   ],
   { error: "Company is required" },

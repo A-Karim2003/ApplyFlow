@@ -58,13 +58,13 @@ export async function GET(request: NextRequest) {
 
     const data: CompaniesHouseResponse = await res.json();
 
-    const results = (data.items ?? [])
+    const results = data.items
       .filter((item) => item.company_status === "active")
       .slice(0, 5)
       .map((item) => ({
         name: item.title,
         companyNumber: item.company_number,
-        location: item.address.locality,
+        location: item.address?.locality,
       }));
 
     return respond({ success: true, data: results });

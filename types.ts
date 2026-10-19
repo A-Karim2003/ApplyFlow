@@ -13,7 +13,7 @@ export type CompaniesHouseItem = {
   title: string;
   company_number: string;
   company_status: string;
-  address: {
+  address?: {
     locality: string;
   };
 };
@@ -21,7 +21,7 @@ export type CompaniesHouseItem = {
 export type SearchResult = {
   name: string;
   companyNumber: string;
-  location: string;
+  location?: string;
 };
 
 export type CompaniesHouseResponse = {
