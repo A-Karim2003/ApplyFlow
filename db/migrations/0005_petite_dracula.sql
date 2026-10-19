@@ -1,0 +1,1 @@
+ALTER TABLE "companies" ADD COLUMN "companies_house_number" text;

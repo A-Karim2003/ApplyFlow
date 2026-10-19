@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
     //? Ask for 20 so dissolved companies don't use up the 5 slots we keep
     const params = new URLSearchParams({
       q: searchQuery,
-      items_per_page: "20",
+      items_per_page: "5",
     });
 
     const res = await fetch(
@@ -58,14 +58,11 @@ export async function GET(request: NextRequest) {
 
     const data: CompaniesHouseResponse = await res.json();
 
-    const results = data.items
-      .filter((item) => item.company_status === "active")
-      .slice(0, 5)
-      .map((item) => ({
-        name: item.title,
-        companyNumber: item.company_number,
-        location: item.address?.locality,
-      }));
+    const results = data.items.map((item) => ({
+      name: item.title,
+      companyNumber: item.company_number,
+      location: item.address?.locality,
+    }));
 
     return respond({ success: true, data: results });
   } catch (error) {

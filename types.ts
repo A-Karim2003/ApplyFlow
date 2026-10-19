@@ -12,9 +12,8 @@ export type Result<T> =
 export type CompaniesHouseItem = {
   title: string;
   company_number: string;
-  company_status: string;
   address?: {
-    locality: string;
+    locality?: string;
   };
 };
 
