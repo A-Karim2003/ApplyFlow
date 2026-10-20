@@ -17,6 +17,7 @@ import {
 type DatePickerWithPresetsProps = {
   value?: string;
   onChange: (value: string) => void;
+  id?: string;
 };
 
 const PRESETS = [
@@ -28,17 +29,20 @@ const PRESETS = [
 export function DatePickerWithPresets({
   value,
   onChange,
+  id,
 }: DatePickerWithPresetsProps) {
   const selected = value ? parseISO(value) : undefined;
   const [month, setMonth] = useState<Date>(selected ?? new Date());
+  const [open, setOpen] = useState(false);
 
   function select(date: Date | undefined) {
     onChange(date ? format(date, "yyyy-MM-dd") : "");
     if (date) setMonth(date);
+    setOpen(false);
   }
 
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger
         render={
           <Button
@@ -50,7 +54,7 @@ export function DatePickerWithPresets({
             )}
           >
             <CalendarIcon />
-            {selected ? format(selected, "PPP") : "Pick a date"}
+            {selected ? format(selected, "PP") : "Pick a date"}
           </Button>
         }
       />
@@ -58,6 +62,7 @@ export function DatePickerWithPresets({
         <Card className="w-fit border-0 shadow-none" size="sm">
           <CardContent className="p-0">
             <Calendar
+              id={id}
               mode="single"
               selected={selected}
               onSelect={select}

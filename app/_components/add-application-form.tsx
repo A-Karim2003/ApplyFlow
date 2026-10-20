@@ -42,67 +42,19 @@ import type { Company } from "@/lib/data/companies";
 import type { Document } from "@/lib/data/documents";
 import CompanyPicker from "./company-picker";
 
+import { DatePicker } from "../(main)/applications/date-picker";
+import { DatePickerWithPresets } from "../(main)/applications/date-picker-with-presets";
+
+import { createApplicationSchema } from "@/lib/validations/applications";
+
+import type { ApplicationFormValues } from "@/lib/validations/applications";
+
 /*
   The company is one of two shapes:
   "type" tells the server which one it got.
   existing -> only the id is needed.
   new -> only the name is needed and id will be retrieved from db once company is inserted.
  */
-const companySchema = z.discriminatedUnion(
-  "type",
-  [
-    z.object({ type: z.literal("existing"), id: z.number().int().positive() }),
-    z.object({
-      type: z.literal("new"),
-      name: z.string().trim().min(1, "Company name is required"),
-      companyHouseNumber: z.string().optional(),
-    }),
-  ],
-  { error: "Company is required" },
-);
-
-const addApplicationSchema = z
-  .object({
-    jobTitle: z.string().trim().min(1, "Job title is required"),
-    company: companySchema,
-    status: z.enum(STATUS_OPTIONS.map((option) => option.value)),
-    jobType: z.enum(
-      JOB_TYPE_OPTIONS.map((option) => option.value),
-      { error: "Job type is required" },
-    ),
-    source: z.enum(
-      APPLICATION_SOURCE_OPTIONS.map((option) => option.value),
-      {
-        error: "Source is required",
-      },
-    ),
-    workMode: z
-      .enum(WORK_MODE_OPTIONS.map((option) => option.value))
-      .optional(),
-    location: z.string().optional(),
-    jobUrl: z.union([z.url("Enter a valid URL"), z.literal("")]).optional(),
-    //? Salary columns are integers, so reject decimals. Empty input -> undefined (see setValueAs)
-    salaryMin: z.number().int("Whole numbers only").nonnegative().optional(),
-    salaryMax: z.number().int("Whole numbers only").nonnegative().optional(),
-    appliedAt: z.string().optional(),
-    applicationDeadline: z.string().optional(),
-    resumeId: z.number().int().positive().optional(),
-    coverLetterId: z.number().int().positive().optional(),
-    notes: z.string().optional(),
-  })
-  .refine(
-    (data) =>
-      data.salaryMin === undefined ||
-      data.salaryMax === undefined ||
-      data.salaryMin <= data.salaryMax,
-    {
-      message: "Min salary must be ≤ max salary",
-      path: ["salaryMax"],
-    },
-  );
-
-type ApplicationFormValues = z.infer<typeof addApplicationSchema>;
-export type CompanyValue = z.infer<typeof companySchema>;
 
 //? "" -> undefined so an empty salary box isn't turned into 0
 const toOptionalNumber = (value: unknown) =>
@@ -137,7 +89,7 @@ export function AddApplicationForm({
     reset,
     formState: { errors, isSubmitting },
   } = useForm<ApplicationFormValues>({
-    resolver: zodResolver(addApplicationSchema),
+    resolver: zodResolver(createApplicationSchema),
     defaultValues: {
       jobTitle: "",
       status: "wishlist",
@@ -442,11 +394,22 @@ export function AddApplicationForm({
                     Date applied{" "}
                     <span className="text-muted-foreground">(optional)</span>
                   </FieldLabel>
-                  <Input
-                    id="applied-at"
-                    type="date"
-                    {...register("appliedAt")}
+
+                  <Controller
+                    name="appliedAt"
+                    control={control}
+                    render={({ field }) => (
+                      <DatePicker
+                        id="applied-at"
+                        value={field.value}
+                        onChange={field.onChange}
+                      />
+                    )}
                   />
+
+                  {errors.appliedAt && (
+                    <FieldError>{errors.appliedAt.message}</FieldError>
+                  )}
                 </Field>
 
                 <Field>
@@ -454,10 +417,17 @@ export function AddApplicationForm({
                     Deadline{" "}
                     <span className="text-muted-foreground">(optional)</span>
                   </FieldLabel>
-                  <Input
-                    id="deadline"
-                    type="date"
-                    {...register("applicationDeadline")}
+
+                  <Controller
+                    name="applicationDeadline"
+                    control={control}
+                    render={({ field }) => (
+                      <DatePickerWithPresets
+                        id="deadline"
+                        value={field.value}
+                        onChange={field.onChange}
+                      />
+                    )}
                   />
                 </Field>
               </div>

@@ -15,9 +15,10 @@ import {
 type DatePickerProps = {
   value?: string; // "yyyy-MM-dd" or ""
   onChange: (value: string) => void;
+  id?: string;
 };
 
-export function DatePicker({ value, onChange }: DatePickerProps) {
+export function DatePicker({ value, onChange, id }: DatePickerProps) {
   // converts date string into js date object
   const selected = value ? parseISO(value) : undefined;
 
@@ -34,12 +35,13 @@ export function DatePicker({ value, onChange }: DatePickerProps) {
             )}
           >
             <CalendarIcon />
-            {selected ? format(selected, "PPP") : "Pick a date"}
+            {selected ? format(selected, "PP") : "Pick a date"}
           </Button>
         }
       />
       <PopoverContent className="w-auto p-0" align="start">
         <Calendar
+          id={id}
           mode="single"
           selected={selected}
           onSelect={(date) => onChange(date ? format(date, "yyyy-MM-dd") : "")}

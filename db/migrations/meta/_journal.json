@@ -43,6 +43,13 @@
       "when": 1792444861045,
       "tag": "0005_petite_dracula",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1792446093334,
+      "tag": "0006_light_namor",
+      "breakpoints": true
     }
   ]
 }

@@ -14,7 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-import type { CompanyValue } from "./add-application-form";
+import type { CompanyValue } from "@/lib/validations/applications";
 import type { Company } from "@/lib/data/companies";
 import type { Result, SearchResult } from "@/types";
 
@@ -151,10 +151,6 @@ export default function CompanyPicker({
                   onClick={() => confirmNew(result.name, result.companyNumber)}
                 >
                   <span className="block font-medium">{result.name}</span>
-                  <span className="block text-xs text-muted-foreground">
-                    {result.companyNumber}
-                    {result?.location && ` · ${result.location}`}
-                  </span>
                 </button>
               </li>
             ))}

@@ -62,7 +62,7 @@ export const applicationsTable = pgTable(
 
     applicationDeadline: t.date("application_deadline"),
 
-    status: applicationStatusEnum("status").default("wishlist").notNull(),
+    status: applicationStatusEnum("status").notNull(),
 
     appliedAt: t.date("applied_at"), //* wishlisted jobs wont have this
 
