@@ -9,6 +9,7 @@ import {
   type InferSelectModel,
 } from "drizzle-orm";
 import {
+  applicationDocumentsTable,
   applicationsTable,
   applicationStatusHistoryTable,
   companiesTable,
@@ -22,6 +23,8 @@ import {
   ApplicationFormValues,
   createApplicationSchema,
 } from "@/lib/validations/applications";
+import { COMPANIESCACHETAG } from "@/lib/data/companies";
+import { APPLICATIONDOCUMENTSCACHETAG } from "@/lib/data/documents";
 
 export type NewApplication = InferInsertModel<typeof applicationsTable>;
 export type Application = InferSelectModel<typeof applicationsTable>;
@@ -306,32 +309,60 @@ export async function createApplication(
       }
 
       //? Insert the application
+      const [application] = await tx
+        .insert(applicationsTable)
+        .values({
+          ...applicationInput,
+          location: emptyToNull(applicationInput.location),
+          jobUrl: emptyToNull(applicationInput.jobUrl),
+          notes: emptyToNull(applicationInput.notes),
+          appliedAt: emptyToNull(applicationInput.appliedAt),
+          applicationDeadline: emptyToNull(
+            applicationInput.applicationDeadline,
+          ),
+          userId: session.user.id,
+          companyId: companyId,
+        })
+        .returning();
+
+      if (!application) throw new Error("APPLICATION_INSERT_FAILED");
 
       //? Record the initial status in the history table
+      await tx.insert(applicationStatusHistoryTable).values({
+        applicationId: application.id,
+        status: applicationInput.status,
+      });
+
       //? Link the chosen documents to the application
-      //? Return the application and companyCreated: return { application, companyCreated }
+      if (documentIds.length > 0) {
+        await tx.insert(applicationDocumentsTable).values(
+          documentIds.map((documentId) => ({
+            applicationId: application.id,
+            documentId: documentId,
+          })),
+        );
+      }
+      return { application, companyCreated };
     });
     //? Refresh cached data now the commit has succeeded
+    updateTag(`applications-${session.user.id}`); // swap for APPLICATIONSCACHETAG once it exists
+    revalidatePath("/applications");
+
+    if (addedApplication.companyCreated) {
+      updateTag(COMPANIESCACHETAG(session.user.id));
+      revalidatePath("/companies");
+    }
+
+    if (documentIds.length > 0) {
+      updateTag(APPLICATIONDOCUMENTSCACHETAG(session.user.id));
+      revalidatePath("/documents");
+    }
+
     //? Return the new application
+    return { success: true, data: addedApplication.application };
   } catch (error) {
-    //? Log and return a generic error
+    console.error("createApplication failed:", error);
+    return { success: false, error: "Could not create application" };
   }
 }
-
-// ---- helper, same file, NOT exported ----
-// resolveCompanyId(tx, userId, company): Promise<{ id: number; created: boolean }>
-//
-// 1. company.type === "existing" -> return { id: company.id, created: false }
-//    (ownership already verified in step 4)
-// 2. company.companiesHouseNumber present?
-//    select id where userId matches AND companiesHouseNumber = number
-//    found -> return { id, created: false }
-// 3. select id where userId matches AND
-//    sql`lower(trim(${companiesTable.name})) = lower(${company.name})`
-//    found -> return { id, created: false }  (reuse only, never overwrite fields)
-// 4. insert { userId, name, companiesHouseNumber ?? null, industry: "other" }
-//    .returning({ id }) -> return { id, created: true }
-
-// ---- helper ----
-// emptyToNull(value?: string): string | null
-// trim; "" or undefined -> null; otherwise the trimmed string
+const emptyToNull = (value?: string) => value?.trim() || null;
