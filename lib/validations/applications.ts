@@ -37,9 +37,7 @@ export const createApplicationSchema = z
   .object({
     jobTitle: z.string().trim().min(1, "Job title is required"),
     company: companySchema,
-    status: z
-      .enum(STATUS_OPTIONS.map((option) => option.value))
-      .default("wishlist"),
+    status: z.enum(STATUS_OPTIONS.map((option) => option.value)),
     jobType: z.enum(
       JOB_TYPE_OPTIONS.map((option) => option.value),
       { error: "Job type is required" },

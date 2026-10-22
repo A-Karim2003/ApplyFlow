@@ -42,7 +42,7 @@ import {
   type UpdateApplicationProp,
   updateApplicationDetails,
   deleteApplication,
-} from "@/actions/applications";
+} from "@/actions/applications/applications";
 import { toast } from "react-toastify";
 import SpinnerEllipsis from "@/components/shadcn-space/spinner/spinner-05";
 import { DatePicker } from "./date-picker";

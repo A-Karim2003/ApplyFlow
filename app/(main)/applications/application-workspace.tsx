@@ -38,7 +38,7 @@ import {
 import {
   type UpdateApplicationProp,
   updateApplicationStatus,
-} from "@/actions/applications";
+} from "@/actions/applications/applications";
 import { ApplicationsPageData } from "@/lib/data/applications";
 import { cn } from "@/lib/utils";
 import KanbanBoard from "./kanban-board";

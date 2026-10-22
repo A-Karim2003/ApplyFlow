@@ -8,7 +8,7 @@ import {
   metaHelper,
 } from "@tanstack/react-table";
 import { type ApplicationWithCompany } from "@/lib/data/applications";
-import { type UpdateApplicationProp } from "@/actions/applications";
+import { type UpdateApplicationProp } from "@/actions/applications/applications";
 
 import { cn, formatDate, formatEnumLabel } from "@/lib/utils";
 import { STATUS_STYLES, StatusBadge } from "@/app/_components/status-badge";

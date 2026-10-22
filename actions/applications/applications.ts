@@ -3,18 +3,16 @@
 import {
   and,
   eq,
-  inArray,
-  sql,
   type InferInsertModel,
   type InferSelectModel,
 } from "drizzle-orm";
+
 import {
   applicationDocumentsTable,
   applicationsTable,
   applicationStatusHistoryTable,
-  companiesTable,
-  documentsTable,
 } from "@/db/schema";
+
 import { requireSession } from "@/lib/data/session";
 import { Result } from "@/types";
 import { db } from "@/db";
@@ -25,6 +23,8 @@ import {
 } from "@/lib/validations/applications";
 import { COMPANIESCACHETAG } from "@/lib/data/companies";
 import { APPLICATIONDOCUMENTSCACHETAG } from "@/lib/data/documents";
+import { resolveCompanyId } from "./resolve-company-id";
+import { checkOwnership } from "./ownership-check";
 
 export type NewApplication = InferInsertModel<typeof applicationsTable>;
 export type Application = InferSelectModel<typeof applicationsTable>;
@@ -164,6 +164,11 @@ export async function deleteApplication(
   }
 }
 
+export type Transaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
+
+//? Trims a string and turns empty input into null so the db stores NULL, not ""
+const emptyToNull = (value?: string) => value?.trim() || null;
+
 export async function createApplication(
   application: ApplicationFormValues,
 ): Promise<Result<Application>> {
@@ -172,141 +177,33 @@ export async function createApplication(
   //? validate input
   const parsed = createApplicationSchema.safeParse(application);
   if (!parsed.success) {
-    return { success: false, error: "Invalid application data" };
+    return { success: false, error: parsed.error.issues[0].message };
   }
 
   const applicationInput = parsed.data;
 
   try {
-    //? Check the chosen existing company belongs to the user
-    if (applicationInput.company.type === "existing") {
-      const company = await db
-        .select({
-          id: companiesTable.id,
-        })
-        .from(companiesTable)
-        .where(
-          and(
-            eq(companiesTable.id, applicationInput.company.id),
-            eq(companiesTable.userId, session.user.id),
-          ),
-        );
-
-      if (company.length === 0) {
-        return { success: false, error: "Company not found" };
-      }
-    }
-
-    //? Check the chosen CV / cover letter belong to the user and are the right type
     const documentIds = [
       applicationInput.resumeId,
       applicationInput.coverLetterId,
     ].filter((id) => id !== undefined);
 
-    if (documentIds.length > 0) {
-      const documents = await db
-        .select({
-          id: documentsTable.id,
-          documentType: documentsTable.documentType,
-        })
-        .from(documentsTable)
-        .where(
-          and(
-            inArray(documentsTable.id, documentIds),
-            eq(documentsTable.userId, session.user.id),
-          ),
-        );
+    //? Check the chosen company and documents belong to the user
+    const ownershipError = await checkOwnership(
+      session.user.id,
+      applicationInput,
+      documentIds,
+    );
 
-      for (const document of documents) {
-        //? check whether a the documents has the correct type (cv or cover_letter)
-        if (
-          document.id === applicationInput.resumeId &&
-          document.documentType !== "cv"
-        ) {
-          return { success: false, error: "Selected CV not found" };
-        }
-
-        if (
-          document.id === applicationInput.coverLetterId &&
-          document.documentType !== "cover_letter"
-        ) {
-          return { success: false, error: "Selected cover letter not found" };
-        }
-      }
-
-      //? checks the selected documents belongs to the user
-      if (documents.length !== documentIds.length) {
-        return { success: false, error: "Selected document not found" };
-      }
-    }
+    if (ownershipError) return { success: false, error: ownershipError };
 
     //* This transaction creates company (if new), application, status history, document links
     const addedApplication = await db.transaction(async (tx) => {
-      let companyId: number | undefined;
-      let companyCreated = false;
-
-      if (applicationInput.company.type === "existing") {
-        //? Reuse the selected existing company's ID
-        companyId = applicationInput.company.id;
-      } else {
-        //? For new companies, check whether a company needs to be created or reused
-
-        //* 1. Check for an existing company by Companies House number
-        if (applicationInput.company.companyHouseNumber) {
-          const newCompany = await tx
-            .select({ id: companiesTable.id })
-            .from(companiesTable)
-            .where(
-              and(
-                eq(
-                  companiesTable.companyHouseNumber,
-                  applicationInput.company.companyHouseNumber,
-                ),
-                eq(companiesTable.userId, session.user.id),
-              ),
-            );
-
-          if (newCompany.length > 0) {
-            companyId = newCompany[0].id;
-          }
-        }
-
-        //* 2. If no match was found, check by company name
-        if (companyId === undefined) {
-          const newCompany = await tx
-            .select({ id: companiesTable.id })
-            .from(companiesTable)
-            .where(
-              and(
-                sql`LOWER(TRIM(${companiesTable.name})) = LOWER(TRIM(${applicationInput.company.name}))`,
-                eq(companiesTable.userId, session.user.id),
-              ),
-            );
-
-          if (newCompany.length > 0) {
-            companyId = newCompany[0].id;
-          }
-        }
-
-        //* 3. If neither lookup found a match, insert a new company
-        if (companyId === undefined) {
-          const [insertedCompany] = await tx
-            .insert(companiesTable)
-            .values({
-              userId: session.user.id,
-              name: applicationInput.company.name,
-              companyHouseNumber:
-                applicationInput.company.companyHouseNumber ?? null,
-              industry: "other",
-            })
-            .returning({ id: companiesTable.id });
-
-          if (!insertedCompany) throw new Error("COMPANY_INSERT_FAILED");
-
-          companyId = insertedCompany.id;
-          companyCreated = true;
-        }
-      }
+      const { companyId, companyCreated } = await resolveCompanyId(
+        tx,
+        session.user.id,
+        applicationInput.company,
+      );
 
       //? Insert the application
       const [application] = await tx
@@ -344,8 +241,10 @@ export async function createApplication(
       }
       return { application, companyCreated };
     });
+
     //? Refresh cached data now the commit has succeeded
-    updateTag(`applications-${session.user.id}`); // swap for APPLICATIONSCACHETAG once it exists
+    //TODO swap for APPLICATIONSCACHETAG once it exists
+    updateTag(`applications-${session.user.id}`);
     revalidatePath("/applications");
 
     if (addedApplication.companyCreated) {
@@ -365,4 +264,3 @@ export async function createApplication(
     return { success: false, error: "Could not create application" };
   }
 }
-const emptyToNull = (value?: string) => value?.trim() || null;

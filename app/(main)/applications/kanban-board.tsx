@@ -5,7 +5,7 @@ import {
   ApplicationStatus,
 } from "@/lib/constants/applications-status";
 
-import { type UpdateApplicationProp } from "@/actions/applications";
+import { type UpdateApplicationProp } from "@/actions/applications/applications";
 
 import { type ApplicationWithCompany } from "@/lib/data/applications";
 

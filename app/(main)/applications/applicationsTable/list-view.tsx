@@ -15,7 +15,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import { type UpdateApplicationProp } from "@/actions/applications";
+import { type UpdateApplicationProp } from "@/actions/applications/applications";
 
 type ListViewProps = {
   applications: ApplicationWithCompany[];
