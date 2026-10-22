@@ -47,6 +47,8 @@ import { DatePickerWithPresets } from "../(main)/applications/date-picker-with-p
 import { createApplicationSchema } from "@/lib/validations/applications";
 
 import type { ApplicationFormValues } from "@/lib/validations/applications";
+import { createApplication } from "@/actions/applications/applications";
+import { toast } from "react-toastify";
 
 /*
   The company is one of two shapes:
@@ -106,10 +108,22 @@ export function AddApplicationForm({
     onOpenChange(next);
   }
 
-  function submit(values: ApplicationFormValues) {
-    // TODO: call createApplication here (the company is resolved inside its transaction)
-    console.log(values);
-    // handleOpenChange(false);
+  async function submit(values: ApplicationFormValues) {
+    try {
+      const result = await createApplication(values);
+
+      //? Keep the sheet open and the form filled in so the user can fix and retry
+      if (!result.success) {
+        toast.error(result.error);
+        return;
+      }
+
+      toast.success("Application added");
+      handleOpenChange(false); //? Closes the sheet and resets the form
+    } catch (error) {
+      console.error("createApplication failed:", error);
+      toast.error("Something went wrong. Please try again.");
+    }
   }
 
   return (

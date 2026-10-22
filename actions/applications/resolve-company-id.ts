@@ -1,3 +1,5 @@
+import "server-only";
+
 import { companiesTable } from "@/db/schema";
 import { and, eq, sql } from "drizzle-orm";
 import { Transaction } from "./applications";

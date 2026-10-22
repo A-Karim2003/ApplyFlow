@@ -1,3 +1,5 @@
+import "server-only";
+
 import { db } from "@/db";
 import { companiesTable, documentsTable } from "@/db/schema";
 import { ApplicationFormValues } from "@/lib/validations/applications";
