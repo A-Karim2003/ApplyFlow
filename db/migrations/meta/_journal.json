@@ -50,6 +50,13 @@
       "when": 1792446093334,
       "tag": "0006_light_namor",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1792672828336,
+      "tag": "0007_chubby_zzzax",
+      "breakpoints": true
     }
   ]
 }

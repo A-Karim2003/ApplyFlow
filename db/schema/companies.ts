@@ -34,7 +34,7 @@ export const companiesTable = pgTable(
       .references(() => user.id, { onDelete: "cascade" }),
 
     name: t.text("name").notNull(),
-    companiesHouseNumber: t.text("companies_house_number"),
+    companyHouseNumber: t.text("company_house_number"),
     website: t.text("website"),
     industry: industryEnum("industry").notNull(),
     location: t.text("location"),
