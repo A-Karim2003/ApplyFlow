@@ -24,8 +24,10 @@ export type StatCards = {
   interviewCount: number;
   offers: number;
   offerCompanies: string[]; //? latest two, for the card subtitle
+  interviewCompanies: string[]; //? latest two, for the card subtitle
   responseRate: number | null; //? null when nothing submitted
   previousResponseRate: number | null;
+  repliedCount: number;
 };
 
 //* This functions counts number of applications for each status, excluding wishlist and applied
@@ -50,6 +52,30 @@ const calculateResponseRate = (
     ? null
     : Math.round((repliedCount / totalSubmissions) * 100);
 
+//? Latest two company names for applications in a given status
+function getLatestCompanyNames(
+  userId: string,
+  status: ApplicationStatus,
+  fromDate: string | null, //? null = no date limit
+) {
+  return db
+    .select({ name: companiesTable.name })
+    .from(applicationsTable)
+    .innerJoin(
+      companiesTable,
+      eq(applicationsTable.companyId, companiesTable.id),
+    )
+    .where(
+      and(
+        eq(applicationsTable.userId, userId),
+        eq(applicationsTable.status, status),
+        fromDate ? gte(appliedOn, fromDate) : undefined,
+      ),
+    )
+    .orderBy(desc(appliedOn))
+    .limit(2);
+}
+
 async function getStatCardsCached(
   userId: string,
   days: number | null,
@@ -66,6 +92,7 @@ async function getStatCardsCached(
     previousPeriodCounts,
     allTimeCounts,
     recentOfferCompanies,
+    recentInterviewCompanies,
   ] = await Promise.all([
     //* returns all applications from a certain date to now
     getApplicationStatusCounts(userId, fromDate, null),
@@ -78,22 +105,10 @@ async function getStatCardsCached(
     getApplicationStatusCounts(userId, null, null),
 
     //* returns company names of the 2 lastest offers
-    db
-      .select({ name: companiesTable.name })
-      .from(applicationsTable)
-      .innerJoin(
-        companiesTable,
-        eq(applicationsTable.companyId, companiesTable.id),
-      )
-      .where(
-        and(
-          eq(applicationsTable.userId, userId),
-          eq(applicationsTable.status, "offer"),
-          fromDate ? gte(appliedOn, fromDate) : undefined,
-        ),
-      )
-      .orderBy(desc(appliedOn))
-      .limit(2),
+    getLatestCompanyNames(userId, "offer", fromDate),
+
+    //* returns company names of the 2 latest interviews
+    getLatestCompanyNames(userId, "interview", fromDate),
   ]);
 
   const currentPeriodMetrics = calculateSubmissionMetrics(currentPeriodCounts);
@@ -110,6 +125,7 @@ async function getStatCardsCached(
     interviewCount: allTimeCounts.interview,
     offers: currentPeriodCounts.offer,
     offerCompanies: recentOfferCompanies.map((r) => r.name),
+    interviewCompanies: recentInterviewCompanies.map((r) => r.name),
     responseRate: calculateResponseRate(
       currentPeriodMetrics.repliedCount,
       currentPeriodMetrics.totalSubmissions,
@@ -120,6 +136,7 @@ async function getStatCardsCached(
           previousPeriodMetrics.totalSubmissions,
         )
       : null,
+    repliedCount: currentPeriodMetrics.repliedCount,
   };
 }
 

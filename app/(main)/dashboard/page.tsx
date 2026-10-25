@@ -5,7 +5,8 @@ import { parseRangeKey } from "./components/range-filter";
 type Props = { searchParams: Promise<{ range?: string | string[] }> };
 
 export default async function DashboardPage({ searchParams }: Props) {
-  const rangeKey = parseRangeKey((await searchParams).range);
+  const dateRange = await searchParams;
+  const rangeKey = parseRangeKey(dateRange.range);
 
   return (
     <DashboardView
