@@ -21,6 +21,9 @@ export type ApplicationsPageData = {
   applications: ApplicationWithCompany[];
 };
 
+export const APPLICATIONSCACHETAG = (userId: Application["userId"]) =>
+  `applications-${userId}`;
+
 export async function getApplicationsPageData(): Promise<
   Result<ApplicationsPageData>
 > {
