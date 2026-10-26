@@ -25,6 +25,7 @@ import { COMPANIESCACHETAG } from "@/lib/data/companies";
 import { APPLICATIONDOCUMENTSCACHETAG } from "@/lib/data/documents";
 import { resolveCompanyId } from "./resolve-company-id";
 import { checkOwnership } from "./ownership-check";
+import { APPLICATIONSCACHETAG } from "@/lib/data/applications";
 
 export type NewApplication = InferInsertModel<typeof applicationsTable>;
 export type Application = InferSelectModel<typeof applicationsTable>;
@@ -78,8 +79,7 @@ export async function updateApplicationStatus({
 
       return result;
     });
-
-    updateTag(`applications-${session.user.id}`);
+    updateTag(APPLICATIONSCACHETAG(session.user.id));
     revalidatePath("/applications");
     return { success: true, data: result[0] };
   } catch (error) {
@@ -128,7 +128,7 @@ export async function updateApplicationDetails({
 
     if (!result) return { success: false, error: "Not found" };
 
-    updateTag(`applications-${session.user.id}`);
+    updateTag(APPLICATIONSCACHETAG(session.user.id));
     revalidatePath("/applications");
     return { success: true, data: result };
   } catch (error) {
@@ -155,7 +155,7 @@ export async function deleteApplication(
 
     if (!result) return { success: false, error: "Not found" };
 
-    updateTag(`applications-${session.user.id}`);
+    updateTag(APPLICATIONSCACHETAG(session.user.id));
     revalidatePath("/applications");
     return { success: true, data: result };
   } catch (error) {
@@ -244,7 +244,7 @@ export async function createApplication(
 
     //? Refresh cached data now the commit has succeeded
     //TODO swap for APPLICATIONSCACHETAG once it exists
-    updateTag(`applications-${session.user.id}`);
+    updateTag(APPLICATIONSCACHETAG(session.user.id));
     revalidatePath("/applications");
 
     if (addedApplication.companyCreated) {

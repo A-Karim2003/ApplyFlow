@@ -1,6 +1,6 @@
 import { cn, formatEnumLabel } from "@/lib/utils";
 
-import type { ApplicationStatus } from "@/lib/constants/applications-status";
+import type { ApplicationStatus } from "@/lib/constants/applications";
 
 export const STATUS_STYLES: Record<
   ApplicationStatus,

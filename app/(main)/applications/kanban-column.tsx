@@ -5,7 +5,7 @@ import { STATUS_STYLES } from "@/app/_components/status-badge";
 import {
   STATUS_COLUMN_STYLES,
   type ApplicationStatus,
-} from "@/lib/constants/applications-status";
+} from "@/lib/constants/applications";
 import { cn } from "@/lib/utils";
 import type { ApplicationWithCompany } from "@/lib/data/applications";
 import { KanbanApplicationCard } from "./kanban-application-card";

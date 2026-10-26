@@ -16,7 +16,7 @@ import CompanyLogo from "@/app/_components/company-logo";
 import {
   STATUS_OPTIONS,
   type ApplicationStatus,
-} from "@/lib/constants/applications-status";
+} from "@/lib/constants/applications";
 import {
   DropdownMenu,
   DropdownMenuContent,

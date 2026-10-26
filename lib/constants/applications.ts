@@ -24,6 +24,7 @@ export const STATUS_OPTIONS = applicationStatusEnum.enumValues.map(
     value: status,
   }),
 );
+
 /*============================Job Type=============================*/
 
 export type JobType = (typeof jobTypeEnum.enumValues)[number];
@@ -186,4 +187,14 @@ export const STATUS_COLUMN_STYLES: Record<
     dropBorderOver:
       "border-[color-mix(in_oklch,var(--destructive)_55%,transparent)]",
   },
+};
+
+//? Chart fill per status
+export const STATUS_COLOURS: Record<ApplicationStatus, string> = {
+  wishlist: "var(--muted-foreground)",
+  applied: "var(--status-applied)",
+  online_assessment: "var(--chart-5)",
+  interview: "var(--status-interview)",
+  offer: "var(--chart-1)",
+  rejected: "var(--destructive)",
 };

@@ -3,7 +3,7 @@
 import {
   STATUS_OPTIONS,
   ApplicationStatus,
-} from "@/lib/constants/applications-status";
+} from "@/lib/constants/applications";
 
 import { type UpdateApplicationProp } from "@/actions/applications/applications";
 

@@ -55,7 +55,7 @@ export function ViewLinkedApplicationsModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="min-w-fit">
         <DialogHeader>
           <DialogTitle>Linked Applications</DialogTitle>
           <DialogDescription>

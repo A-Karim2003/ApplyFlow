@@ -35,7 +35,7 @@ import {
   WORK_MODE_OPTIONS,
   APPLICATION_SOURCE_OPTIONS,
   type ApplicationStatus,
-} from "@/lib/constants/applications-status";
+} from "@/lib/constants/applications";
 import { cn } from "@/lib/utils";
 import { type ApplicationWithCompany } from "@/lib/data/applications";
 import {
