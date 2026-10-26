@@ -16,30 +16,44 @@ export const RANGES = [
 ] as const;
 
 export type RangeKey = (typeof RANGES)[number]["key"];
+export type Range = (typeof RANGES)[number];
 
-export function RangeFilter({ value }: { value: RangeKey }) {
+export function RangeFilter({
+  value,
+  selectedRange,
+}: {
+  value: RangeKey;
+  selectedRange: Range;
+}) {
   return (
-    <nav
-      aria-label="Date range"
-      className="flex w-fit max-w-full gap-1 overflow-x-auto rounded-lg border bg-card p-1"
-    >
-      {RANGES.map((range) => (
-        <Link
-          key={range.key}
-          href={`?range=${range.key}`}
-          replace
-          scroll={false}
-          aria-current={range.key === value ? "true" : undefined}
-          className={cn(
-            "shrink-0 rounded-md px-3 py-1 text-sm transition-colors",
-            range.key === value
-              ? "bg-primary text-primary-foreground"
-              : "text-muted-foreground hover:bg-accent",
-          )}
-        >
-          {range.label}
-        </Link>
-      ))}
-    </nav>
+    <>
+      <p className="text-sm text-muted-foreground">
+        {selectedRange.days === null
+          ? "Showing all time"
+          : `Showing the last ${selectedRange.label}`}
+      </p>
+      <nav
+        aria-label="Date range"
+        className="flex w-fit max-w-full gap-1 overflow-x-auto rounded-lg border bg-card p-1"
+      >
+        {RANGES.map((range) => (
+          <Link
+            key={range.key}
+            href={`?range=${range.key}`}
+            replace
+            scroll={false}
+            aria-current={range.key === value ? "true" : undefined}
+            className={cn(
+              "shrink-0 rounded-md px-3 py-1 text-sm transition-colors",
+              range.key === value
+                ? "bg-primary text-primary-foreground"
+                : "text-muted-foreground hover:bg-accent",
+            )}
+          >
+            {range.label}
+          </Link>
+        ))}
+      </nav>
+    </>
   );
 }
