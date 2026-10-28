@@ -8,7 +8,6 @@ export async function StatusChartSection({ days }: { days: number | null }) {
   const result = await getStatusCounts(days);
 
   if (!result.success) return <SectionError message={result.error} />;
-  console.log(result.data);
 
   const data = STATUS_OPTIONS.map((status) => ({
     label: status.label,
