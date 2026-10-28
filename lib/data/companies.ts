@@ -6,6 +6,7 @@ import { getSession, requireSession } from "./session";
 import { db } from "@/db";
 import { Result } from "@/types";
 import { cacheLife, cacheTag } from "next/cache";
+import { APPLICATIONSCACHETAG } from "./applications";
 
 export type Company = InferSelectModel<typeof companiesTable>;
 export type Application = InferSelectModel<typeof applicationsTable>;
@@ -48,7 +49,7 @@ async function getCompaniesPageDataCached(
 ): Promise<CompaniesPageData> {
   "use cache";
   cacheLife("minutes");
-  cacheTag(COMPANIESCACHETAG(userId), `applications-${userId}`);
+  cacheTag(COMPANIESCACHETAG(userId), APPLICATIONSCACHETAG(userId));
 
   const [companies, applications] = await Promise.all([
     db

@@ -90,27 +90,3 @@ export async function deleteCompany(id: number): Promise<Result<Company>> {
     return { success: false, error: "Failed to delete company" };
   }
 }
-
-export async function searchCompanies(query: string) {
-  const API_KEY = process.env.COMPANIES_HOUSE_API_KEY;
-  if (!API_KEY) throw new Error("Companies House API key is missing");
-
-  if (query.length < 2) return [];
-
-  const params = new URLSearchParams({
-    q: query,
-    items_per_page: "5",
-  });
-
-  const res = await fetch(
-    `https://api.company-information.service.gov.uk/search/companies?${params}`,
-    {
-      headers: {
-        Authorization: `Basic ${Buffer.from(`${API_KEY}:`).toString("base64")}`,
-      },
-    },
-  );
-
-  const data = await res.json();
-  return data.items || [];
-}
