@@ -29,7 +29,7 @@ export const STATUS_OPTIONS = applicationStatusEnum.enumValues.map(
 
 export type JobType = (typeof jobTypeEnum.enumValues)[number];
 
-const JOB_TYPES: Record<JobType, string> = {
+export const JOB_TYPES: Record<JobType, string> = {
   full_time: "Full-time",
   part_time: "Part-time",
   internship: "Internship",

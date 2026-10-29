@@ -30,33 +30,7 @@ export function DashboardCard({
         {description && <CardDescription>{description}</CardDescription>}
         {action && <CardAction>{action}</CardAction>}
       </CardHeader>
-      <CardContent>{children}</CardContent>
+      <CardContent className="h-full">{children}</CardContent>
     </Card>
-  );
-}
-
-const AVATAR_COLOURS = [
-  "#1f8a56",
-  "#c8514b",
-  "#5b63c4",
-  "#b8901e",
-  "#2f7fb8",
-  "#8a5bb8",
-];
-
-//? Initial on a colour picked from the company name, so each company always gets the same colour
-export function CompanyAvatar({ name }: { name: string }) {
-  const index =
-    [...name].reduce((sum, char) => sum + char.charCodeAt(0), 0) %
-    AVATAR_COLOURS.length;
-
-  return (
-    <div
-      className="flex size-10 shrink-0 items-center justify-center rounded-xl text-sm font-semibold text-white"
-      style={{ backgroundColor: AVATAR_COLOURS[index] }}
-      aria-hidden
-    >
-      {name.charAt(0)}
-    </div>
   );
 }

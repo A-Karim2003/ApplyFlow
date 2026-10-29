@@ -17,6 +17,7 @@ import {
   getApplicationStatusCounts,
   dateDaysAgo,
 } from "../shared";
+import { COMPANIESCACHETAG } from "../../companies";
 
 export type StatCards = {
   totalApplications: number;
@@ -82,8 +83,7 @@ async function getStatCardsCached(
 ): Promise<StatCards> {
   "use cache";
   cacheLife("minutes");
-  cacheTag(APPLICATIONSCACHETAG(userId));
-
+  cacheTag(APPLICATIONSCACHETAG(userId), COMPANIESCACHETAG(userId));
   //* returns the date from [days] days ago
   const fromDate = days === null ? null : dateDaysAgo(days);
 

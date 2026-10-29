@@ -7,6 +7,7 @@ import { Result } from "@/types";
 import { db } from "@/db";
 import { revalidatePath, updateTag } from "next/cache";
 import { COMPANIESCACHETAG, type Company } from "@/lib/data/companies";
+import { APPLICATIONSCACHETAG } from "@/lib/data/applications";
 
 export type NewCompany = InferInsertModel<typeof companiesTable>;
 
@@ -83,7 +84,9 @@ export async function deleteCompany(id: number): Promise<Result<Company>> {
     }
 
     updateTag(COMPANIESCACHETAG(session.user.id));
+    updateTag(APPLICATIONSCACHETAG(session.user.id));
     revalidatePath("/companies");
+    revalidatePath("/applications");
     return { success: true, data: result[0] };
   } catch (error) {
     console.error("deleteCompany failed:", error);

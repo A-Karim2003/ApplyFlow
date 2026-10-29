@@ -243,7 +243,6 @@ export async function createApplication(
     });
 
     //? Refresh cached data now the commit has succeeded
-    //TODO swap for APPLICATIONSCACHETAG once it exists
     updateTag(APPLICATIONSCACHETAG(session.user.id));
     revalidatePath("/applications");
 
