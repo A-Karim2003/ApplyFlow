@@ -39,21 +39,29 @@ function formatStatus(status: ApplicationStatus) {
 export function StatusBadge({
   status,
   className,
+  abbreviate = false,
 }: {
   status: ApplicationStatus;
   className?: string;
+  abbreviate?: boolean;
 }) {
+  console.log(formatStatus(status), abbreviate);
   const styles = STATUS_STYLES[status];
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium whitespace-nowrap",
+        "inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium whitespace-nowrap min-w-22 justify-evenly",
         styles.pill,
         className,
       )}
     >
       <span className={cn("size-1.5 rounded-full", styles.dot)} aria-hidden />
-      {formatStatus(status)}
+
+      {formatStatus(status) === "Online Assessment" && abbreviate ? (
+        <span>OA</span>
+      ) : (
+        formatStatus(status)
+      )}
     </span>
   );
 }
