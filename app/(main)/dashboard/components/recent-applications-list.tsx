@@ -15,7 +15,7 @@ export function RecentApplications({
 }) {
   return (
     <DashboardCard
-      className="h-full"
+      className="h-full min-h-0"
       title="Recent applications"
       description="Sorted by the date you applied (or added the job)"
       action={
@@ -36,7 +36,7 @@ export function RecentApplications({
           {applications.map((application) => (
             <li
               key={application.id}
-              className="flex items-center gap-3 py-3 first:pt-0 last:pb-0"
+              className="border-b border-muted last:border-0 flex items-center gap-3 py-3 first:pt-0 last:pb-0"
             >
               <CompanyLogo name={application.companyName} />
               <div className="min-w-0 flex-1">

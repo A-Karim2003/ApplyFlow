@@ -45,7 +45,6 @@ export function StatusBadge({
   className?: string;
   abbreviate?: boolean;
 }) {
-  console.log(formatStatus(status), abbreviate);
   const styles = STATUS_STYLES[status];
   return (
     <span

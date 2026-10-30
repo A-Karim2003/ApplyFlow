@@ -10,3 +10,11 @@ export function relativeDay(applicatonDate: string) {
   if (days === 1) return "Yesterday";
   return `${days} days ago`;
 }
+
+export function daysSince(value: string) {
+  return differenceInCalendarDays(new Date(), parseISO(value));
+}
+
+export function shortDate(value: string) {
+  return format(parseISO(value), "d MMM");
+}
