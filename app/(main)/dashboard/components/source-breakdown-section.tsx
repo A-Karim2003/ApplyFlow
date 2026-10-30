@@ -11,7 +11,5 @@ export async function SourceBreakdownSection({
   const result = await getSourceBreakdown(days);
   if (!result.success) return <SectionError message={result.error} />;
 
-  console.log(result.data);
-
   return <SourceBreakdown data={result.data} />;
 }
