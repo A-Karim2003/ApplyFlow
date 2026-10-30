@@ -37,7 +37,9 @@ export const interviewsTable = pgTable(
         onDelete: "cascade",
       }),
 
-    scheduledAt: timestamp("scheduled_at").notNull(),
+    scheduledAt: timestamp("scheduled_at", {
+      withTimezone: true,
+    }).notNull(),
 
     interviewerName: text("interviewer_name"),
     interviewType: interviewType("interview_type").notNull(),
