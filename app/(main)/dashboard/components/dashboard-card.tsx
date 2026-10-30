@@ -24,13 +24,15 @@ export function DashboardCard({
   children,
 }: DashboardCardProps) {
   return (
-    <Card className={cn("rounded-2xl", className)}>
+    <Card className={cn("rounded-2xl h-full", className)}>
       <CardHeader>
         <CardTitle>{title}</CardTitle>
         {description && <CardDescription>{description}</CardDescription>}
         {action && <CardAction>{action}</CardAction>}
       </CardHeader>
-      <CardContent className="h-full">{children}</CardContent>
+      <CardContent className="overflow-scroll h-full min-h-40">
+        {children}
+      </CardContent>
     </Card>
   );
 }

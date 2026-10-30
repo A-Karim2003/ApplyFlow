@@ -108,7 +108,7 @@ async function getStatCardsCached(
     getLatestCompanyNames(userId, "offer", fromDate),
 
     //* returns company names of the 2 latest interviews
-    getLatestCompanyNames(userId, "interview", fromDate),
+    getLatestCompanyNames(userId, "interview", null),
   ]);
 
   const currentPeriodMetrics = calculateSubmissionMetrics(currentPeriodCounts);
