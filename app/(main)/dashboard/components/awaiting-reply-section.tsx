@@ -7,6 +7,5 @@ export async function AwaitingReplySection() {
   const result = await getAwaitingReply();
   if (!result.success) return <SectionError message={result.error} />;
 
-  console.log(result.data);
   return <AwaitingReply applications={result.data} />;
 }

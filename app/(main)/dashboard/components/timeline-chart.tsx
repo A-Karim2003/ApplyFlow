@@ -10,7 +10,7 @@ import {
   YAxis,
 } from "recharts";
 import { DashboardCard } from "./dashboard-card";
-import { ACCENT, EmptyChart } from "./chart-shared";
+import { EmptyChart } from "./chart-shared";
 
 const AXIS_TICK = { fill: "var(--muted-foreground)", fontSize: 12 };
 
@@ -48,8 +48,16 @@ export function TimelineChart({ points, unit }: TimelineChartProps) {
             >
               <defs>
                 <linearGradient id="timelineFill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={ACCENT} stopOpacity={0.3} />
-                  <stop offset="100%" stopColor={ACCENT} stopOpacity={0} />
+                  <stop
+                    offset="0%"
+                    stopColor={"var(--primary)"}
+                    stopOpacity={0.3}
+                  />
+                  <stop
+                    offset="100%"
+                    stopColor={"var(--primary)"}
+                    stopOpacity={0}
+                  />
                 </linearGradient>
               </defs>
               <CartesianGrid
@@ -75,10 +83,10 @@ export function TimelineChart({ points, unit }: TimelineChartProps) {
                 type="monotone"
                 dataKey="count"
                 name="Applications"
-                stroke={ACCENT}
+                stroke={"var(--primary)"}
                 strokeWidth={2}
                 fill="url(#timelineFill)"
-                dot={{ r: 3, fill: ACCENT }}
+                dot={{ r: 3, fill: "var(--primary)" }}
                 activeDot={{ r: 5 }}
               />
             </AreaChart>
