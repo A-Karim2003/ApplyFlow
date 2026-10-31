@@ -4,7 +4,6 @@ import { getStatCards } from "@/lib/data/dashboard/sections/kpi";
 
 import { KpiCards, type Kpi } from "./kpi-cards";
 import { SectionError } from "../components/section-error";
-import { signed } from "./stats";
 
 const toneOf = (totalChange: number | null): Kpi["tone"] =>
   totalChange === null || totalChange === 0
@@ -12,6 +11,11 @@ const toneOf = (totalChange: number | null): Kpi["tone"] =>
     : totalChange > 0
       ? "up"
       : "down";
+
+const signed = (value: number | null): string => {
+  if (value === null) return "-";
+  return value >= 0 ? `+${value}` : String(value);
+};
 
 export async function KpiCardsSection({
   days,
