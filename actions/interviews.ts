@@ -5,27 +5,14 @@ import { revalidatePath, updateTag } from "next/cache";
 import { z } from "zod";
 
 import { db } from "@/db";
-import {
-  applicationsTable,
-  interviewOutcome,
-  interviewsTable,
-  interviewType,
-} from "@/db/schema";
+import { applicationsTable, interviewsTable } from "@/db/schema";
 import { requireSession } from "@/lib/data/session";
 import { APPLICATIONSCACHETAG } from "@/lib/data/applications";
 import { Result } from "@/types";
-
-//* Not exported: a "use server" file may only export async functions (and types)
-const createInterviewSchema = z.object({
-  applicationId: z.number().int().positive(),
-  scheduledAt: z.date("Invalid date"),
-  interviewType: z.enum(interviewType.enumValues),
-  outcome: z.enum(interviewOutcome.enumValues),
-  interviewerName: z.string().trim().max(100).nullable(),
-  notes: z.string().trim().max(2000).nullable(),
-});
-
-export type CreateInterviewInput = z.infer<typeof createInterviewSchema>;
+import {
+  CreateInterviewInput,
+  createInterviewSchema,
+} from "@/lib/validations/interview";
 
 export type Interview = InferSelectModel<typeof interviewsTable>;
 export type NewInterview = InferInsertModel<typeof interviewsTable>;
@@ -36,9 +23,8 @@ export async function createInterview(
   const session = await requireSession();
 
   const parsed = createInterviewSchema.safeParse(input);
-  if (!parsed.success) {
+  if (!parsed.success)
     return { success: false, error: "Invalid interview details." };
-  }
 
   //* confirm the application belongs to the user
   const [application] = await db

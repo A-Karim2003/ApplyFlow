@@ -79,8 +79,8 @@ export default function ScheduleInterviewForm({
       }),
       interviewType: values.interviewType,
       outcome: values.outcome,
-      interviewerName: values.interviewerName || null,
-      notes: values.notes || null,
+      interviewerName: values.interviewerName,
+      notes: values.notes,
     });
 
     //* Stay open on failure so nothing typed is lost
