@@ -2,7 +2,6 @@
 
 import { and, eq, InferSelectModel, InferInsertModel } from "drizzle-orm";
 import { revalidatePath, updateTag } from "next/cache";
-import { z } from "zod";
 
 import { db } from "@/db";
 import { applicationsTable, interviewsTable } from "@/db/schema";
