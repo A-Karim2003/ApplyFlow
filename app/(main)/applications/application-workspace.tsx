@@ -362,10 +362,6 @@ export function ApplicationsWorkspace({ applications }: ApplicationsPageData) {
         onOpenChange={(open) =>
           setInterviewDialog((prev) => ({ ...prev, open }))
         }
-        //TODO: Placeholder until createInterview exists
-        onSubmit={async (interview) => {
-          console.log(interview);
-        }}
       />
     </>
   );

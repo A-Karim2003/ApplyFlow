@@ -8,7 +8,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-import type { NewInterview } from "@/actions/interviews";
 import ScheduleInterviewForm from "./schedule-interview-form";
 import { JobType, JOB_TYPES } from "@/lib/constants";
 import CompanyLogo from "@/app/_components/company-logo";
@@ -24,14 +23,12 @@ type ScheduleInterviewDialogProps = {
   open: boolean;
   application: ApplicationForInterview;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (interview: NewInterview) => Promise<void>;
 };
 
 export function ScheduleInterviewDialog({
   open,
   application,
   onOpenChange,
-  onSubmit,
 }: ScheduleInterviewDialogProps) {
   if (application.applicationId === null) return null;
 
@@ -44,7 +41,7 @@ export function ScheduleInterviewDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:w-[90%] sm:max-w-[90%] md:w-[80%] md:max-w-[80%] lg:w-[80%] lg:max-w-4xl">
         <DialogHeader>
           <DialogTitle>Schedule interview</DialogTitle>
           <DialogDescription>
@@ -69,7 +66,6 @@ export function ScheduleInterviewDialog({
 
         <ScheduleInterviewForm
           applicationId={applicationId}
-          onSubmit={onSubmit}
           onClose={() => onOpenChange(false)}
         />
       </DialogContent>
