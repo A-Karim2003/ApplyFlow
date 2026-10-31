@@ -1,7 +1,7 @@
 import { getStatusCounts } from "@/lib/data/dashboard/sections/status";
 
-import { SectionError } from "./section-error";
-import { StatusChart } from "./status-chart";
+import { SectionError } from "../section-error";
+import { StatusChart } from "../status-chart";
 import { STATUS_COLOURS, STATUS_OPTIONS } from "@/lib/constants";
 
 export async function StatusChartSection({ days }: { days: number | null }) {

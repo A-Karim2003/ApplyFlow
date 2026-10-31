@@ -1,7 +1,7 @@
 import { getSourceBreakdown } from "@/lib/data/dashboard/sections/source-breakdown";
 
-import { SectionError } from "./section-error";
-import { SourceBreakdown } from "./source-breakdown";
+import { SectionError } from "../section-error";
+import { SourceBreakdown } from "../source-breakdown";
 
 export async function SourceBreakdownSection({
   days,

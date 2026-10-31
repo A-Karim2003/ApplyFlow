@@ -2,8 +2,8 @@ import { Briefcase, CalendarClock, TrendingUp, Trophy } from "lucide-react";
 
 import { getStatCards } from "@/lib/data/dashboard/sections/kpi";
 
-import { KpiCards, type Kpi } from "./kpi-cards";
-import { SectionError } from "../components/section-error";
+import { KpiCards, type Kpi } from "../kpi-cards";
+import { SectionError } from "../section-error";
 
 const toneOf = (totalChange: number | null): Kpi["tone"] =>
   totalChange === null || totalChange === 0

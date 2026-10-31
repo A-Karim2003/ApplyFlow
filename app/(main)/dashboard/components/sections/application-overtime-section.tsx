@@ -1,6 +1,6 @@
 import { getTimeline } from "@/lib/data/dashboard/sections/timeline";
-import { SectionError } from "./section-error";
-import { TimelineChart } from "./timeline-chart";
+import { SectionError } from "../section-error";
+import { TimelineChart } from "../timeline-chart";
 
 export async function ApplicationOvertimeSection({
   days,
