@@ -45,6 +45,10 @@ import KanbanBoard from "./kanban-board";
 import ListView from "./applicationsTable/list-view";
 import ApplicationDetailsDialog from "./application-details-dialog";
 import { Button } from "@/components/ui/button";
+import {
+  ApplicationForInterview,
+  ScheduleInterviewDialog,
+} from "../(interview)/schedule-interview-dialog";
 
 type ApplicationFilters = {
   status: ApplicationStatus | "all";
@@ -68,6 +72,20 @@ export function ApplicationsWorkspace({ applications }: ApplicationsPageData) {
     number | null
   >(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+
+  //* This controls both whether the dialog is open and which application it belongs to.
+  const [interviewDialog, setInterviewDialog] = useState<{
+    open: boolean;
+    application: ApplicationForInterview;
+  }>({
+    open: false,
+    application: {
+      applicationId: null,
+      jobTitle: null,
+      jobType: null,
+      companyName: null,
+    },
+  });
 
   const [query, setQuery] = useState<string>("");
   const [filters, setFilters] = useState<ApplicationFilters>({
@@ -96,8 +114,24 @@ export function ApplicationsWorkspace({ applications }: ApplicationsPageData) {
 
       const result = await updateApplicationStatus({ id, newStatus });
 
-      if (!result.success) {
+      if (!result.success)
         toast.error("Unable to update status. Please try again.");
+
+      if (result.success && result.data.status === "interview") {
+        const { id: applicationId, jobTitle, jobType } = result.data;
+        const companyData = applications.find(
+          (app) => app.application.id === applicationId,
+        )?.company;
+
+        setInterviewDialog({
+          open: true,
+          application: {
+            applicationId: applicationId,
+            jobTitle: jobTitle,
+            jobType: jobType,
+            companyName: companyData?.name ?? null,
+          },
+        });
       }
     });
   }
@@ -319,6 +353,19 @@ export function ApplicationsWorkspace({ applications }: ApplicationsPageData) {
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         onStatusChange={moveApplication}
+      />
+
+      <ScheduleInterviewDialog
+        open={interviewDialog.open}
+        application={interviewDialog.application}
+        //* Only closes; the id is overwritten on the next open anyway
+        onOpenChange={(open) =>
+          setInterviewDialog((prev) => ({ ...prev, open }))
+        }
+        //TODO: Placeholder until createInterview exists
+        onSubmit={async (interview) => {
+          console.log(interview);
+        }}
       />
     </>
   );
