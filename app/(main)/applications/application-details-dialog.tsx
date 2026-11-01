@@ -4,7 +4,7 @@
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { MapPin, Trash2 } from "lucide-react";
+import { CalendarPlus, MapPin, Trash2 } from "lucide-react";
 import { useState, useTransition } from "react";
 import { STATUS_COLUMN_STYLES } from "@/lib/constants";
 
@@ -83,6 +83,7 @@ type ApplicationDetailsDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onStatusChange: (props: UpdateApplicationProp) => void;
+  onScheduleInterview: () => void;
 };
 
 export default function ApplicationDetailsDialog({
@@ -91,6 +92,7 @@ export default function ApplicationDetailsDialog({
   open,
   onOpenChange,
   onStatusChange,
+  onScheduleInterview,
 }: ApplicationDetailsDialogProps) {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [isDeleting, startDeleteTransition] = useTransition();
@@ -205,6 +207,20 @@ export default function ApplicationDetailsDialog({
                   )}
                 </DialogDescription>
               </div>
+
+              {status === "interview" && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="shrink-0 bg-amber-100 text-amber-800 hover:bg-amber-200"
+                  onClick={onScheduleInterview}
+                >
+                  <CalendarPlus data-icon="inline-start" />
+                  Schedule interview
+                </Button>
+              )}
+
               <Button
                 type="button"
                 variant="outline"
@@ -216,7 +232,6 @@ export default function ApplicationDetailsDialog({
               </Button>
             </div>
           </DialogHeader>
-
           <div className="grid grid-cols-2 gap-1.5 rounded-xl border bg-muted/40 p-2 sm:grid-cols-3 lg:grid-cols-3 2xl:grid-cols-6">
             {STATUS_OPTIONS.map((step, index) => {
               const active = status === step.value;

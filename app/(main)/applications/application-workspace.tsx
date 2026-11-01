@@ -109,6 +109,11 @@ export function ApplicationsWorkspace({ applications }: ApplicationsPageData) {
   );
 
   function moveApplication({ id, newStatus }: UpdateApplicationProp) {
+    //? Same-status move: nothing changed, so skip the update, history row and dialog
+    const currentStatus = applications.find((app) => app.application.id === id)
+      ?.application.status;
+    if (currentStatus === newStatus) return;
+
     startTransition(async () => {
       applyOptimisticMove({ id, newStatus });
 
@@ -210,6 +215,24 @@ export function ApplicationsWorkspace({ applications }: ApplicationsPageData) {
   function openApplication(id: number) {
     setSelectedApplicationId(id);
     setDialogOpen(true);
+  }
+
+  //? Opens the schedule modal for the application shown in the details dialog
+  function openScheduleInterview() {
+    //* if an application is selected, that means the details dialog is open
+    if (!selectedApplication) return;
+    
+    const { application, company } = selectedApplication;
+
+    setInterviewDialog({
+      open: true,
+      application: {
+        applicationId: application.id,
+        jobTitle: application.jobTitle,
+        jobType: application.jobType,
+        companyName: company.name,
+      },
+    });
   }
   return (
     <>
@@ -353,6 +376,7 @@ export function ApplicationsWorkspace({ applications }: ApplicationsPageData) {
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         onStatusChange={moveApplication}
+        onScheduleInterview={openScheduleInterview}
       />
 
       <ScheduleInterviewDialog
