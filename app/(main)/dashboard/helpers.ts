@@ -1,4 +1,10 @@
-import { differenceInCalendarDays, format, parseISO } from "date-fns";
+import {
+  differenceInCalendarDays,
+  differenceInMinutes,
+  format,
+  formatDistanceToNowStrict,
+  parseISO,
+} from "date-fns";
 
 //? Takes a "YYYY-MM-DD"
 export function relativeDay(applicatonDate: string) {
@@ -43,4 +49,10 @@ export function interviewTiming(scheduledAt: Date) {
     dayLabel: days === 1 ? "Tomorrow" : `In ${days} days`,
     whenLabel: `${date} · ${time}`,
   };
+}
+
+/*===================== FOR RECENT ACTIVITY SECTION ====================*/
+export function activityTime(createdAt: Date) {
+  if (differenceInMinutes(new Date(), createdAt) <= 1) return "Just now";
+  return formatDistanceToNowStrict(createdAt, { addSuffix: true });
 }

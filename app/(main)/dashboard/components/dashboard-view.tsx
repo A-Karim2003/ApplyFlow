@@ -16,6 +16,8 @@ import { SourceBreakdownSkeleton } from "./skeletons/source-breakdown-skeleton";
 import { SourceBreakdownSection } from "./sections/source-breakdown-section";
 import { UpcomingInterviewsSection } from "./sections/upcoming-interviews-section";
 import { UpcomingInterviewsSkeleton } from "./skeletons/upcoming-interviews-skeleton";
+import { RecentActivitySection } from "./sections/recent-activity-section";
+import { RecentActivitySkeleton } from "./skeletons/recent-activity-skeleton";
 
 export function DashboardView({ rangeKey }: { rangeKey: RangeKey }) {
   const selectedRange = RANGES.find((range) => range.key === rangeKey)!;
@@ -70,6 +72,10 @@ export function DashboardView({ rangeKey }: { rangeKey: RangeKey }) {
           fallback={<SourceBreakdownSkeleton />}
         >
           <SourceBreakdownSection days={selectedRange.days} />
+        </Suspense>
+
+        <Suspense fallback={<RecentActivitySkeleton />}>
+          <RecentActivitySection />
         </Suspense>
       </div>
     </div>
