@@ -66,7 +66,17 @@ const FILTER_CONFIGS = [
   options: { label: string; value: string }[];
 }[];
 
-export function ApplicationsWorkspace({ applications }: ApplicationsPageData) {
+type ApplicationsWorkspaceProps = ApplicationsPageData & {
+  companies: {
+    id: number;
+    name: string;
+  }[];
+};
+
+export function ApplicationsWorkspace({
+  applications,
+  companies,
+}: ApplicationsWorkspaceProps) {
   // selectedApplicationId and dialogOpen are for managing the application details dialog (modal)
   const [selectedApplicationId, setSelectedApplicationId] = useState<
     number | null
@@ -221,7 +231,7 @@ export function ApplicationsWorkspace({ applications }: ApplicationsPageData) {
   function openScheduleInterview() {
     //* if an application is selected, that means the details dialog is open
     if (!selectedApplication) return;
-    
+
     const { application, company } = selectedApplication;
 
     setInterviewDialog({
@@ -368,11 +378,7 @@ export function ApplicationsWorkspace({ applications }: ApplicationsPageData) {
 
       <ApplicationDetailsDialog
         application={selectedApplication}
-        companies={Array.from(
-          new Map(
-            applications.map(({ company }) => [company.id, company]),
-          ).values(),
-        )}
+        companies={companies}
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         onStatusChange={moveApplication}
