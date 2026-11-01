@@ -10,6 +10,8 @@ import {
   FileText,
   Settings,
   Waypoints,
+  ChevronDown,
+  LogOut,
 } from "lucide-react";
 import {
   Sidebar,
@@ -23,7 +25,20 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { signOut } from "@/lib/auth-client-actions";
+import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
 
 import { AddApplicationButton } from "./AddApplicationButton";
 
@@ -35,8 +50,18 @@ const navItems = [
   { title: "Account", href: "/account", icon: Settings },
 ];
 
-export function AppSidebar() {
+type AppSidebarProps = {
+  user: {
+    name: string;
+    email: string;
+    image?: string | null;
+    initials: string;
+  } | null;
+};
+
+export function AppSidebar({ user }: AppSidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
 
   return (
     <Sidebar>
@@ -82,19 +107,52 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="p-3">
-        <div className="flex items-center gap-3 rounded-lg p-2">
-          <Avatar className="size-9">
-            <AvatarFallback className="bg-sidebar-accent text-sidebar-accent-foreground">
-              AK
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex min-w-0 flex-col">
-            <span className="truncate text-sm font-medium">Abdoulkarim D.</span>
-            <span className="truncate text-xs text-sidebar-foreground/70">
-              abdoulkarim@email.com
-            </span>
-          </div>
-        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            render={
+              <button
+                type="button"
+                className="flex w-full items-center gap-3 rounded-lg p-2 text-left outline-none transition-colors hover:bg-sidebar-accent focus-visible:ring-2 focus-visible:ring-sidebar-ring"
+              >
+                <Avatar className="size-9">
+                  {user?.image && <AvatarImage src={user.image} alt="" />}
+                  <AvatarFallback className="bg-sidebar-accent text-sidebar-accent-foreground">
+                    {user?.initials ?? "U"}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="flex min-w-0 flex-1 flex-col">
+                  <span className="truncate text-sm font-medium">
+                    {user?.name ?? "User"}
+                  </span>
+                  <span className="truncate text-xs text-sidebar-foreground/70">
+                    {user?.email}
+                  </span>
+                </span>
+                <ChevronDown className="size-4 shrink-0 text-sidebar-foreground/70" />
+              </button>
+            }
+          />
+          <DropdownMenuContent align="end" side="top" className="w-56">
+            <DropdownMenuItem
+              onClick={async () => {
+                try {
+                  await signOut();
+                  router.replace("/sign-in");
+                  router.refresh();
+                } catch (error) {
+                  toast.error(
+                    error instanceof Error
+                      ? error.message
+                      : "Unable to log out. Please try again.",
+                  );
+                }
+              }}
+            >
+              <LogOut className="size-4" />
+              Log out
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </SidebarFooter>
     </Sidebar>
   );
