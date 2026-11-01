@@ -1,13 +1,13 @@
 "use server";
 
-import { and, eq, type InferInsertModel } from "drizzle-orm";
+import { and, count, eq, type InferInsertModel } from "drizzle-orm";
 import { companiesTable } from "@/db/schema/companies";
 import { requireSession } from "@/lib/data/session";
 import { Result } from "@/types";
 import { db } from "@/db";
 import { revalidatePath, updateTag } from "next/cache";
 import { COMPANIESCACHETAG, type Company } from "@/lib/data/companies";
-import { APPLICATIONSCACHETAG } from "@/lib/data/applications";
+import { applicationsTable } from "@/db/schema";
 
 export type NewCompany = InferInsertModel<typeof companiesTable>;
 
@@ -67,26 +67,39 @@ export async function updateCompany(
 
 export async function deleteCompany(id: number): Promise<Result<Company>> {
   const session = await requireSession();
+  const userId = session.user.id;
 
   try {
-    const result = await db
-      .delete(companiesTable)
+    //* applications.companyId is onDelete: restrict, so check first for a clear message
+    const [{ total }] = await db
+      .select({ total: count() })
+      .from(applicationsTable)
       .where(
         and(
-          eq(companiesTable.id, id),
-          eq(companiesTable.userId, session.user.id),
+          eq(applicationsTable.companyId, id),
+          eq(applicationsTable.userId, userId),
         ),
-      )
+      );
+
+    if (total > 0) {
+      return {
+        success: false,
+        error: `Used by ${total} application${total === 1 ? "" : "s"}. Delete or reassign them first.`,
+      };
+    }
+
+    const result = await db
+      .delete(companiesTable)
+      .where(and(eq(companiesTable.id, id), eq(companiesTable.userId, userId)))
       .returning();
 
     if (result.length === 0) {
       return { success: false, error: "Company not found" };
     }
 
-    updateTag(COMPANIESCACHETAG(session.user.id));
-    updateTag(APPLICATIONSCACHETAG(session.user.id));
+    //* Delete only succeeds with no applications, so only company data changed
+    updateTag(COMPANIESCACHETAG(userId));
     revalidatePath("/companies");
-    revalidatePath("/applications");
     return { success: true, data: result[0] };
   } catch (error) {
     console.error("deleteCompany failed:", error);
