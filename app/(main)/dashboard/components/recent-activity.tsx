@@ -57,7 +57,9 @@ export function RecentActivity({ items }: { items: RecentActivityItem[] }) {
       description="The latest changes in your pipeline"
     >
       {items.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No activity yet.</p>
+        <p className="py-8 text-center text-sm text-muted-foreground">
+          No activity yet.
+        </p>
       ) : (
         <ul>
           {items.map((item, index) => {

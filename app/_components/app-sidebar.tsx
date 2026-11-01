@@ -2,15 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useTransition } from "react";
-import { toast } from "react-toastify";
+
 import {
   LayoutDashboard,
   Briefcase,
   Building2,
   FileText,
   Settings,
-  Plus,
   Waypoints,
 } from "lucide-react";
 import {
@@ -25,13 +23,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { AddApplicationForm } from "./add-application-form";
-import { getAddApplicationFormData } from "@/actions/applications/get-add-application-form-data";
-import type { Company } from "@/lib/data/companies";
-import type { Document } from "@/lib/data/documents";
-import SpinnerEllipsis from "@/components/shadcn-space/spinner/spinner-05";
+
 import { AddApplicationButton } from "./AddApplicationButton";
 
 const navItems = [
