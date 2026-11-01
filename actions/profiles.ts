@@ -1,22 +1,51 @@
 "use server";
 
+import { eq } from "drizzle-orm";
 import type { InferInsertModel, InferSelectModel } from "drizzle-orm";
-import { profilesTable } from "@/db/schema/index";
+import { revalidatePath, updateTag } from "next/cache";
+
+import { db } from "@/db";
+import { profilesTable } from "@/db/schema";
+import { PROFILECACHETAG } from "@/lib/data/profile";
+import { requireSession } from "@/lib/data/session";
+import {
+  updateProfileSchema,
+  type UpdateProfileInput,
+} from "@/lib/validations/profile";
+import { Result } from "@/types";
 
 export type Profile = InferSelectModel<typeof profilesTable>;
 export type NewProfile = InferInsertModel<typeof profilesTable>;
 
-export async function createProfile(data: NewProfile): Promise<Profile> {
-  throw new Error("Not implemented yet.");
-}
-
 export async function updateProfile(
-  userId: Profile["userId"],
-  data: Partial<NewProfile>,
-): Promise<Profile> {
-  throw new Error("Not implemented yet.");
-}
+  input: UpdateProfileInput,
+): Promise<Result<Profile>> {
+  const session = await requireSession();
 
-export async function deleteProfile(userId: Profile["userId"]): Promise<void> {
-  throw new Error("Not implemented yet.");
+  const parsed = updateProfileSchema.safeParse(input);
+  if (!parsed.success)
+    return { success: false, error: "Invalid profile details." };
+
+  try {
+    const [profile] = await db
+      .update(profilesTable)
+      .set({
+        firstName: parsed.data.firstName,
+        lastName: parsed.data.lastName,
+        bio: parsed.data.bio || null,
+      })
+      .where(eq(profilesTable.userId, session.user.id))
+      .returning();
+
+    if (!profile) return { success: false, error: "Profile not found" };
+
+    //? Refreshes the sidebar name and header greeting
+    updateTag(PROFILECACHETAG(session.user.id));
+    revalidatePath("/account");
+
+    return { success: true, data: profile };
+  } catch (error) {
+    console.error(error);
+    return { success: false, error: "Could not update profile" };
+  }
 }
