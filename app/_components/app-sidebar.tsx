@@ -32,6 +32,8 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -42,6 +44,7 @@ import { toast } from "react-toastify";
 
 import { AddApplicationButton } from "./AddApplicationButton";
 import Logo from "./logo";
+import { useEffect } from "react";
 
 const navItems = [
   { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -64,7 +67,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { theme, setTheme } = useTheme();
-  console.log(theme);
+
   return (
     <Sidebar>
       <SidebarHeader className="gap-4 p-4">
@@ -130,20 +133,25 @@ export function AppSidebar({ user }: AppSidebarProps) {
             }
           />
           <DropdownMenuContent align="end" side="top" className="w-56">
-            <DropdownMenuItem onClick={() => setTheme("system")}>
-              <Monitor className="size-4" />
-              System
-            </DropdownMenuItem>
+            <DropdownMenuRadioGroup
+              value={theme ?? "system"}
+              onValueChange={setTheme}
+            >
+              <DropdownMenuRadioItem value="system">
+                <Monitor className="size-4" />
+                System
+              </DropdownMenuRadioItem>
 
-            <DropdownMenuItem onClick={() => setTheme("light")}>
-              <Sun className="size-4" />
-              Light
-            </DropdownMenuItem>
+              <DropdownMenuRadioItem value="light">
+                <Sun className="size-4" />
+                Light
+              </DropdownMenuRadioItem>
 
-            <DropdownMenuItem onClick={() => setTheme("dark")}>
-              <Moon className="size-4" />
-              Dark
-            </DropdownMenuItem>
+              <DropdownMenuRadioItem value="dark">
+                <Moon className="size-4" />
+                Dark
+              </DropdownMenuRadioItem>
+            </DropdownMenuRadioGroup>
 
             <DropdownMenuSeparator />
 
