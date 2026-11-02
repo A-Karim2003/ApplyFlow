@@ -15,6 +15,7 @@ export const profilesTable = pgTable("profiles", (t) => ({
 
   firstName: t.text("first_name").notNull(),
   lastName: t.text("last_name").notNull(),
+  image: t.text("image"),
   bio: t.text("bio"),
 
   createdAt: t.timestamp("created_at").defaultNow().notNull(),
