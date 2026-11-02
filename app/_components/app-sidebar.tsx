@@ -44,7 +44,6 @@ import { toast } from "react-toastify";
 
 import { AddApplicationButton } from "./AddApplicationButton";
 import Logo from "./logo";
-import { useEffect } from "react";
 
 const navItems = [
   { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
