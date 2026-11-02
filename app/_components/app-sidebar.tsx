@@ -9,9 +9,11 @@ import {
   Building2,
   FileText,
   Settings,
-  Waypoints,
   ChevronDown,
   LogOut,
+  Monitor,
+  Moon,
+  Sun,
 } from "lucide-react";
 import {
   Sidebar,
@@ -25,22 +27,21 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { signOut } from "@/lib/auth-client-actions";
 import { useRouter } from "next/navigation";
+import { useTheme } from "next-themes";
 import { toast } from "react-toastify";
 
 import { AddApplicationButton } from "./AddApplicationButton";
+import Logo from "./logo";
 
 const navItems = [
   { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -62,17 +63,13 @@ type AppSidebarProps = {
 export function AppSidebar({ user }: AppSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
-
+  const { theme, setTheme } = useTheme();
+  console.log(theme);
   return (
     <Sidebar>
       <SidebarHeader className="gap-4 p-4">
-        <Link href="/dashboard" className="flex items-center gap-2.5">
-          <span className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <Waypoints className="size-5" />
-          </span>
-          <span className="text-lg font-semibold tracking-tight">
-            ApplyFlow
-          </span>
+        <Link href="/dashboard" className="block">
+          <Logo className="w-full" />
         </Link>
         <AddApplicationButton className="w-full justify-center" size="lg" />
       </SidebarHeader>
@@ -133,6 +130,23 @@ export function AppSidebar({ user }: AppSidebarProps) {
             }
           />
           <DropdownMenuContent align="end" side="top" className="w-56">
+            <DropdownMenuItem onClick={() => setTheme("system")}>
+              <Monitor className="size-4" />
+              System
+            </DropdownMenuItem>
+
+            <DropdownMenuItem onClick={() => setTheme("light")}>
+              <Sun className="size-4" />
+              Light
+            </DropdownMenuItem>
+
+            <DropdownMenuItem onClick={() => setTheme("dark")}>
+              <Moon className="size-4" />
+              Dark
+            </DropdownMenuItem>
+
+            <DropdownMenuSeparator />
+
             <DropdownMenuItem
               onClick={async () => {
                 try {
