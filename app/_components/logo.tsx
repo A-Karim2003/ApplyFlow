@@ -10,12 +10,17 @@ type LogoProps = {
 
 export default function Logo({ className, theme }: LogoProps) {
   return (
-    <div className={cn("relative w-100 aspect-[3.89/1]", className)}>
+    <div
+      className={cn(
+        "relative w-100 aspect-[3.89/1]  flex items-center justify-center",
+        className,
+      )}
+    >
       <Image
         src={`/logo-${theme || "light"}.png`}
         alt="ApplyFlow"
         fill
-        className="object-contain object-left"
+        className="object-contain"
         priority
       />
     </div>

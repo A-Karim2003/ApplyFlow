@@ -9,9 +9,15 @@ import { requireSession } from "./session";
 
 export const PROFILECACHETAG = (userId: string) => `profile-${userId}`;
 
+export type ProfileDetails = {
+  firstName: string;
+  lastName: string;
+  bio: string | null;
+};
+
 async function getProfileCached(
   userId: string,
-): Promise<{ firstName: string; lastName: string } | null> {
+): Promise<ProfileDetails | null> {
   "use cache";
   cacheLife("minutes");
   cacheTag(PROFILECACHETAG(userId));
@@ -20,6 +26,7 @@ async function getProfileCached(
     .select({
       firstName: profilesTable.firstName,
       lastName: profilesTable.lastName,
+      bio: profilesTable.bio,
     })
     .from(profilesTable)
     .where(eq(profilesTable.userId, userId));
@@ -27,9 +34,7 @@ async function getProfileCached(
   return profile ?? null;
 }
 
-export async function getProfile(): Promise<
-  Result<{ firstName: string; lastName: string }>
-> {
+export async function getProfile(): Promise<Result<ProfileDetails>> {
   const session = await requireSession();
 
   try {
