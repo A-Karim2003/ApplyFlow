@@ -13,6 +13,7 @@ import {
   type UpdateProfileInput,
 } from "@/lib/validations/profile";
 import { Result } from "@/types";
+import { deleteObject } from "@/lib/s3/delete-object";
 
 export type Profile = InferSelectModel<typeof profilesTable>;
 export type NewProfile = InferInsertModel<typeof profilesTable>;
@@ -47,5 +48,77 @@ export async function updateProfile(
   } catch (error) {
     console.error(error);
     return { success: false, error: "Could not update profile" };
+  }
+}
+
+export async function updateProfileImage(key: string): Promise<Result<null>> {
+  const session = await requireSession();
+
+  //? key comes from the client: it must sit under this user's avatar prefix
+  if (!key.startsWith(`users/${session.user.id}/avatar/`)) {
+    return { success: false, error: "Invalid image" };
+  }
+
+  try {
+    const [profile] = await db
+      .select({ image: profilesTable.image })
+      .from(profilesTable)
+      .where(eq(profilesTable.userId, session.user.id));
+
+    if (!profile) return { success: false, error: "Profile not found" };
+
+    //? delete old object first: a failed delete never loses the only pointer to it
+    if (profile.image && profile.image !== key) {
+      try {
+        await deleteObject(profile.image);
+      } catch (error) {
+        console.error("Failed to delete old avatar:", error);
+      }
+    }
+
+    await db
+      .update(profilesTable)
+      .set({ image: key })
+      .where(eq(profilesTable.userId, session.user.id));
+
+    updateTag(PROFILECACHETAG(session.user.id));
+    revalidatePath("/account");
+    return { success: true, data: null };
+  } catch (error) {
+    console.error("updateProfileImage failed:", error);
+    return { success: false, error: "Could not update profile image" };
+  }
+}
+
+export async function removeProfileImage(): Promise<Result<null>> {
+  const session = await requireSession();
+
+  try {
+    const [profile] = await db
+      .select({ image: profilesTable.image })
+      .from(profilesTable)
+      .where(eq(profilesTable.userId, session.user.id));
+
+    if (!profile) return { success: false, error: "Profile not found" };
+
+    if (!profile.image) return { success: true, data: null };
+
+    try {
+      await deleteObject(profile.image);
+    } catch (error) {
+      console.error("Failed to delete avatar:", error);
+    }
+
+    await db
+      .update(profilesTable)
+      .set({ image: null })
+      .where(eq(profilesTable.userId, session.user.id));
+
+    updateTag(PROFILECACHETAG(session.user.id));
+    revalidatePath("/account");
+    return { success: true, data: null };
+  } catch (error) {
+    console.error("removeProfileImage failed:", error);
+    return { success: false, error: "Could not remove profile image" };
   }
 }

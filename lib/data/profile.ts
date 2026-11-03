@@ -13,6 +13,7 @@ export type ProfileDetails = {
   firstName: string;
   lastName: string;
   bio: string | null;
+  image: string | null; //? S3 key
 };
 
 async function getProfileCached(
@@ -27,6 +28,7 @@ async function getProfileCached(
       firstName: profilesTable.firstName,
       lastName: profilesTable.lastName,
       bio: profilesTable.bio,
+      image: profilesTable.image,
     })
     .from(profilesTable)
     .where(eq(profilesTable.userId, userId));
