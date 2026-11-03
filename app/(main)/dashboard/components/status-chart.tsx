@@ -64,6 +64,8 @@ export function StatusChart({ data }: { data: StatusPoint[] }) {
               <Tooltip
                 cursor={{ fill: "var(--muted)", opacity: 0.5 }}
                 contentStyle={TOOLTIP_STYLE}
+                itemStyle={{ color: "var(--card-foreground)" }}
+                labelStyle={{ color: "var(--card-foreground)" }}
               />
               <Bar
                 dataKey="count"

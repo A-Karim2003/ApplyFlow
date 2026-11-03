@@ -48,7 +48,7 @@ export function DashboardView({ rangeKey }: { rangeKey: RangeKey }) {
         </Suspense>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-3 lg:h-150">
+      <div className="grid gap-4 lg:grid-cols-3 ">
         <div className="lg:col-span-2 h-full min-h-0">
           <Suspense fallback={<RecentApplicationsSkeleton />}>
             <RecentApplicationsSection />
