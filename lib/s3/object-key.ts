@@ -11,3 +11,7 @@ export function generateObjectKey(userId: string, filename: string): string {
 
   return `users/${userId}/documents/${documentUuid}/${safeFilename}`;
 }
+
+export function generateAvatarKey(userId: string): string {
+  return `users/${userId}/avatar/${randomUUID()}`;
+}
