@@ -7,6 +7,8 @@ import { AppSidebar } from "../_components/app-sidebar";
 import { RoutePageHeader } from "../_components/route-page-header";
 import { getSession } from "@/lib/data/session";
 import { getProfile } from "@/lib/data/profile";
+import { getAvatarUrl } from "@/lib/s3/avatar/avatar-url";
+
 import { PageHeaderSkeleton } from "../_components/page-header-skeleton";
 
 export const instant = false;
@@ -54,6 +56,10 @@ export default async function Layout({
       ? `${firstName[0] ?? ""}${lastName[0] ?? ""}`.toUpperCase()
       : (session?.user.email[0]?.toUpperCase() ?? "U");
 
+  //? signed per render, outside the cache: uploaded photo, then Google photo
+  const avatarUrl =
+    (await getAvatarUrl(profile?.image ?? null)) ?? session?.user.image;
+
   return (
     <SidebarProvider>
       <AppSidebar
@@ -62,7 +68,7 @@ export default async function Layout({
             ? {
                 name,
                 email: session.user.email,
-                image: session.user.image,
+                image: avatarUrl,
                 initials,
               }
             : null

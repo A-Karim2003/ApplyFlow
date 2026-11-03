@@ -114,7 +114,13 @@ export function AppSidebar({ user }: AppSidebarProps) {
                 className="flex w-full items-center gap-3 rounded-lg p-2 text-left outline-none transition-colors hover:bg-sidebar-accent focus-visible:ring-2 focus-visible:ring-sidebar-ring"
               >
                 <Avatar className="size-9">
-                  {user?.image && <AvatarImage src={user.image} alt="" />}
+                  {user?.image && (
+                    <AvatarImage
+                      src={user.image}
+                      alt=""
+                      referrerPolicy="no-referrer"
+                    />
+                  )}
                   <AvatarFallback className="bg-sidebar-accent text-sidebar-accent-foreground">
                     {user?.initials ?? "U"}
                   </AvatarFallback>
