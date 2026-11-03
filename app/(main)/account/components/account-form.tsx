@@ -1,10 +1,15 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 
-import { updateProfile } from "@/actions/profiles";
+import {
+  removeProfileImage,
+  updateProfile,
+  updateProfileImage,
+} from "@/actions/profiles";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,14 +25,18 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import SpinnerEllipsis from "@/components/shadcn-space/spinner/spinner-05";
 import {
+  AVATAR_TYPES,
+  avatarUploadSchema,
   updateProfileSchema,
   type UpdateProfileInput,
 } from "@/lib/validations/profile";
+import { createAvatarUploadUrl } from "@/lib/s3/avatar/presigned-avatar-upload";
 
 type AccountFormProps = UpdateProfileInput & {
   email: string;
   image?: string | null;
   initials: string;
+  hasUpload: boolean;
 };
 
 export function AccountForm({
@@ -37,7 +46,11 @@ export function AccountForm({
   email,
   image,
   initials,
+  hasUpload,
 }: AccountFormProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isUploading, setIsUploading] = useState(false);
+
   const {
     register,
     handleSubmit,
@@ -60,6 +73,77 @@ export function AccountForm({
     toast.success("Profile updated");
   }
 
+  //* Function for handling avatar uploads into S3 and storing key in DB
+  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    //? client pre-check for UX only; the server re-validates
+    const check = avatarUploadSchema.safeParse({
+      contentType: file.type,
+      size: file.size,
+    });
+
+    if (!check.success) {
+      toast.error("Use a JPG, PNG or WebP image under 2MB.");
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const upload = await createAvatarUploadUrl({
+        contentType: file.type,
+        size: file.size,
+      });
+
+      if (!upload.success) {
+        toast.error(upload.error);
+        return;
+      }
+
+      //? Content-Type must match what was signed, or S3 returns 403
+      const put = await fetch(upload.data.presignedUrl, {
+        method: "PUT",
+        body: file,
+        headers: { "Content-Type": file.type },
+      });
+
+      if (!put.ok) {
+        toast.error("Upload failed");
+        return;
+      }
+
+      const saved = await updateProfileImage(upload.data.key);
+      if (!saved.success) {
+        toast.error(saved.error);
+        return;
+      }
+      toast.success("Photo updated");
+    } catch {
+      toast.error("Upload failed");
+    } finally {
+      setIsUploading(false);
+    }
+  }
+
+  //* Function for handling avatar deletion in S3 and removing key in DB
+
+  async function handleRemove() {
+    setIsUploading(true);
+    try {
+      const result = await removeProfileImage();
+      if (!result.success) {
+        toast.error(result.error);
+        return;
+      }
+      toast.success("Photo removed");
+    } catch {
+      toast.error("Could not remove photo");
+    } finally {
+      setIsUploading(false);
+    }
+  }
+
   return (
     <form onSubmit={handleSubmit(submit)} className="max-w-2xl">
       <Card className="rounded-2xl">
@@ -71,15 +155,51 @@ export function AccountForm({
         <CardContent className="flex flex-col gap-6">
           <div className="flex items-center gap-4 border-b pb-6">
             <Avatar className="size-16">
-              {image && <AvatarImage src={image} alt="" />}
+              {image && (
+                <AvatarImage src={image} alt="" referrerPolicy="no-referrer" />
+              )}
               <AvatarFallback className="bg-primary text-lg text-primary-foreground">
                 {initials}
               </AvatarFallback>
             </Avatar>
-            <p className="text-sm text-muted-foreground">
-              Taken from your Google account when you sign in with Google,
-              otherwise your initials are shown.
-            </p>
+
+            <div className="flex flex-col gap-2">
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={isUploading}
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  {isUploading ? "Working…" : "Change photo"}
+                </Button>
+
+                {/* has upload means an image key already exists in db */}
+                {hasUpload && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    disabled={isUploading}
+                    onClick={handleRemove}
+                  >
+                    Remove
+                  </Button>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                JPG, PNG or WebP, up to 2MB.
+              </p>
+            </div>
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept={AVATAR_TYPES.join(",")}
+              className="hidden"
+              onChange={handleFile}
+            />
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">

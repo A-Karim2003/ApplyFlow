@@ -5,6 +5,7 @@ import { requireSession } from "@/lib/data/session";
 
 import { AccountForm } from "./components/account-form";
 import AccountSkeleton from "./components/skeleton/account-skeleton";
+import { getAvatarUrl } from "@/lib/s3/avatar/avatar-url";
 
 export default function AccountPage() {
   return (
@@ -25,11 +26,14 @@ async function AccountContent() {
   if (!profileResult.success)
     return <p className="text-sm text-destructive">{profileResult.error}</p>;
 
-  const { firstName, lastName, bio } = profileResult.data;
+  const { firstName, lastName, bio, image } = profileResult.data;
   const initials =
     firstName || lastName
       ? `${firstName[0] ?? ""}${lastName[0] ?? ""}`.toUpperCase()
       : (session.user.email[0]?.toUpperCase() ?? "U");
+
+  //? signed per render, outside the cache: uploaded photo first, then Google photo
+  const uploadedUrl = await getAvatarUrl(image);
 
   return (
     <AccountForm
@@ -37,7 +41,8 @@ async function AccountContent() {
       lastName={lastName}
       bio={bio ?? ""}
       email={session.user.email}
-      image={session.user.image}
+      image={uploadedUrl || session.user.image}
+      hasUpload={!!image}
       initials={initials}
     />
   );
