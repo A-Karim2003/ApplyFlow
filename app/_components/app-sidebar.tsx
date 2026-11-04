@@ -130,7 +130,9 @@ export function AppSidebar({ user }: AppSidebarProps) {
                     {user?.name ?? "User"}
                   </span>
                   <span className="truncate text-xs text-sidebar-foreground/70">
-                    {user?.email}
+                    {/* TODO: Add users real email after demo */}
+                    {/* {user?.email} */}
+                    demo_user03@gmail.com
                   </span>
                 </span>
                 <ChevronDown className="size-4 shrink-0 text-sidebar-foreground/70" />

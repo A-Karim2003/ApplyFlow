@@ -79,7 +79,7 @@ export default function Home() {
   return (
     <>
       <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur supports-backdrop-filter:bg-background/60">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+        <div className="mx-auto flex max-w-360 w-full items-center justify-between px-6 py-4">
           <Logo />
           <div className="flex items-center gap-2">
             <Link
@@ -98,12 +98,11 @@ export default function Home() {
       <main className="flex-1 overflow-x-hidden">
         <Hero signUpHref={"/sign-up"} signInHref={"/sign-in"} />
 
-        {/* Static on purpose: only the hero tilt and feature rows animate */}
-        <section className="mx-auto max-w-6xl px-6 pb-16">
+        <section className="mx-auto max-w-360 w-full px-6 pb-16">
           <MediaFrame media={HERO_IMAGE} />
         </section>
 
-        <section className="mx-auto max-w-6xl px-6">
+        <section className="mx-auto max-w-360 w-full px-6">
           {FEATURES.map((feature, index) => (
             <FeatureSection
               key={feature.label}
@@ -115,7 +114,7 @@ export default function Home() {
       </main>
 
       <footer className="border-t">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-8 text-sm text-muted-foreground">
+        <div className="mx-auto flex max-w-360 w-full items-center justify-between px-6 py-8 text-sm text-muted-foreground">
           <span>ApplyFlow</span>
         </div>
       </footer>
