@@ -1,4 +1,4 @@
-import { desc, eq, type InferSelectModel } from "drizzle-orm";
+import { asc, eq, type InferSelectModel } from "drizzle-orm";
 import { applicationDocumentsTable, documentsTable } from "@/db/schema/";
 import { db } from "@/db";
 import { getSession } from "./session";
@@ -55,7 +55,7 @@ async function getDocumentsPageDataCached(
       .select()
       .from(documentsTable)
       .where(eq(documentsTable.userId, userId))
-      .orderBy(desc(documentsTable.createdAt)),
+      .orderBy(asc(documentsTable.documentType)),
     db
       .select({
         applicationId: applicationDocumentsTable.applicationId,
