@@ -211,7 +211,10 @@ export function DocumentsLibrary({
           </TabsList>
         </Tabs>
 
-        <UploadDocumentModal onUpload={handleUpload}>
+        <UploadDocumentModal
+          onUpload={handleUpload}
+          existingFilenames={documents.map((document) => document.filename)}
+        >
           <Button>
             <UploadIcon data-icon="inline-start" />
             Upload document

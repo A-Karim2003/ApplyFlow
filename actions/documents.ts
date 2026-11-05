@@ -45,7 +45,19 @@ export async function createDocument(
     updateTag(DOCUMENTSCACHETAG(session.user.id));
     revalidatePath("/documents");
     return { success: true, data: result[0] };
-  } catch {
+  } catch (error) {
+    if (
+      error &&
+      typeof error === "object" &&
+      "code" in error &&
+      error.code === "23505"
+    ) {
+      return {
+        success: false,
+        error: `You already have a document called ${data.filename}`,
+      };
+    }
+
     return { success: false, error: "Failed to upload document" };
   }
 }

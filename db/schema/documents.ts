@@ -1,4 +1,4 @@
-import { pgEnum, pgTable, index } from "drizzle-orm/pg-core";
+import { pgEnum, pgTable, index, unique } from "drizzle-orm/pg-core";
 import { user } from "./auth-schema";
 
 export const documentTypeEnum = pgEnum("document_type", [
@@ -29,5 +29,11 @@ export const documentsTable = pgTable(
 
     createdAt: t.timestamp("created_at").defaultNow().notNull(),
   }),
-  (table) => [index("documents_user_id_idx").on(table.userId)],
+  (table) => [
+    index("documents_user_id_idx").on(table.userId),
+    unique("documents_user_id_filename_unique").on(
+      table.userId,
+      table.filename,
+    ),
+  ],
 );
