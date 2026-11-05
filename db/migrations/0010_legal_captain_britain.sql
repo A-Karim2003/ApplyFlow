@@ -1,0 +1,1 @@
+ALTER TABLE "documents" ADD CONSTRAINT "documents_user_id_filename_unique" UNIQUE("user_id","filename");
