@@ -10,7 +10,7 @@ export async function StatusChartSection({ days }: { days: number | null }) {
   if (!result.success) return <SectionError message={result.error} />;
 
   const data = STATUS_OPTIONS.map((status) => ({
-    label: status.label,
+    label: status.label === "Online Assessment" ? "OA" : status.label,
     count: result.data[status.value],
     colour: STATUS_COLOURS[status.value],
   }));
