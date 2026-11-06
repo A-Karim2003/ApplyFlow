@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 
 export default function Logo({ className }: { className?: string }) {
   return (
-    <div className={cn("w-56", className)}>
+    <div className={cn("aspect-984/253 w-56", className)}>
       <Image
         src="/logo-dark.png"
         alt="ApplyFlow"
@@ -11,7 +11,7 @@ export default function Logo({ className }: { className?: string }) {
         height={253}
         sizes="400px"
         quality={100}
-        className="h-auto w-full dark:hidden"
+        className="h-full w-full dark:hidden"
       />
       <Image
         src="/logo-light.png"
@@ -20,8 +20,10 @@ export default function Logo({ className }: { className?: string }) {
         height={272}
         sizes="400px"
         quality={100}
-        className="hidden h-auto w-full dark:block"
+        className="h-full w-full hidden dark:block"
       />
     </div>
   );
 }
+
+// absolute inset-0 object-fill

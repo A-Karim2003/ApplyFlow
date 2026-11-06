@@ -3,6 +3,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { Media, MediaFrame } from "./_components/homepage/media-frame";
 import { ApplicationsTabs } from "./_components/homepage/applications-tabs";
 import { ThemedImage } from "./_components/homepage/themed-image";
+import ThemeToggle from "./_components/homepage/theme-toggle";
 
 import { Hero } from "./_components/homepage/hero";
 import {
@@ -97,6 +98,7 @@ export default function Home() {
         <div className="mx-auto flex max-w-360 w-full items-center justify-between px-6 py-4">
           <Logo />
           <div className="flex items-center gap-2">
+            <ThemeToggle />
             <Link
               href={"/sign-in"}
               className={buttonVariants({ variant: "ghost" })}
