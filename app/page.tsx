@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import { Media, MediaFrame } from "./_components/homepage/media-frame";
+import { ApplicationsTabs } from "./_components/homepage/applications-tabs";
+import { ThemedImage } from "./_components/homepage/themed-image";
 
 import { Hero } from "./_components/homepage/hero";
 import {
@@ -19,22 +21,29 @@ const FEATURES: Feature[] = [
       "Every status change recorded with its date",
       "Filter and sort without leaving the board",
     ],
-    media: { src: "", alt: "Kanban board", width: 1400, height: 900 },
+    media: {
+      lightSrc: "/application_images/applications-kanban-light.png",
+      darkSrc: "/application_images/applications-kanban-dark.png",
+      alt: "Applications Kanban board",
+      width: 1401,
+      height: 1004,
+    },
   },
   {
-    label: "Interviews",
-    heading: "Never lose an interview date.",
-    body: "Schedule interviews against an application and see what's coming up on your dashboard, with the type and interviewer attached.",
+    label: "Companies",
+    heading: "Keep every company in view.",
+    body: "Keep company details alongside each application, instead of scattered across folders and inboxes.",
     bullets: [
-      "Schedule from any application",
-      "Upcoming interviews surfaced on the dashboard",
-      "Record the outcome once it's done",
+      "One company record, many applications",
+      "Company details available from every application",
+      "Notes, links and deadlines in one place",
     ],
     media: {
-      src: "",
-      alt: "Interview scheduling modal",
-      width: 1400,
-      height: 900,
+      lightSrc: "/company_images/companies-light.png",
+      darkSrc: "/company_images/companies-dark.png",
+      alt: "Companies in ApplyFlow",
+      width: 2800,
+      height: 2000,
     },
   },
   {
@@ -46,33 +55,39 @@ const FEATURES: Feature[] = [
       "Status breakdown at a glance",
       "A list of applications awaiting a reply",
     ],
-    media: { src: "", alt: "Dashboard", width: 1400, height: 900 },
+    media: {
+      lightSrc: "/dashboard_images/dashboard-light.png",
+      darkSrc: "/dashboard_images/dashboard-dark.png",
+      alt: "ApplyFlow dashboard",
+      width: 2800,
+      height: 2000,
+    },
   },
   {
-    label: "Companies and documents",
-    heading: "Everything for each application, in one place.",
-    body: "Keep company details and the documents you sent alongside each application, instead of scattered across folders and inboxes.",
+    label: "Documents",
+    heading: "Send the right documents every time.",
+    body: "Keep the documents you sent alongside each application, instead of scattered across folders and inboxes.",
     bullets: [
-      "One company record, many applications",
       "Attach the CV and cover letter you used",
+      "Keep documents with the application they belong to",
       "Notes, links and deadlines on every application",
     ],
     media: {
-      src: "",
-      alt: "Application details",
-      width: 1400,
-      height: 900,
+      lightSrc: "/document_images/documents-light.png",
+      darkSrc: "/document_images/documents-dark.png",
+      alt: "Documents in ApplyFlow",
+      width: 2800,
+      height: 2000,
     },
   },
 ];
 
-//TODO: Hero screenshot (Kanban board).
-
 const HERO_IMAGE: Media = {
-  src: "",
-  alt: "ApplyFlow applications board",
-  width: 1600,
-  height: 1000,
+  lightSrc: "/dashboard_images/dashboard-light.png",
+  darkSrc: "/dashboard_images/dashboard-dark.png",
+  alt: "ApplyFlow dashboard showing applications by status",
+  width: 2800,
+  height: 2000,
 };
 
 export default function Home() {
@@ -99,7 +114,21 @@ export default function Home() {
         <Hero signUpHref={"/sign-up"} signInHref={"/sign-in"} />
 
         <section className="mx-auto max-w-360 w-full px-6 pb-16">
-          <MediaFrame media={HERO_IMAGE} />
+          <div className="relative pb-6">
+            <div className="overflow-hidden rounded-xl border bg-card">
+              <MediaFrame media={HERO_IMAGE} />
+            </div>
+            <div className="absolute z-10 -right-4 -bottom-6 hidden w-1/2 rounded-xl border border-border bg-card shadow-xl md:block">
+              <ThemedImage
+                lightSrc="/dashboard_images/partial-dashboard-light.png"
+                darkSrc="/dashboard_images/partial-dashboard-dark.png"
+                alt="Additional dashboard details in ApplyFlow"
+                width={2054}
+                height={1599}
+                sizes="50vw"
+              />
+            </div>
+          </div>
         </section>
 
         <section className="mx-auto max-w-360 w-full px-6">
@@ -108,6 +137,7 @@ export default function Home() {
               key={feature.label}
               feature={feature}
               flip={index % 2 === 1}
+              mediaContent={index === 0 ? <ApplicationsTabs /> : undefined}
             />
           ))}
         </section>
@@ -115,7 +145,7 @@ export default function Home() {
 
       <footer className="border-t">
         <div className="mx-auto flex max-w-360 w-full items-center justify-between px-6 py-8 text-sm text-muted-foreground">
-          <span>ApplyFlow</span>
+          <Logo />
         </div>
       </footer>
     </>
