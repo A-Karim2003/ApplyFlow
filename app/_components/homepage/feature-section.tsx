@@ -65,7 +65,12 @@ export function FeatureSection({
         transition={{ duration: 0.6, ease: "easeOut", delay: 0.08 }}
         className={flip ? "lg:order-1" : ""}
       >
-        {mediaContent ?? <MediaFrame media={feature.media} />}
+        {mediaContent ?? (
+          <MediaFrame
+            media={feature.media}
+            sizes="(min-width: 1024px) 50vw, 100vw"
+          />
+        )}
       </motion.div>
     </article>
   );

@@ -13,9 +13,14 @@ export type Media = {
 export type MediaFrameProps = {
   media: Media;
   priority?: boolean;
+  sizes?: string;
 };
 
-export function MediaFrame({ priority = false, media }: MediaFrameProps) {
+export function MediaFrame({
+  priority = false,
+  media,
+  sizes,
+}: MediaFrameProps) {
   return (
     <div className="overflow-hidden rounded-xl shadow-md bg-card">
       <ThemedImage
@@ -27,6 +32,7 @@ export function MediaFrame({ priority = false, media }: MediaFrameProps) {
         darkWidth={media.darkWidth}
         darkHeight={media.darkHeight}
         priority={priority}
+        sizes={sizes}
       />
     </div>
   );
