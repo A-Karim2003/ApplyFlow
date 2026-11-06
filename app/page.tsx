@@ -47,18 +47,18 @@ const FEATURES: Feature[] = [
     },
   },
   {
-    label: "Dashboard",
-    heading: "Know what's gone quiet.",
-    body: "See how many applications you've sent, where they stand, and which ones are still waiting for a reply.",
+    label: "Interviews",
+    heading: "Never miss an interview.",
+    body: "Schedule interviews when an application moves forward, and see what's coming up the moment you open your dashboard.",
     bullets: [
-      "Applications over time for any date range",
-      "Status breakdown at a glance",
-      "A list of applications awaiting a reply",
+      "Schedule an interview from the application itself",
+      "Upcoming interviews listed on your dashboard",
+      "Every interview kept with its application",
     ],
     media: {
-      lightSrc: "/dashboard_images/dashboard-light.png",
-      darkSrc: "/dashboard_images/dashboard-dark.png",
-      alt: "ApplyFlow dashboard",
+      lightSrc: "/interview_images/interviews-light.png",
+      darkSrc: "/interview_images/interviews-dark.png",
+      alt: "Scheduling an interview in ApplyFlow",
       width: 2800,
       height: 2000,
     },
@@ -114,19 +114,19 @@ export default function Home() {
         <Hero signUpHref={"/sign-up"} signInHref={"/sign-in"} />
 
         <section className="mx-auto max-w-360 w-full px-6 pb-16">
-          <div className="relative md:mb-[20%]">
+          <div className="relative md:mb-[25%]">
             <div className="overflow-hidden rounded-xl border bg-card">
               <MediaFrame media={HERO_IMAGE} priority />
             </div>
 
-            <div className="absolute z-10 -right-6 bottom-0 hidden w-2/5 translate-y-[66.6%] overflow-hidden rounded-xl border border-foreground/20 bg-card shadow-2xl md:block">
+            <div className="absolute z-10 -right-6 bottom-0 hidden w-[45%] translate-y-[70%] overflow-hidden rounded-xl border border-foreground/20 bg-card shadow-2xl md:block">
               <ThemedImage
                 lightSrc="/dashboard_images/partial-dashboard-light.png"
                 darkSrc="/dashboard_images/partial-dashboard-dark.png"
                 alt="Additional dashboard details in ApplyFlow"
                 width={2054}
                 height={1599}
-                sizes="40vw"
+                sizes="45vw"
               />
             </div>
           </div>
