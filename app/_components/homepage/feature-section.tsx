@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef } from "react";
+import type { ReactNode } from "react";
 import { motion, useInView } from "motion/react";
 import { Check } from "lucide-react";
 import { MediaFrame, type Media } from "./media-frame";
@@ -16,9 +17,11 @@ export type Feature = {
 export function FeatureSection({
   feature,
   flip,
+  mediaContent,
 }: {
   feature: Feature;
   flip: boolean;
+  mediaContent?: ReactNode;
 }) {
   const ref = useRef<HTMLElement>(null);
 
@@ -62,7 +65,7 @@ export function FeatureSection({
         transition={{ duration: 0.6, ease: "easeOut", delay: 0.08 }}
         className={flip ? "lg:order-1" : ""}
       >
-        <MediaFrame media={feature.media} />
+        {mediaContent ?? <MediaFrame media={feature.media} />}
       </motion.div>
     </article>
   );

@@ -1,7 +1,6 @@
 "use client";
 
 import Logo from "@/app/_components/logo";
-import { useTheme } from "next-themes";
 
 type BrandPanelProps = {
   headline?: string;
@@ -9,7 +8,6 @@ type BrandPanelProps = {
 };
 
 export function BrandPanel({ headline, subtext }: BrandPanelProps) {
-  const { resolvedTheme } = useTheme();
   return (
     <div className="relative hidden overflow-hidden bg-primary p-10 lg:flex lg:flex-col">
       <div
@@ -24,7 +22,7 @@ export function BrandPanel({ headline, subtext }: BrandPanelProps) {
         }}
       />
 
-      <Logo theme={resolvedTheme == "dark" ? "dark" : "light"} />
+      <Logo />
 
       <div className="mt-auto mb-2 w-full text-center text-primary-foreground">
         <h2 className="text-3xl font-bold leading-tight text-balance">
