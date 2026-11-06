@@ -17,7 +17,7 @@ export type MediaFrameProps = {
 
 export function MediaFrame({ priority = false, media }: MediaFrameProps) {
   return (
-    <div className="overflow-hidden rounded-xl border bg-card">
+    <div className="overflow-hidden rounded-xl shadow-md bg-card">
       <ThemedImage
         lightSrc={media.lightSrc}
         darkSrc={media.darkSrc}

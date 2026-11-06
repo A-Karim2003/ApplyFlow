@@ -114,18 +114,19 @@ export default function Home() {
         <Hero signUpHref={"/sign-up"} signInHref={"/sign-in"} />
 
         <section className="mx-auto max-w-360 w-full px-6 pb-16">
-          <div className="relative pb-6">
+          <div className="relative md:mb-[20%]">
             <div className="overflow-hidden rounded-xl border bg-card">
-              <MediaFrame media={HERO_IMAGE} />
+              <MediaFrame media={HERO_IMAGE} priority />
             </div>
-            <div className="absolute z-10 -right-4 -bottom-6 hidden w-1/2 rounded-xl border border-border bg-card shadow-xl md:block">
+
+            <div className="absolute z-10 -right-6 bottom-0 hidden w-2/5 translate-y-[66.6%] overflow-hidden rounded-xl border border-foreground/20 bg-card shadow-2xl md:block">
               <ThemedImage
                 lightSrc="/dashboard_images/partial-dashboard-light.png"
                 darkSrc="/dashboard_images/partial-dashboard-dark.png"
                 alt="Additional dashboard details in ApplyFlow"
                 width={2054}
                 height={1599}
-                sizes="50vw"
+                sizes="40vw"
               />
             </div>
           </div>
