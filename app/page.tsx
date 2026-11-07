@@ -147,8 +147,34 @@ export default function Home() {
       </main>
 
       <footer className="border-t">
-        <div className="mx-auto flex max-w-360 w-full items-center justify-between px-6 py-8 text-sm text-muted-foreground">
-          <Logo />
+        <div className="mx-auto flex max-w-360 w-full flex-col items-center justify-between gap-4 px-6 py-8 text-sm text-muted-foreground sm:flex-row">
+          <div className="flex items-center gap-3">
+            <Logo />
+            <span className="hidden sm:inline">
+              Track every application, from wishlist to offer.
+            </span>
+          </div>
+
+          <nav className="flex items-center gap-6">
+            <a
+              href="https://github.com/A-Karim2003/ApplyFlow"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-foreground"
+            >
+              GitHub
+            </a>
+            <a
+              href="https://www.linkedin.com/in/abdoulkarim-kourouma"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-foreground"
+            >
+              LinkedIn
+            </a>
+          </nav>
+
+          <p>© 2026 Abdoulkarim Kourouma</p>
         </div>
       </footer>
     </>
