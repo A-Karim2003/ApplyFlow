@@ -80,19 +80,19 @@ export function Hero({
           ))}
         </ol>
 
-        {/* Video frame: perspective on the wrapper, tilt on the child */}
         <div className="flex w-full justify-center perspective-[1500px]">
           <motion.div
             className="w-full overflow-hidden rounded-2xl border bg-card shadow-xl"
             style={{ transformOrigin: "center top", rotateX, scale }}
           >
             <video
-              className="aspect-video w-full"
-              src={""}
-              poster={""}
+              className="aspect-1920/1048 w-full"
+              src="/demo/demo.mp4"
+              poster="/demo/poster.jpg"
               controls
               playsInline
               preload="metadata"
+              muted
             />
           </motion.div>
         </div>

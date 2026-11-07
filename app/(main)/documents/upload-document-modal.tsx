@@ -80,11 +80,13 @@ function guessDocType(name: string): DocType {
 interface UploadDocumentModalProps {
   children: React.ReactNode;
   onUpload: (docs: PendingDocumentUpload[]) => Promise<void>;
+  existingFilenames: string[];
 }
 
 export default function UploadDocumentModal({
   children,
   onUpload,
+  existingFilenames,
 }: UploadDocumentModalProps) {
   const [open, setOpen] = useState(false);
   const [staged, setStaged] = useState<StagedFile[]>([]);
@@ -113,11 +115,20 @@ export default function UploadDocumentModal({
 
     // set is used for lookup performance not for keeping staged files names unique
     const stagedNames = new Set(staged.map((f) => f.file.name.toLowerCase()));
+    const existingNames = new Set(
+      existingFilenames.map((name) => name.toLowerCase()),
+    );
+    const alreadyUploaded: string[] = [];
     const duplicateNames: string[] = [];
     const dedupedFiles: File[] = [];
 
     for (const file of incomingFiles) {
       const fileName = file.name.toLowerCase();
+
+      if (existingNames.has(fileName)) {
+        alreadyUploaded.push(file.name);
+        continue;
+      }
 
       // Collects duplicate names
       if (stagedNames.has(fileName)) {
@@ -137,6 +148,11 @@ export default function UploadDocumentModal({
     const rejectedByLimit = dedupedFiles.length - acceptedFiles.length;
 
     const messages: string[] = [];
+    if (alreadyUploaded.length > 0) {
+      messages.push(
+        `${alreadyUploaded.length} file${alreadyUploaded.length > 1 ? "s" : ""} skipped, already in your documents: ${alreadyUploaded.join(", ")}`,
+      );
+    }
     if (duplicateNames.length > 0) {
       messages.push(
         `${duplicateNames.length} file${duplicateNames.length > 1 ? "s" : ""} skipped — already staged (remove the existing one first): ${duplicateNames.join(", ")}`,
@@ -197,8 +213,12 @@ export default function UploadDocumentModal({
         await onUpload(docs);
         setOpen(false);
         reset();
-      } catch {
-        setLimitMessage("Upload failed. Please try again.");
+      } catch (error) {
+        setLimitMessage(
+          error instanceof Error
+            ? error.message
+            : "Upload failed. Please try again.",
+        );
       }
     });
   }

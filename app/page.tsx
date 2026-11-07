@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import { Media, MediaFrame } from "./_components/homepage/media-frame";
+import { ApplicationsTabs } from "./_components/homepage/applications-tabs";
+import { ThemedImage } from "./_components/homepage/themed-image";
+import ThemeToggle from "./_components/homepage/theme-toggle";
 
 import { Hero } from "./_components/homepage/hero";
 import {
@@ -19,69 +22,83 @@ const FEATURES: Feature[] = [
       "Every status change recorded with its date",
       "Filter and sort without leaving the board",
     ],
-    media: { src: "", alt: "Kanban board", width: 1400, height: 900 },
-  },
-  {
-    label: "Interviews",
-    heading: "Never lose an interview date.",
-    body: "Schedule interviews against an application and see what's coming up on your dashboard, with the type and interviewer attached.",
-    bullets: [
-      "Schedule from any application",
-      "Upcoming interviews surfaced on the dashboard",
-      "Record the outcome once it's done",
-    ],
     media: {
-      src: "",
-      alt: "Interview scheduling modal",
-      width: 1400,
-      height: 900,
+      lightSrc: "/application_images/applications-kanban-light.png",
+      darkSrc: "/application_images/applications-kanban-dark.png",
+      alt: "Applications Kanban board",
+      width: 1401,
+      height: 1004,
     },
   },
   {
-    label: "Dashboard",
-    heading: "Know what's gone quiet.",
-    body: "See how many applications you've sent, where they stand, and which ones are still waiting for a reply.",
-    bullets: [
-      "Applications over time for any date range",
-      "Status breakdown at a glance",
-      "A list of applications awaiting a reply",
-    ],
-    media: { src: "", alt: "Dashboard", width: 1400, height: 900 },
-  },
-  {
-    label: "Companies and documents",
-    heading: "Everything for each application, in one place.",
-    body: "Keep company details and the documents you sent alongside each application, instead of scattered across folders and inboxes.",
+    label: "Companies",
+    heading: "Keep every company in view.",
+    body: "Keep company details alongside each application, instead of scattered across folders and inboxes.",
     bullets: [
       "One company record, many applications",
+      "Company details available from every application",
+      "Notes, links and deadlines in one place",
+    ],
+    media: {
+      lightSrc: "/company_images/companies-light.png",
+      darkSrc: "/company_images/companies-dark.png",
+      alt: "Companies in ApplyFlow",
+      width: 2800,
+      height: 2000,
+    },
+  },
+  {
+    label: "Interviews",
+    heading: "Never miss an interview.",
+    body: "Schedule interviews when an application moves forward, and see what's coming up the moment you open your dashboard.",
+    bullets: [
+      "Schedule an interview from the application itself",
+      "Upcoming interviews listed on your dashboard",
+      "Every interview kept with its application",
+    ],
+    media: {
+      lightSrc: "/interview_images/interviews-light.png",
+      darkSrc: "/interview_images/interviews-dark.png",
+      alt: "Scheduling an interview in ApplyFlow",
+      width: 2800,
+      height: 2000,
+    },
+  },
+  {
+    label: "Documents",
+    heading: "Send the right documents every time.",
+    body: "Keep the documents you sent alongside each application, instead of scattered across folders and inboxes.",
+    bullets: [
       "Attach the CV and cover letter you used",
+      "Keep documents with the application they belong to",
       "Notes, links and deadlines on every application",
     ],
     media: {
-      src: "",
-      alt: "Application details",
-      width: 1400,
-      height: 900,
+      lightSrc: "/document_images/documents-light.png",
+      darkSrc: "/document_images/documents-dark.png",
+      alt: "Documents in ApplyFlow",
+      width: 2800,
+      height: 2000,
     },
   },
 ];
 
-//TODO: Hero screenshot (Kanban board).
-
 const HERO_IMAGE: Media = {
-  src: "",
-  alt: "ApplyFlow applications board",
-  width: 1600,
-  height: 1000,
+  lightSrc: "/dashboard_images/dashboard-light.png",
+  darkSrc: "/dashboard_images/dashboard-dark.png",
+  alt: "ApplyFlow dashboard showing applications by status",
+  width: 2800,
+  height: 2000,
 };
 
 export default function Home() {
   return (
     <>
       <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur supports-backdrop-filter:bg-background/60">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+        <div className="mx-auto flex max-w-360 w-full items-center justify-between px-6 py-4">
           <Logo />
           <div className="flex items-center gap-2">
+            <ThemeToggle />
             <Link
               href={"/sign-in"}
               className={buttonVariants({ variant: "ghost" })}
@@ -98,25 +115,66 @@ export default function Home() {
       <main className="flex-1 overflow-x-hidden">
         <Hero signUpHref={"/sign-up"} signInHref={"/sign-in"} />
 
-        {/* Static on purpose: only the hero tilt and feature rows animate */}
-        <section className="mx-auto max-w-6xl px-6 pb-16">
-          <MediaFrame media={HERO_IMAGE} />
+        <section className="mx-auto max-w-360 w-full px-6 pb-16">
+          <div className="relative md:mb-[25%]">
+            <div className="overflow-hidden rounded-xl border bg-card">
+              <MediaFrame media={HERO_IMAGE} priority />
+            </div>
+
+            <div className="absolute z-10 -right-6 bottom-0 hidden w-[45%] translate-y-[70%] overflow-hidden rounded-xl border border-foreground/20 bg-card shadow-2xl md:block">
+              <ThemedImage
+                lightSrc="/dashboard_images/partial-dashboard-light.png"
+                darkSrc="/dashboard_images/partial-dashboard-dark.png"
+                alt="Additional dashboard details in ApplyFlow"
+                width={2054}
+                height={1599}
+                sizes="45vw"
+              />
+            </div>
+          </div>
         </section>
 
-        <section className="mx-auto max-w-6xl px-6">
+        <section className="mx-auto max-w-360 w-full px-6">
           {FEATURES.map((feature, index) => (
             <FeatureSection
               key={feature.label}
               feature={feature}
               flip={index % 2 === 1}
+              mediaContent={index === 0 ? <ApplicationsTabs /> : undefined}
             />
           ))}
         </section>
       </main>
 
       <footer className="border-t">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-8 text-sm text-muted-foreground">
-          <span>ApplyFlow</span>
+        <div className="mx-auto flex max-w-360 w-full flex-col items-center justify-between gap-4 px-6 py-8 text-sm text-muted-foreground sm:flex-row">
+          <div className="flex items-center gap-3">
+            <Logo />
+            <span className="hidden sm:inline">
+              Track every application, from wishlist to offer.
+            </span>
+          </div>
+
+          <nav className="flex items-center gap-6">
+            <a
+              href="https://github.com/A-Karim2003/ApplyFlow"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-foreground"
+            >
+              GitHub
+            </a>
+            <a
+              href="https://www.linkedin.com/in/abdoulkarim-kourouma"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-foreground"
+            >
+              LinkedIn
+            </a>
+          </nav>
+
+          <p>© 2026 Abdoulkarim Kourouma</p>
         </div>
       </footer>
     </>

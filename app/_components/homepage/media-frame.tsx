@@ -1,41 +1,39 @@
-import Image from "next/image";
+import { ThemedImage } from "./themed-image";
 
 export type Media = {
-  src?: string;
+  lightSrc: string;
+  darkSrc: string;
   alt: string;
   width: number;
   height: number;
+  darkWidth?: number;
+  darkHeight?: number;
 };
 
 export type MediaFrameProps = {
   media: Media;
   priority?: boolean;
+  sizes?: string;
 };
 
-//* Renders the real image when src is set, otherwise a sized placeholder
-export function MediaFrame({ priority = false, media }: MediaFrameProps) {
+export function MediaFrame({
+  priority = false,
+  media,
+  sizes,
+}: MediaFrameProps) {
   return (
-    <div className="overflow-hidden rounded-xl border bg-card">
-      {media.src ? (
-        <Image
-          src={media.src}
-          alt={media.alt}
-          width={media.width}
-          height={media.height}
-          priority={priority}
-          className="h-auto w-full"
-        />
-      ) : (
-        <div
-          className="flex flex-col items-center justify-center gap-1 bg-muted text-sm text-muted-foreground"
-          style={{ aspectRatio: `${media.width} / ${media.height}` }}
-        >
-          <span>{media.alt}</span>
-          <span className="text-xs">
-            {media.width} × {media.height}
-          </span>
-        </div>
-      )}
+    <div className="overflow-hidden rounded-xl shadow-md bg-card">
+      <ThemedImage
+        lightSrc={media.lightSrc}
+        darkSrc={media.darkSrc}
+        alt={media.alt}
+        width={media.width}
+        height={media.height}
+        darkWidth={media.darkWidth}
+        darkHeight={media.darkHeight}
+        priority={priority}
+        sizes={sizes}
+      />
     </div>
   );
 }
