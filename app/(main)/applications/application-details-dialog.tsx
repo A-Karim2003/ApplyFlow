@@ -183,7 +183,7 @@ export default function ApplicationDetailsDialog({
         onOpenChange(open);
       }}
     >
-      <DialogContent className="max-h-[calc(100vh-4rem)] sm:w-[90%] sm:max-w-[90%] md:w-[80%] md:max-w-[80%] lg:w-[80%] lg:max-w-7xl overflow-y-auto p-0">
+      <DialogContent className="max-h-[calc(100vh-6rem)] sm:w-[90%] sm:max-w-[90%] md:w-[80%] md:max-w-[80%] lg:w-[80%] lg:max-w-7xl overflow-y-auto p-0">
         <div className="flex min-w-0 flex-col gap-6 p-4 sm:p-6">
           <DialogHeader className="pr-8">
             <div className="flex min-w-0 flex-col gap-4 sm:justify-between">
