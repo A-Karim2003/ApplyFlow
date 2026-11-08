@@ -88,8 +88,10 @@ export function AppSidebar({ user }: AppSidebarProps) {
                 return (
                   <SidebarMenuItem key={item.href}>
                     <SidebarMenuButton
+                      size="lg"
                       isActive={isActive}
                       tooltip={item.title}
+                      className="gap-3 px-3 text-base [&_svg]:size-5 mb-1"
                       render={
                         <Link href={item.href}>
                           <item.icon />
