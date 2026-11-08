@@ -20,6 +20,9 @@ export const metadata: Metadata = {
   title: "ApplyFlow — Your Calm Career Command Center",
   description:
     "Organise your job search with ApplyFlow. Track applications, interviews, companies, and documents in one calm, focused workspace.",
+  appleWebApp: {
+    title: "ApplyFlow",
+  },
 };
 
 export default function RootLayout({
