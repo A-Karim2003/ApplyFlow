@@ -183,53 +183,57 @@ export default function ApplicationDetailsDialog({
         onOpenChange(open);
       }}
     >
-      <DialogContent className="max-h-[calc(100vh-2rem)] sm:w-[90%] sm:max-w-[90%] md:w-[80%] md:max-w-[80%] lg:w-[80%] lg:max-w-7xl overflow-y-auto p-0">
+      <DialogContent className="max-h-[calc(100vh-4rem)] sm:w-[90%] sm:max-w-[90%] md:w-[80%] md:max-w-[80%] lg:w-[80%] lg:max-w-7xl overflow-y-auto p-0">
         <div className="flex min-w-0 flex-col gap-6 p-4 sm:p-6">
           <DialogHeader className="pr-8">
-            <div className="flex items-start gap-3">
-              <CompanyLogo
-                name={company.name}
-                className="size-12 rounded-xl text-lg"
-              />
-              <div className="min-w-0 flex-1">
-                <DialogTitle className="text-2xl text-balance">
-                  {app.jobTitle}
-                </DialogTitle>
-                <DialogDescription className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1">
-                  <span className="font-medium text-foreground">
-                    {company.name}
-                  </span>
-                  {app.location && (
-                    <span className="inline-flex items-center gap-1">
-                      <MapPin className="size-3.5" />
-                      {app.location}
+            <div className="flex min-w-0 flex-col gap-4 sm:justify-between">
+              <div className="flex min-w-0 flex-1 gap-3">
+                <CompanyLogo
+                  name={company.name}
+                  className="size-12 rounded-xl text-lg"
+                />
+                <div className="min-w-0 flex-1">
+                  <DialogTitle className="text-2xl text-balance">
+                    {app.jobTitle}
+                  </DialogTitle>
+                  <DialogDescription className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1">
+                    <span className="font-medium text-foreground">
+                      {company.name}
                     </span>
-                  )}
-                </DialogDescription>
+                    {app.location && (
+                      <span className="inline-flex items-center gap-1">
+                        <MapPin className="size-3.5" />
+                        {app.location}
+                      </span>
+                    )}
+                  </DialogDescription>
+                </div>
               </div>
 
-              {status === "interview" && (
+              <div className="flex w-full flex-wrap gap-2 sm:w-auto sm:shrink-0 sm:justify-end">
+                {status === "interview" && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="flex-1 bg-amber-100 text-amber-800 hover:bg-amber-200 sm:flex-none"
+                    onClick={onScheduleInterview}
+                  >
+                    <CalendarPlus data-icon="inline-start" />
+                    Schedule interview
+                  </Button>
+                )}
+
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
-                  className="shrink-0 bg-amber-100 text-amber-800 hover:bg-amber-200"
-                  onClick={onScheduleInterview}
+                  className="flex-1 text-destructive hover:text-destructive sm:flex-none"
+                  onClick={() => setConfirmDelete(true)}
                 >
-                  <CalendarPlus data-icon="inline-start" />
-                  Schedule interview
+                  <Trash2 data-icon="inline-start" /> Delete
                 </Button>
-              )}
-
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="shrink-0 text-destructive hover:text-destructive"
-                onClick={() => setConfirmDelete(true)}
-              >
-                <Trash2 data-icon="inline-start" /> Delete
-              </Button>
+              </div>
             </div>
           </DialogHeader>
           <div className="grid grid-cols-2 gap-1.5 rounded-xl border bg-muted/40 p-2 sm:grid-cols-3 lg:grid-cols-3 2xl:grid-cols-6">

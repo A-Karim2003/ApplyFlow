@@ -48,7 +48,7 @@ export function RecentApplications({
                   {application.location && ` · ${application.location}`}
                 </p>
               </div>
-              <div className="max-w-44 w-full flex flex-wrap items-center justify-between gap-2 ">
+              <div className="min-w-0 max-w-44 flex flex-wrap items-center justify-between gap-2">
                 <span className="hidden rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground sm:inline">
                   {JOB_TYPES[application.jobType]}
                 </span>
@@ -56,7 +56,7 @@ export function RecentApplications({
                 <StatusBadge status={application.status} abbreviate={true} />
               </div>
 
-              <span className="hidden w-24 text-right text-xs text-muted-foreground md:inline">
+              <span className="hidden w-20 truncate text-right text-xs text-muted-foreground sm:inline">
                 {relativeDay(application.date)}
               </span>
             </li>
