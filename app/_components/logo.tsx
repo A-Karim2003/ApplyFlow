@@ -25,5 +25,3 @@ export default function Logo({ className }: { className?: string }) {
     </div>
   );
 }
-
-// absolute inset-0 object-fill

@@ -39,8 +39,9 @@ const FEATURES: Feature[] = [
     body: "Keep company details alongside each application, instead of scattered across folders and inboxes.",
     bullets: [
       "One company record, many applications",
-      "Company details available from every application",
-      "Notes, links and deadlines in one place",
+      "View every application associated with a company",
+      "Track each application's status at a glance",
+      "Add custom companies not listed publicly",
     ],
     media: {
       lightSrc: "/company_images/companies-light.png",
@@ -73,8 +74,9 @@ const FEATURES: Feature[] = [
     body: "Keep the documents you sent alongside each application, instead of scattered across folders and inboxes.",
     bullets: [
       "Attach the CV and cover letter you used",
-      "Keep documents with the application they belong to",
-      "Notes, links and deadlines on every application",
+      "Find every document alongside the application it supports",
+      "Securely save your documents in the cloud",
+      "Reuse documents across multiple applications",
     ],
     media: {
       lightSrc: "/document_images/documents-light.png",
