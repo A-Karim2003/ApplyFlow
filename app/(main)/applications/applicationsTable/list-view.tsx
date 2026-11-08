@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/table";
 
 import { type UpdateApplicationProp } from "@/actions/applications/applications";
+import { useState } from "react";
 
 type ListViewProps = {
   applications: ApplicationWithCompany[];
@@ -28,17 +29,20 @@ export default function ListView({
   onMove,
   onOpenApplication,
 }: ListViewProps) {
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: 10,
+  });
+
   const table = useTable({
     features,
     columns,
     data: applications,
     getRowId: (row) => String(row.application.id),
     state: {
-      pagination: {
-        pageIndex: 0,
-        pageSize: 10,
-      },
+      pagination,
     },
+    onPaginationChange: setPagination,
     meta: {
       onStatusChange: onMove,
       onOpenApplication,

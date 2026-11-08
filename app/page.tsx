@@ -11,6 +11,9 @@ import {
   FeatureSection,
 } from "./_components/homepage/feature-section";
 import Logo from "./_components/logo";
+import { getSession } from "@/lib/data/session";
+import { redirect } from "next/navigation";
+import { Suspense } from "react";
 
 const FEATURES: Feature[] = [
   {
@@ -94,6 +97,9 @@ const HERO_IMAGE: Media = {
 export default function Home() {
   return (
     <>
+      <Suspense fallback={null}>
+        <RedirectIfSignedIn />
+      </Suspense>
       <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur supports-backdrop-filter:bg-background/60">
         <div className="mx-auto flex max-w-360 w-full items-center justify-between px-6 py-4">
           <Logo />
@@ -182,4 +188,10 @@ export default function Home() {
       </footer>
     </>
   );
+}
+
+async function RedirectIfSignedIn() {
+  const session = await getSession();
+  if (session) redirect("/dashboard");
+  return null;
 }
