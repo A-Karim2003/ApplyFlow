@@ -172,6 +172,9 @@ export default function Home() {
             >
               LinkedIn
             </a>
+            <Link href="/privacy" className="hover:text-foreground">
+              Privacy
+            </Link>
           </nav>
 
           <p>© 2026 Abdoulkarim Kourouma</p>
