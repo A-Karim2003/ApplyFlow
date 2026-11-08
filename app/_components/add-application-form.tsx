@@ -365,7 +365,7 @@ export function AddApplicationForm({
 
               <div className="grid grid-cols-2 gap-3">
                 <Field>
-                  <FieldLabel htmlFor="salary-min">
+                  <FieldLabel htmlFor="salary-min" className="max-[475px]:min-h-10">
                     Salary min{" "}
                     <span className="text-muted-foreground">(optional)</span>
                   </FieldLabel>
@@ -383,7 +383,7 @@ export function AddApplicationForm({
                 </Field>
 
                 <Field>
-                  <FieldLabel htmlFor="salary-max">
+                  <FieldLabel htmlFor="salary-max" className="max-[475px]:min-h-10">
                     Salary max{" "}
                     <span className="text-muted-foreground">(optional)</span>
                   </FieldLabel>
@@ -403,7 +403,7 @@ export function AddApplicationForm({
 
               <div className="grid grid-cols-2 gap-3">
                 <Field>
-                  <FieldLabel htmlFor="applied-at">
+                  <FieldLabel htmlFor="applied-at" className="max-[475px]:min-h-10">
                     Date applied{" "}
                     <span className="text-muted-foreground">(optional)</span>
                   </FieldLabel>
@@ -426,7 +426,7 @@ export function AddApplicationForm({
                 </Field>
 
                 <Field>
-                  <FieldLabel htmlFor="deadline">
+                  <FieldLabel htmlFor="deadline" className="max-[475px]:min-h-10">
                     Deadline{" "}
                     <span className="text-muted-foreground">(optional)</span>
                   </FieldLabel>

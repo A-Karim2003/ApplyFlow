@@ -72,7 +72,7 @@ export function CompaniesGrid({ companies, applications }: CompaniesGridProps) {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex justify-between items-center w-full">
+      <div className="flex justify-between gap-4 items-center w-full">
         <InputGroup className="max-w-sm ">
           <InputGroupAddon>
             <SearchIcon />
